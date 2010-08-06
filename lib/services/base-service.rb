@@ -10,7 +10,7 @@ class BaseService
   end
 
   def register_service( name, full_name )
-    ServiceManager.instance.register_service( self, name, full_name )
+    @service = ServiceManager.instance.register_service( self, name, full_name )
   end
 
   def self.inherited( subclass )

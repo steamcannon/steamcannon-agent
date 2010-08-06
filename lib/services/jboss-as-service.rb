@@ -6,7 +6,7 @@ class JBossASService < BaseService
   end
 
   def restart
-    { :operation => 'restart', :status => 'ok' }
+    { :status => 'ok' }
   end
 
   def start
@@ -16,33 +16,51 @@ class JBossASService < BaseService
 
     @log.info "JBoss is starting..."
 
-    { :operation => 'start', :status => 'ok', :response => { :jboss_status => :starting } }
+    { :status => 'ok', :response => { :jboss_status => :starting } }
   end
 
   def stop
-    { :operation => 'stop', :status => 'ok', :response => { :jboss_status => :stopping } }
+    { :status => 'ok', :response => { :jboss_status => :stopping } }
   end
 
   def status
     # started, stopped, starting, stopping
-    { :operation => 'status', :status => 'ok', :response => { :jboss_status => :started } }
+    { :status => 'ok', :response => { :jboss_status => :started } }
   end
 
   def artifacts
-    { :operation => 'artifacts', :status => 'ok', :response => [ { :id => 12, :type => 'war', :name => 'My app' }, { :id => 14, :type => 'ear', :name => 'My business app' } ] }
-  end
 
+    artifacts = []
+
+    Artifact.all.each do |artifact|
+      artifacts << { :name => artifact.name, :id => artifact.id }
+    end
+
+    { :status => 'ok', :response => artifacts }
+  end
 
   def deploy( artifact )
     # validate the parameter, do the job, etc
 
-    { :operation => 'deploy', :status => 'ok', :response => { :artifact_id => 1 } }
+    artifact = Artifact.create( :name => 'abc.war', :location => '/opt/test/abc.war', :service => @service )
+
+    { :status => 'ok', :response => { :artifact_id => artifact.id } }
   end
 
   def undeploy( artifact_id )
     # validate the parameter, do the job, etc
 
-    { :operation => 'undeploy', :status => 'ok' }
-  end
+    artifact = Artifact.get( artifact_id )
 
+    if artifact.nil?
+      { :status => 'error', :msg => "Artifact with id = '#{artifact_id}' not found" }
+    else
+      begin
+        artifact.destroy
+        { :status => 'ok' }
+      rescue
+        { :status => 'error', :msg => "Error occured while removing artifact with id = '#{artifact_id}'" }
+      end
+    end
+  end
 end

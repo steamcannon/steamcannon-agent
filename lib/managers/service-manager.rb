@@ -41,9 +41,13 @@ class ServiceManager
     if @config['services'].include?( name.to_s )
       @log.debug "Registering #{o.class} service..."
       @services[name] = { :object => o, :info => { :name => name, :full_name => full_name } }
+
+      return Service.create( :name => name )
     else
       @log.warn "Service already registered!"
     end
+
+    nil
   end
 
   def execute_operation( name, operation, *params )
