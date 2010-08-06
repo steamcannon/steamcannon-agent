@@ -3,4 +3,6 @@ class Event
 
   property :id, Serial
   property :service, String
+  property :operation, String
+  property :time, DateTime
 end

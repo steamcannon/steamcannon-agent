@@ -1,9 +1,9 @@
 require 'services/base-service'
 
 class JBossASService < BaseService
-  def after_init
-    register( :jboss_as, 'JBoss Application Server' )
-  end 
+  def initialize
+    register_service( :jboss_as, 'JBoss Application Server' )
+  end
 
   def restart
     { :operation => 'restart', :status => 'ok' }
@@ -20,7 +20,7 @@ class JBossASService < BaseService
   end
 
   def stop
-    { :operation => 'stop', :status => 'ok' }
+    { :operation => 'stop', :status => 'ok', :response => { :jboss_status => :stopping } }
   end
 
   def status
@@ -29,13 +29,14 @@ class JBossASService < BaseService
   end
 
   def artifacts
-    {:operation => 'artifacts', :status => 'ok', :response => [ { :id => 12, :type => 'war', :name => 'My app' }, { :id => 14, :type => 'ear', :name => 'My business app' } ] }
+    { :operation => 'artifacts', :status => 'ok', :response => [ { :id => 12, :type => 'war', :name => 'My app' }, { :id => 14, :type => 'ear', :name => 'My business app' } ] }
   end
+
 
   def deploy( artifact )
     # validate the parameter, do the job, etc
 
-    { :operation => 'deploy', :status => 'ok', :artifact_id => 1 }
+    { :operation => 'deploy', :status => 'ok', :response => { :artifact_id => 1 } }
   end
 
   def undeploy( artifact_id )
@@ -44,9 +45,4 @@ class JBossASService < BaseService
     { :operation => 'undeploy', :status => 'ok' }
   end
 
-  def configure( file, path ) # ???
-    # validate the parameter, do the job, etc
-
-    { :operation => 'configure', :status => 'ok' }
-  end
 end

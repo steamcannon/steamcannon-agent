@@ -10,7 +10,7 @@ class ServiceManager
   include Singleton
 
   def initialize
-    @log = LogHelper.new
+    @log = LogHelper.new( :threshold => :trace )
 
     @log.info "Starting ServiceManager..."
 
@@ -29,10 +29,9 @@ class ServiceManager
 
     @service_classes.each do |clazz|
       @log.debug "Loading #{clazz} service..."
-      clazz.send(:define_method, :supported_operations ) { { :operation => 'supported_operations', :status => 'ok', :response =>  (self.public_methods - Object.public_methods - [ 'after_init', 'register' ]).sort }}
-      o = clazz.new( :log => @log )
-      o.after_init
-      @log.debug "Supported operations: #{o.supported_operations[:response].join(', ')}."
+      o = clazz.new
+      o.send(:prepare, :log => @log )
+      @log.debug "Service #{clazz} loaded."
     end
 
     @log.info "#{@service_classes.size} service(s) loaded."
@@ -43,7 +42,7 @@ class ServiceManager
       @log.debug "Registering #{o.class} service..."
       @services[name] = { :object => o, :info => { :name => name, :full_name => full_name } }
     else
-      @log.debug "Service already registered!"
+      @log.warn "Service already registered!"
     end
   end
 
@@ -59,6 +58,9 @@ class ServiceManager
     end
 
     @log.debug "Executing #{operation} operation for #{service.class}..."
+
+    Event.create( :service => service.class, :operation => operation, :time => Time.now )
+
     service.send( operation, *params )
   end
 

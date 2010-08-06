@@ -5,10 +5,4 @@ class DBHelper
     @clazz  = clazz
     @log    = options[:log] || Logger.new(STDOUT)
   end
-
-  def store_event
-
-  end
-
-
 end

@@ -1,9 +1,10 @@
 
-Steps to run:
+Running
+=======
 
-git clone git://github.com/goldmann/ct-manager.git
-cd ct-manager
-ruby ct-manager.rb
+        git clone git://github.com/goldmann/ct-manager.git
+        cd ct-manager
+        ruby ct-manager.rb
 
 Try those URLs:
 
@@ -16,7 +17,7 @@ POST http://localhost:4567/services/jboss_as/stop
 POST http://localhost:4567/services/jboss_as/restart
 POST http://localhost:4567/services/jboss_as/artifacts/deploy
 
-Dependencies:
+Dependencies
+============
 
-gem install dm-core dm-sqlite-adapter
-
+gem install sinatra dm-core dm-sqlite-adapter db-migrations
