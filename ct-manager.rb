@@ -29,16 +29,8 @@ after do
 end
 
 helpers do
-  def validate_service
-    halt 415, response_builder( false, "Unrecognized service '#{params[:name]}'" ) if !params[:name].nil? and !ServiceManager.instance.service_exists?( params[:name] )
-  end
-
   def validate_parameter( name )
     halt 415, response_builder( false, "No '#{name}' parameter specified in request" ) if params[name.to_sym].nil?
-  end
-
-  def execute_operation( service, operation, *args )
-    ServiceManager.instance.execute_operation( service, operation, *args )
   end
 
   def response_builder( success, message )
@@ -60,7 +52,7 @@ end
 
 ServiceManager.instance.services_info.each do |service_info|
   # noargs
-  [:status, :supported_operations, :artifacts].each do |operation|
+  [:status, :artifacts].each do |operation|
     get "/services/#{service_info[:name]}/#{operation}" do
       ServiceManager.instance.execute_operation( service_info[:name], operation ).to_yaml
     end

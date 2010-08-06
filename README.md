@@ -6,19 +6,22 @@ Running
         cd ct-manager
         ruby ct-manager.rb
 
-Try those URLs:
+API description
+===============
 
         GET http://localhost:4567/services
-        GET http://localhost:4567/services/jboss_as/status
-        GET http://localhost:4567/services/jboss_as/artifacts
+        GET http://localhost:4567/services/SERVICE/status
+        GET http://localhost:4567/services/SERVICE/artifacts
 
-        POST http://localhost:4567/services/jboss_as/stop
-        POST http://localhost:4567/services/jboss_as/restart
-        POST http://localhost:4567/services/jboss_as/artifacts
+        POST http://localhost:4567/services/SERVICE/start
+        POST http://localhost:4567/services/SERVICE/stop
+        POST http://localhost:4567/services/SERVICE/restart
 
-        DELETE http://localhost:4567/services/jboss_as/artifacts/1
+        POST http://localhost:4567/services/SERVICE/artifacts, params: artifact
+
+        DELETE http://localhost:4567/services/SERVICE/artifacts/ARTIFACT_ID
 
 Dependencies
 ============
 
-gem install sinatra dm-core dm-sqlite-adapter db-migrations
+        gem install sinatra dm-core dm-sqlite-adapter db-migrations
