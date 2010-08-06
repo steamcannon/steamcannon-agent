@@ -1,10 +1,11 @@
 require 'logger'
+require 'helpers/db-helper'
 
 class BaseService
   def initialize( options = {} )
     @log = options[:log] || Logger.new(STDOUT)
 
-    @db = nil
+    @db   = DBHelper.new( self.class, :log => @log )
   end
 
   protected

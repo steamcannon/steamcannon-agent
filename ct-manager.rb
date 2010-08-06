@@ -2,8 +2,11 @@ $: << 'lib'
 
 require 'rubygems'
 require 'sinatra'
+require 'dm-core'
 require 'managers/service-manager'
 require 'yaml'
+
+DataMapper.setup(:default, 'sqlite::memory:')
 
 Dir["lib/services/*.rb"].each {|file| require file }
 
