@@ -8,14 +8,15 @@ Running
 
 Try those URLs:
 
-GET http://localhost:4567/services
-GET http://localhost:4567/services/jboss_as/supported_operations
-GET http://localhost:4567/services/jboss_as/status
-GET http://localhost:4567/services/jboss_as/artifacts
+        GET http://localhost:4567/services
+        GET http://localhost:4567/services/jboss_as/status
+        GET http://localhost:4567/services/jboss_as/artifacts
 
-POST http://localhost:4567/services/jboss_as/stop
-POST http://localhost:4567/services/jboss_as/restart
-POST http://localhost:4567/services/jboss_as/artifacts/deploy
+        POST http://localhost:4567/services/jboss_as/stop
+        POST http://localhost:4567/services/jboss_as/restart
+        POST http://localhost:4567/services/jboss_as/artifacts
+
+        DELETE http://localhost:4567/services/jboss_as/artifacts/1
 
 Dependencies
 ============
