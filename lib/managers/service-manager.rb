@@ -1,5 +1,6 @@
 require 'singleton'
 require 'helpers/config-helper'
+require 'helpers/log-helper'
 
 def service( args )
   ServiceManager.instance.register_service( args )
@@ -9,18 +10,40 @@ class ServiceManager
   include Singleton
 
   def initialize
+    @log = LogHelper.new
+
+    @log.info "Starting ServiceManager..."
+
+    @service_classes = []
+
     @services = {}
     @config   = ConfigHelper.instance.config
   end
 
-  def register_service( args )
-    if @services[args[:name]].nil? and @config['services'].include?( args[:name].to_s )
-      clazz = args[:class]
-      args.delete( :class )
+  def register_service_class( clazz )
+    @service_classes << clazz
+  end
 
-      clazz.send(:define_method, :supported_operations ) { { :operation => 'supported_operations', :status => 'ok', :response =>  (self.public_methods - Object.public_methods).sort }}
+  def load_services
+    @log.info "Loading services..."
 
-      @services[args[:name]] = { :object => clazz.new, :info => args }
+    @service_classes.each do |clazz|
+      @log.debug "Loading #{clazz} service..."
+      clazz.send(:define_method, :supported_operations ) { { :operation => 'supported_operations', :status => 'ok', :response =>  (self.public_methods - Object.public_methods - [ 'after_init', 'register' ]).sort }}
+      o = clazz.new( :log => @log )
+      o.after_init
+      @log.debug "Supported operations: #{o.supported_operations[:response].join(', ')}."
+    end
+
+    @log.info "#{@service_classes.size} service(s) loaded."
+  end
+
+  def register_service( o, name, full_name )
+    if @config['services'].include?( name.to_s )
+      @log.debug "Registering #{o.class} service..."
+      @services[name] = { :object => o, :info => { :name => name, :full_name => full_name } }
+    else
+      @log.debug "Service already registered!"
     end
   end
 
@@ -35,6 +58,7 @@ class ServiceManager
       return { :operation => operation, :status => 'error', :message => "Operation '#{operation}' takes #{service.method( operation ).arity } argument, but provided #{params.size}"}
     end
 
+    @log.debug "Executing #{operation} operation for #{service.class}..."
     service.send( operation, *params )
   end
 

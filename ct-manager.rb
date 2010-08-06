@@ -45,6 +45,8 @@ helpers do
   end
 end
 
+ServiceManager.instance.load_services
+
 ### GET
 
 get '/services' do

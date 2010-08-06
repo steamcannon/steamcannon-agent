@@ -1,10 +1,22 @@
-class JBossASService
+require 'services/base-service'
+
+class JBossASService < BaseService
+  def after_init
+    register( :jboss_as, 'JBoss Application Server' )
+  end 
+
   def restart
     { :operation => 'restart', :status => 'ok' }
   end
 
   def start
-    { :operation => 'start', :status => 'ok' }
+    @log.info "Starting JBoss AS..."
+
+    # actual code
+
+    @log.info "JBoss is starting..."
+
+    { :operation => 'start', :status => 'ok', :response => { :jboss_status => :starting } }
   end
 
   def stop
@@ -13,7 +25,7 @@ class JBossASService
 
   def status
     # started, stopped, starting, stopping
-    { :operation => 'status', :status => 'ok', :response => 'started' }
+    { :operation => 'status', :status => 'ok', :response => { :jboss_status => :started } }
   end
 
   def artifacts
@@ -38,5 +50,3 @@ class JBossASService
     { :operation => 'configure', :status => 'ok' }
   end
 end
-
-service :name => :jboss_as, :full_name => 'JBoss Application Server', :class => JBossASService
