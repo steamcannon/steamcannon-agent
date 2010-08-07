@@ -63,8 +63,6 @@ class ServiceManager
 
     @log.debug "Executing #{operation} operation for #{service.class}..."
 
-    Event.create( :service => service.class, :operation => operation, :time => Time.now )
-
     service.send( operation, *params )
   end
 

@@ -1,8 +1,10 @@
 class Event
   include DataMapper::Resource
 
+  belongs_to :service
+
   property :id, Serial
-  property :service, String
   property :operation, String
-  property :time, DateTime
+  property :status, String
+  property :time, DateTime, :default => Time.now
 end

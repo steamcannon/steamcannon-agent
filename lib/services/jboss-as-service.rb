@@ -3,36 +3,52 @@ require 'services/base-service'
 class JBossASService < BaseService
   def initialize
     register_service( :jboss_as, 'JBoss Application Server' )
+
+    @jboss_home             = '/opt/jboss-as'
+    @default_configuration  = 'default'
+    @service_name           = 'jboss-as6'
   end
 
   def restart
-    { :status => 'ok' }
+    @db.save_event( :restart, :received )
+
+    manage_service( :restart )
+
+    @log.info "JBoss AS is restarting..."
+
+    { :status => 'ok', :response => { :status => :restarting } }
   end
 
   def start
-    @log.info "Starting JBoss AS..."
+    @db.save_event( :start, :received )
 
-    # actual code
+    manage_service( :start )
 
-    @log.info "JBoss is starting..."
+    @log.info "JBoss AS is starting..."
 
-    { :status => 'ok', :response => { :jboss_status => :starting } }
+    { :status => 'ok', :response => { :status => :starting } }
   end
 
   def stop
-    { :status => 'ok', :response => { :jboss_status => :stopping } }
+    @db.save_event( :stop, :received )
+
+    manage_service( :stop )
+
+    @log.info "JBoss AS is stopping..."
+
+    { :status => 'ok', :response => { :status => :stopping } }
   end
 
   def status
     # started, stopped, starting, stopping
-    { :status => 'ok', :response => { :jboss_status => :started } }
+    { :status => 'ok', :response => { :status => :started } }
   end
 
   def artifacts
 
     artifacts = []
 
-    Artifact.all.each do |artifact|
+    @db.artifacts.each do |artifact|
       artifacts << { :name => artifact.name, :id => artifact.id }
     end
 
@@ -40,27 +56,51 @@ class JBossASService < BaseService
   end
 
   def deploy( artifact )
+    @db.save_event( :deploy, :received )
+
+    #TODO base 64 decode artifact
     # validate the parameter, do the job, etc
+    # Tempfile
+    # FileUtils.cp( tempfile, "#{@jboss_home}/server/#{@default_configuration}/deploy/" )
 
-    artifact = Artifact.create( :name => 'abc.war', :location => '/opt/test/abc.war', :service => @service )
+    name = 'abc.war'
 
-    { :status => 'ok', :response => { :artifact_id => artifact.id } }
+    if a = @db.save_artifact( :name => name, :location => "#{@jboss_home}/server/#{@default_configuration}/deploy/#{name}" )
+      @db.save_event( :deploy, :finished )
+      { :status => 'ok', :response => { :artifact_id => a.id } }
+    else
+      @db.save_event( :deploy, :failed )
+      { :status => 'error', :msg => "Error while saving artifact" }
+    end
   end
 
   def undeploy( artifact_id )
-    # validate the parameter, do the job, etc
+    @db.save_event( :undeploy, :received )
 
-    artifact = Artifact.get( artifact_id )
+    # TODO: remove artifact from JBoss
 
-    if artifact.nil?
-      { :status => 'error', :msg => "Artifact with id = '#{artifact_id}' not found" }
+    if @db.remove_artifact( artifact_id )
+      @db.save_event( :undeploy, :finished )
+      { :status => 'ok' }
     else
+      @db.save_event( :undeploy, :failed )
+      { :status => 'error', :msg => "Error occurred while removing artifact with id = '#{artifact_id}'" }
+    end
+  end
+
+  protected
+
+  def manage_service( operation )
+    Thread.new do
+      @log.info "Trying to #{operation} '#{@service_name}' service..."
       begin
-        artifact.destroy
-        { :status => 'ok' }
+        @exec_helper.execute( "service #{@service_name} #{operation}" )
+        @db.save_event( operation, :finished )
+        @log.info "#{operation} operation executed on service #{@service_name}"
       rescue
-        { :status => 'error', :msg => "Error occured while removing artifact with id = '#{artifact_id}'" }
+        @db.save_event( operation, :failed )
       end
     end
   end
+
 end

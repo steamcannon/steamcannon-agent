@@ -24,4 +24,4 @@ API description
 Dependencies
 ============
 
-        gem install sinatra dm-core dm-sqlite-adapter db-migrations
+        gem install sinatra dm-core dm-sqlite-adapter dm-migrations
