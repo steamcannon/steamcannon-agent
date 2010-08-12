@@ -40,8 +40,16 @@ class JBossASService < BaseService
   end
 
   def status
-    # started, stopped, starting, stopping
-    { :status => 'ok', :response => { :status => :started } }
+    @db.save_event( :status, :received )
+
+    begin
+      @exec_helper.execute( "service #{@service_name} status" )
+      { :status => 'ok', :response => { :status => :started } }
+    rescue
+      { :status => 'ok', :response => { :status => :stopped } }
+    ensure
+      @db.save_event( :status, :finished )
+    end
   end
 
   def artifacts

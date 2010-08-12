@@ -24,4 +24,5 @@ API description
 Dependencies
 ============
 
-        gem install sinatra dm-core dm-sqlite-adapter dm-migrations
+        gem install sinatra dm-core dm-sqlite-adapter dm-migrations json
+        gem install ./gems/thin-1.2.8.gem
