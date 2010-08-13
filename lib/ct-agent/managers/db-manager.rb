@@ -1,11 +1,13 @@
 require 'logger'
-require 'models/service'
-require 'models/event'
-require 'models/artifact'
+require 'ct-agent/models/service'
+require 'ct-agent/models/event'
+require 'ct-agent/models/artifact'
 
 class DBManager
   def initialize( options = {} )
-    DataMapper::Logger.new( STDOUT, :debug )
+    @log  = options[:log] || Logger.new(STDOUT)
+
+    DataMapper::Logger.new( @log, :debug )
   end
 
   def prepare_db

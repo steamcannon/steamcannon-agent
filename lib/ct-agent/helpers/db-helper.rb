@@ -1,5 +1,5 @@
 require 'logger'
-require 'models/artifact'
+require 'ct-agent/models/artifact'
 
 class DBHelper
   def initialize( service, options = {} )

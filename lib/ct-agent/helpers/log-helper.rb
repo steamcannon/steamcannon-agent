@@ -68,7 +68,7 @@ class LogHelper
       FileUtils.mkdir_p(File.dirname(location))
 
       @file_log = Logger.new(location, 10, 1024000)
-      @file_log.level = threshold == Logger::TRACE ? Logger::TRACE : Logger::DEBUG
+      @file_log.level = (threshold == Logger::TRACE ? Logger::TRACE : Logger::DEBUG)
       @file_log.formatter = formatter
     end
 

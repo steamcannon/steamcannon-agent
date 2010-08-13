@@ -1,10 +1,15 @@
+Dependencies
+============
+
+        gem install sinatra dm-core dm-sqlite-adapter dm-migrations json
+        gem install ./gems/thin-1.2.8.gem
 
 Running
 =======
 
         git clone git://github.com/goldmann/ct-manager.git
         cd ct-manager
-        ruby ct-manager.rb
+        ruby -I lib/ bin/agent -C config/thin/development.yaml start
 
 API description
 ===============
@@ -20,9 +25,3 @@ API description
         POST http://localhost:4567/services/SERVICE/artifacts, params: artifact
 
         DELETE http://localhost:4567/services/SERVICE/artifacts/ARTIFACT_ID
-
-Dependencies
-============
-
-        gem install sinatra dm-core dm-sqlite-adapter dm-migrations json
-        gem install ./gems/thin-1.2.8.gem

@@ -1,0 +1,6 @@
+services:                 # default: no services? all service?
+  - jboss_as
+log_level: trace
+
+
+

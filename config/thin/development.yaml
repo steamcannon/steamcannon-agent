@@ -1,0 +1,12 @@
+environment: development
+address: 0.0.0.0
+debug: true
+trace: true
+port: 4567
+rackup: config/rackup.ru
+log: log/agent.log
+max_conns: 100
+timeout: 30
+max_persistent_conns: 100
+daemonize: false
+ssl: true

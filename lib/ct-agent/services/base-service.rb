@@ -1,6 +1,6 @@
 require 'logger'
-require 'helpers/db-helper'
-require 'helpers/exec-helper'
+require 'ct-agent/helpers/db-helper'
+require 'ct-agent/helpers/exec-helper'
 
 class BaseService
   protected
@@ -11,11 +11,11 @@ class BaseService
   end
 
   def register_service( name, full_name )
-    @service  = ServiceManager.instance.register_service( self, name, full_name )
+    @service  = ServiceManager.register_service( self, name, full_name )
     @db       = DBHelper.new( @service, :log => @log )
   end
 
   def self.inherited( subclass )
-    ServiceManager.instance.register_service_class( subclass )
+    ServiceManager.register_service_class( subclass )
   end
 end

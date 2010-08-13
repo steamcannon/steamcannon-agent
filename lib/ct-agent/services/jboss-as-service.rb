@@ -1,4 +1,4 @@
-require 'services/base-service'
+require 'ct-agent/services/base-service'
 
 class JBossASService < BaseService
   def initialize
