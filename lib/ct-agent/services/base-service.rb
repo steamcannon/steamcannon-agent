@@ -8,6 +8,7 @@ class BaseService
   def prepare( options = {} )
     @log          = options[:log] || Logger.new(STDOUT)
     @exec_helper  = options[:exec_helper] || ExecHelper.new( :log => @log )
+    @config       = options[:config] || {}
   end
 
   def register_service( name, full_name )

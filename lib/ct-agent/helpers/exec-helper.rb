@@ -31,7 +31,7 @@ class ExecHelper
     @log.debug "Executing command: '#{command}'"
 
     begin
-      Open4::popen4( command ) do |pid, stdin, stdout, stderr|
+      status = Open4::popen4( command ) do |pid, stdin, stdout, stderr|
         threads = []
 
         threads << Thread.new(stdout) do |input_str|
@@ -47,10 +47,15 @@ class ExecHelper
         end
         threads.each{|t|t.join}
       end
+
+      raise "An error occurred while executing command: '#{command}'" if status.exitstatus != 0
     rescue => e
       @log.error e.backtrace.join($/)
       @log.error "An error occurred while executing command: '#{command}'"
       raise "An error occurred while executing command: '#{command}'"
     end
+
+
+
   end
 end

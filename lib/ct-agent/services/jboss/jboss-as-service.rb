@@ -21,9 +21,11 @@ module CoolingTower
     def restart
       @db.save_event( :restart, :received )
 
-      manage_service( :restart )
-
       @status = :restarting
+
+      Thread.new do
+        manage_service( :restart )
+      end
 
       @log.info "JBoss AS is restarting..."
 
@@ -33,11 +35,27 @@ module CoolingTower
     def start
       @db.save_event( :start, :received )
 
-      manage_service( :start )
+      if @status == :started
+        @db.save_event( :start, :finished )
+        return { :status => 'ok', :response => { :status => @status } }
+      end
 
-      @log.info "JBoss AS is starting..."
+      # if is NOT in stopped state
+      unless @status == :stopped
+        @db.save_event( :start, :failed )
+        return { :status => 'error', :msg => "JBoss is currently in '#{@status}' state. It needs to be in 'stopped' state to execute this action." }
+      end
+
+      @log.info "Starting JBoss AS..."
 
       @status = :starting
+
+      Thread.new do
+        manage_service( :start )
+
+        @status = :started
+        @db.save_event( :start, :finished )
+      end
 
       { :status => 'ok', :response => { :status => @status } }
     end
@@ -45,7 +63,9 @@ module CoolingTower
     def stop
       @db.save_event( :stop, :received )
 
-      manage_service( :stop )
+      Thread.new do
+        manage_service( :stop )
+      end
 
       if [:stopped, :stopping].include?( @status )
         return { :status => 'ok', :response => { :status => @status, :call => :ignored } }
@@ -72,6 +92,11 @@ module CoolingTower
     def configure( data )
       @db.save_event( :configure, :received )
 
+      if @status == :reconfiguring
+        @db.save_event( :configure, :failed )
+        return { :status => 'error', :msg => "Previous reconfiguration still running, please be patient" }
+      end
+
       invalid = true
 
       begin
@@ -93,24 +118,42 @@ module CoolingTower
 
       @log.info "Reconfiguring JBoss AS..."
 
-      begin
-        UpdateGossipHostAddressCommand.new( @jboss_config_file, :log => @log ).execute( data['gossip_host'] ) unless data['gossip_host'].nil?
-        UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data['s3_ping'] ) unless data['s3_ping'].nil?
+      Thread.new do
+        begin
+          restart = false
 
-        # TODO if JBoss isn't started Ð start the service and wait!
-        if status == :started
-          UpdateProxyListCommand.new( @jboss_home, :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
+          restart = true if UpdateGossipHostAddressCommand.new( :log => @log ).execute( data['gossip_host'] ) unless data['gossip_host'].nil?
+          restart = true if UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data['s3_ping'] ) unless data['s3_ping'].nil?
+
+          unless data['proxy_list'].nil?
+            if status != :started
+
+              unless manage_service( :start )
+                @db.save_event( :configure, :failed )
+                exit 1
+              end
+            end
+
+            restart = true if UpdateProxyListCommand.new( @jboss_home, :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
+          end
+
+          @status = status
+
+          if restart
+            unless manage_service( :restart )
+              @db.save_event( :configure, :failed )
+              exit 1
+            end
+          end
+
+          @db.save_event( :configure, :finished )
+        rescue => e
+          @log.error e
+          @log.error "An error occurred while updating JBoss configuration."
+          @db.save_event( :configure, :failed )
+          ##return { :status => 'error', :msg => "An error occurred while updating JBoss configuration. Some changes could be not saved." }
         end
-      rescue => e
-        @log.error e
-        @log.error "An error occurred while updating JBoss configuration."
-        @db.save_event( :configure, :failed )
-        return { :status => 'error', :msg => "An error occurred while updating JBoss configuration. Some changes could be not saved." }
       end
-
-      @status = status
-
-      @db.save_event( :configure, :finished )
 
       { :status => 'ok', :response => { :status => @status} }
     end
@@ -162,15 +205,16 @@ module CoolingTower
     protected
 
     def manage_service( operation )
-      Thread.new do
-        @log.info "Trying to #{operation} '#{@service_name}' service..."
-        begin
-          @exec_helper.execute( "service #{@service_name} #{operation}" )
-          @db.save_event( operation, :finished )
-          @log.info "#{operation} operation executed on service #{@service_name}"
-        rescue
-          @db.save_event( operation, :failed )
-        end
+      @log.info "Trying to #{operation} '#{@service_name}' service..."
+      begin
+        @db.save_event( operation, :received )
+        @exec_helper.execute( "service #{@service_name} #{operation}" )
+        @db.save_event( operation, :finished )
+        @log.info "#{operation} operation executed on service #{@service_name}"
+        true
+      rescue
+        @db.save_event( operation, :failed )
+        false
       end
     end
   end

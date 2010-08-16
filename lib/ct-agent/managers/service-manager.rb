@@ -23,7 +23,7 @@ class ServiceManager
       @service_classes.each do |clazz|
         @log.debug "Loading #{clazz} service..."
         o = clazz.new
-        o.send(:prepare, :log => @log )
+        o.send(:prepare, :log => @log, :config => @config )
         @log.debug "Service #{clazz} loaded."
       end
 

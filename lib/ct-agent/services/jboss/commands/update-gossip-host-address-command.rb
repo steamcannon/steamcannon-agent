@@ -26,9 +26,7 @@ module CoolingTower
 
     JBOSS_GOSSIP_HOST = 'JBOSS_GOSSIP_HOST'
 
-    def initialize( jboss_as_config_file, options = {} )
-      @jboss_as_config_file = jboss_as_config_file
-
+    def initialize( options = {} )
       @log              = options[:log]             || Logger.new(STDOUT)
       @string_helper    = options[:string_helper]   || StringHelper.new( { :log => @log } )
       @client_helper    = options[:client_helper]   || ClientHelper.new( { :log => @log } )
@@ -37,7 +35,7 @@ module CoolingTower
     def execute( gossip_host )
       @log.info "Updating JBoss AS GossipRouter Host to '#{gossip_host}'..."
 
-      @jboss_as_config = File.read(@jboss_as_config_file)
+      @jboss_as_config = File.read(JBossASService::JBOSS_AS_SYSCONFIG_FILE)
       @current_gossip_host = @string_helper.prop_value( @jboss_as_config, gossip_host )
 
       @log.debug "Current Gossip host value is '#{@current_gossip_host}'" if @current_gossip_host.length > 0
@@ -45,7 +43,7 @@ module CoolingTower
       unless (@current_gossip_host == gossip_host)
         @log.debug "Updating Gossip host to '#{gossip_host}'..."
         @string_helper.update_config( @jboss_as_config, JBOSS_GOSSIP_HOST, gossip_host )
-        File.open(@jboss_as_config_file, 'w') {|f| f.write(@jboss_as_config) }
+        File.open(JBossASService::JBOSS_AS_SYSCONFIG_FILE, 'w') {|f| f.write(@jboss_as_config) }
         @log.info "GossipRouter Host updated."
 
         # does it needs JBoss AS restart?
