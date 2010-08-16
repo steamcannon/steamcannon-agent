@@ -4,10 +4,10 @@ Dependencies
         gem install sinatra dm-core dm-sqlite-adapter dm-migrations json open4
         gem install ./gems/thin-1.2.8.gem
 
-Testing
--------
+Tests
+-----
 
-        gem install rspec rcov
+        gem install rake rspec rcov
 
 Running
 =======
@@ -15,6 +15,12 @@ Running
         git clone git://github.com/goldmann/ct-manager.git
         cd ct-manager
         ruby -I lib/ bin/agent -C config/thin/development.yaml start
+
+Tests
+-----
+
+        cd ct-manager/spec
+        rake
 
 API description
 ===============
