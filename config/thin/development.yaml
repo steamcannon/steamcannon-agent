@@ -1,7 +1,7 @@
 environment: development
 address: 0.0.0.0
 debug: true
-trace: true
+trace: false
 port: 4567
 rackup: config/rackup.ru
 log: log/agent.log

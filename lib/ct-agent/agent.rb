@@ -14,16 +14,7 @@ module CoolingTower
   class Agent < Sinatra::Base
     config = ConfigHelper.new.config
 
-    unless config.log_level.nil? and [:debug, :trace].include?( config.log_level.to_sym )
-      case config.log_level.to_sym
-        when
-        :debug
-          Thin::Logging.debug = true
-        when
-        :trace
-          Thin::Logging.debug = true
-          Thin::Logging.trace = true
-      end
+    unless config.log_level.nil?
       log = LogHelper.new( :location => 'log/agent.log', :threshold => config.log_level.to_sym )
     else
       log = LogHelper.new( :location => 'log/agent.log', :threshold => :info )
