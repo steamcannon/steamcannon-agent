@@ -10,7 +10,9 @@ class ServiceManager
       @service_classes = []
       @services = {}
 
-      Dir["lib/ct-agent/services/**/*.rb"].each {|file| require file }
+      Dir["lib/ct-agent/services/**/*.rb"].each  do |file|
+        require file.match(/^lib\/(.*)\.rb$/)[1]
+      end
 
       load_services
     end
@@ -76,6 +78,6 @@ class ServiceManager
     end
   end
 
-  #attr_reader :services
+#attr_reader :services
 end
 

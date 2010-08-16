@@ -48,7 +48,8 @@ class ExecHelper
         threads.each{|t|t.join}
       end
     rescue => e
-      @log.error "An error occurred while executing command: '#{command}': #{e}"
+      @log.error e.backtrace.join($/)
+      @log.error "An error occurred while executing command: '#{command}'"
       raise "An error occurred while executing command: '#{command}'"
     end
   end

@@ -4,6 +4,9 @@ require 'ct-agent/services/jboss/commands/update-gossip-host-address-command'
 
 module CoolingTower
   class JBossASService < BaseService
+
+    JBOSS_AS_SYSCONFIG_FILE = '/etc/sysconfig/jboss-as'
+
     def initialize
       register_service( :jboss_as, 'JBoss Application Server' )
 
@@ -92,15 +95,20 @@ module CoolingTower
 
       begin
         UpdateGossipHostAddressCommand.new( @jboss_config_file, :log => @log ).execute( data['gossip_host'] ) unless data['gossip_host'].nil?
+        UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data['s3_ping'] ) unless data['s3_ping'].nil?
 
         # TODO if JBoss isn't started Ð start the service and wait!
-        if status = :started
+        if status == :started
           UpdateProxyListCommand.new( @jboss_home, :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
         end
-      rescue
+      rescue => e
+        @log.error e
+        @log.error "An error occurred while updating JBoss configuration."
         @db.save_event( :configure, :failed )
         return { :status => 'error', :msg => "An error occurred while updating JBoss configuration. Some changes could be not saved." }
       end
+
+      @status = status
 
       @db.save_event( :configure, :finished )
 
