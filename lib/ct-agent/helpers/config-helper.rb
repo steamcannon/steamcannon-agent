@@ -6,7 +6,9 @@ module CoolingTower
   class ConfigHelper
     def initialize
 
-      defaults = {}
+      defaults = {
+              'log_level' => :info
+      }
 
       @config_location = 'config/agent.yaml'
 
