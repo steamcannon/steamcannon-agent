@@ -10,7 +10,7 @@ class ServiceManager
       @service_classes = []
       @services = {}
 
-      Dir["lib/ct-agent/services/*.rb"].each {|file| require file }
+      Dir["lib/ct-agent/services/**/*.rb"].each {|file| require file }
 
       load_services
     end
@@ -40,7 +40,6 @@ class ServiceManager
 
       nil
     end
-
 
     def register_service_class( clazz )
       @service_classes << clazz

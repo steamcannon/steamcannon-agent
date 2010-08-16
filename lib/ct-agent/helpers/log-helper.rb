@@ -52,6 +52,15 @@ class LogHelper
           :info => Logger::INFO
   }
 
+  def change_threshold( threshold )
+    return if threshold.nil?
+
+    threshold = THRESHOLDS[threshold.to_sym]
+
+    @file_log.level = (threshold == Logger::TRACE ? Logger::TRACE : Logger::DEBUG) unless @file_log.nil?
+    @stdout_log.level = threshold || Logger::INFO unless @stdout_log.nil?
+  end
+
   def initialize(options = {})
     location = options[:location] || 'log/manager.log'
     threshold = options[:threshold] || :info

@@ -12,16 +12,20 @@ require 'json'
 
 module CoolingTower
   class Agent < Sinatra::Base
-    config = ConfigHelper.new.config
+    log = LogHelper.new( :location => 'log/agent.log' )
 
-    log = LogHelper.new( :location => 'log/agent.log', :threshold => config.log_level.to_sym )
+    log.info "Launching Agent..."
+
+    config = ConfigHelper.new( :log => log ).config
+
+    log.change_threshold( config.log_level.to_sym )
 
     log.trace config.to_yaml
 
     DBManager.new( :log => log ).prepare_db
     ServiceManager.prepare( config, log )
 
-    set :raise_errors, true
+    set :raise_errors, false
     set :logging, false
     set :lock, false
 
@@ -72,6 +76,11 @@ module CoolingTower
       post "/services/#{service_info[:name]}/artifacts" do
         validate_parameter( 'artifact' )
         ServiceManager.execute_operation( service_info[:name], 'deploy', params[:artifact] ).to_json
+      end
+
+      post "/services/#{service_info[:name]}/configure" do
+        validate_parameter( 'data' )
+        ServiceManager.execute_operation( service_info[:name], 'configure', params[:data] ).to_json
       end
 
       delete "/services/#{service_info[:name]}/artifacts/:id" do
