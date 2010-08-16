@@ -1,0 +1,13 @@
+require 'rake'
+require 'spec/rake/spectask'
+
+desc "Run all examples"
+Spec::Rake::SpecTask.new(:default) do |t|
+
+  t.libs.unshift "#{File.dirname( __FILE__ )}/../lib"
+
+  t.spec_files = FileList["#{File.dirname( __FILE__ )}/**/*-spec.rb"]
+  t.rcov = true
+  t.rcov_opts = ['--exclude', 'spec' ]
+  t.spec_opts = [ '--format', 's']
+end

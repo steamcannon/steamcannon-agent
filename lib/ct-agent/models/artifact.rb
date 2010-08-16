@@ -1,3 +1,5 @@
+require 'dm-core'
+
 class Artifact
   include DataMapper::Resource
 

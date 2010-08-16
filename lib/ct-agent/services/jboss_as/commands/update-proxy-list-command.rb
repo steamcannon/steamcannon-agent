@@ -19,12 +19,12 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'logger'
+require  'ct-agent/helpers/exec-helper'
+require  'ct-agent/services/jboss_as/jboss-as-service'
 
 module CoolingTower
   class UpdateProxyListCommand
-    def initialize( jboss_home, options = {} )
-      @jboss_home     = jboss_home
-
+    def initialize( options = {} )
       @log            = options[:log]           || Logger.new(STDOUT)
       @exec_helper    = options[:exec_helper]   || ExecHelper.new( { :log => @log } )
 
@@ -36,6 +36,8 @@ module CoolingTower
     #  proxies = { IP_ADDRESS => { host => IP_ADDRESS, :port => PORT } }
     #
     def execute( proxies )
+      return false if proxies.nil?
+
       @log.info "Updating proxy list in JBoss AS..."
 
       current_proxies = get_current_proxies
@@ -106,7 +108,7 @@ module CoolingTower
     # TODO https://jira.jboss.org/browse/CIRRAS-38
     def twiddle_execute( command )
       @log.debug "Executing '#{command}' using Twiddle..."
-      out = @exec_helper.execute("#{@jboss_home}/bin/twiddle.sh -o #{Socket.gethostname} -u admin -p admin #{command}")
+      out = @exec_helper.execute("#{JBossASService::JBOSS_AS_HOME}/bin/twiddle.sh -o #{Socket.gethostname} -u admin -p admin #{command}")
       @log.debug "Command executed."
       out
     end

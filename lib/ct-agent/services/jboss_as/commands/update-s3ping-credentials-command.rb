@@ -20,7 +20,6 @@
 
 require 'ct-agent/helpers/string-helper'
 require 'ct-agent/helpers/client-helper'
-require 'ct-agent/services/jboss/jboss-as-service'
 
 module CoolingTower
   class UpdateS3PingCredentialsCommand

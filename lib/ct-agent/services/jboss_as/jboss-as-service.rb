@@ -1,17 +1,41 @@
-require 'ct-agent/services/base-service'
-require 'ct-agent/services/jboss/commands/update-proxy-list-command'
-require 'ct-agent/services/jboss/commands/update-gossip-host-address-command'
+# JBoss, Home of Professional Open Source
+# Copyright 2009, Red Hat Middleware LLC, and individual contributors
+# by the @authors tag. See the copyright.txt in the distribution for a
+# full listing of individual contributors.
+#
+# This is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this software; if not, write to the Free
+# Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+# 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+
+require 'ct-agent/services/jboss_as/commands/update-s3ping-credentials-command'
+require 'ct-agent/services/jboss_as/commands/update-gossip-host-address-command'
+require 'ct-agent/services/jboss_as/commands/update-proxy-list-command'
+require 'ct-agent/managers/service-manager'
 
 module CoolingTower
-  class JBossASService < BaseService
+  class JBossASService
 
     JBOSS_AS_SYSCONFIG_FILE = '/etc/sysconfig/jboss-as'
+    JBOSS_AS_HOME           = '/opt/jboss-as'
 
-    def initialize
-      register_service( :jboss_as, 'JBoss Application Server' )
+    def initialize( options = {} )
+      @db = ServiceManager.register( self, 'JBoss Application Server' )
+
+      @log          = options[:log]         || Logger.new(STDOUT)
+      @exec_helper  = options[:exec_helper] || ExecHelper.new( :log => @log )
 
       @jboss_config_file      = '/etc/sysconfig/jboss-as'
-      @jboss_home             = '/opt/jboss-as'
       @default_configuration  = 'default'
       @service_name           = 'jboss-as6'
 
@@ -130,11 +154,11 @@ module CoolingTower
 
               unless manage_service( :start )
                 @db.save_event( :configure, :failed )
-                exit 1
+                Thread.current.exit
               end
             end
 
-            restart = true if UpdateProxyListCommand.new( @jboss_home, :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
+            restart = true if UpdateProxyListCommand.new( :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
           end
 
           @status = status
@@ -142,7 +166,7 @@ module CoolingTower
           if restart
             unless manage_service( :restart )
               @db.save_event( :configure, :failed )
-              exit 1
+              Thread.current.exit
             end
           end
 
@@ -151,7 +175,6 @@ module CoolingTower
           @log.error e
           @log.error "An error occurred while updating JBoss configuration."
           @db.save_event( :configure, :failed )
-          ##return { :status => 'error', :msg => "An error occurred while updating JBoss configuration. Some changes could be not saved." }
         end
       end
 
@@ -175,11 +198,11 @@ module CoolingTower
       #TODO base 64 decode artifact
       # validate the parameter, do the job, etc
       # Tempfile
-      # FileUtils.cp( tempfile, "#{@jboss_home}/server/#{@default_configuration}/deploy/" )
+      # FileUtils.cp( tempfile, "#{JBOSS_AS_HOME}/server/#{@default_configuration}/deploy/" )
 
       name = 'abc.war'
 
-      if a = @db.save_artifact( :name => name, :location => "#{@jboss_home}/server/#{@default_configuration}/deploy/#{name}" )
+      if a = @db.save_artifact( :name => name, :location => "#{JBOSS_AS_HOME}/server/#{@default_configuration}/deploy/#{name}" )
         @db.save_event( :deploy, :finished )
         { :status => 'ok', :response => { :artifact_id => a.id } }
       else

@@ -1,83 +1,101 @@
+# JBoss, Home of Professional Open Source
+# Copyright 2009, Red Hat Middleware LLC, and individual contributors
+# by the @authors tag. See the copyright.txt in the distribution for a
+# full listing of individual contributors.
+#
+# This is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this software; if not, write to the Free
+# Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+# 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+
 require 'ct-agent/helpers/config-helper'
 require 'ct-agent/helpers/log-helper'
+require 'ct-agent/helpers/db-helper'
 
-class ServiceManager
-  class << self
-    def prepare( config, log )
-      @config  = config
-      @log     = log
+module CoolingTower
+  class ServiceManager
+    class << self
+      def prepare( config, log )
+        @config  = config
+        @log     = log
 
-      @service_classes = []
-      @services = {}
+        @services = {}
 
-      Dir["lib/ct-agent/services/**/*.rb"].each  do |file|
-        require file.match(/^lib\/(.*)\.rb$/)[1]
+        Dir["lib/ct-agent/services/**/*-service.rb"].each  do |file|
+          require file.match(/^lib\/(.*)\.rb$/)[1]
+        end
+
+        load_services
       end
 
-      load_services
-    end
+      def load_services
+        @log.info "Loading services..."
 
-    def load_services
-      @log.info "Loading services..."
+        @config['services'].each do |service_name|
+          @log.trace "Loading #{service_name} service..."
+          eval("CoolingTower::#{service_name}Service").new( :log => @log, :config => @config )
+          @log.trace "Service #{service_name} loaded."
+        end unless @config['services'].nil?
 
-      @service_classes.each do |clazz|
-        @log.debug "Loading #{clazz} service..."
-        o = clazz.new
-        o.send(:prepare, :log => @log, :config => @config )
-        @log.debug "Service #{clazz} loaded."
+        @log.info "#{@config['services'].size} service(s) loaded."
       end
 
-      @log.info "#{@service_classes.size} service(s) loaded."
-    end
+      def register( o, full_name )
+        @log.trace "Registering #{o.class} service..."
 
-    def register_service( o, name, full_name )
-      if @config['services'].include?( name.to_s )
-        @log.debug "Registering #{o.class} service..."
+        name = underscore(o.class.name.split('::').last.split('Service').first)
+
         @services[name] = { :object => o, :info => { :name => name, :full_name => full_name } }
 
-        return Service.create( :name => name )
-      else
-        @log.warn "Service already registered!"
+        return DBHelper.new( name, :log => @log )
       end
 
-      nil
-    end
+      def services_info
+        info = []
 
-    def register_service_class( clazz )
-      @service_classes << clazz
-    end
+        @services.values.each do |service|
+          info << service[:info]
+        end
 
-    def services_info
-      info = []
-
-      @services.values.each do |service|
-        info << service[:info]
+        info
       end
 
-      info
-    end
+      def execute_operation( name, operation, *params )
+        service = @services[name][:object]
 
-    def execute_operation( name, operation, *params )
-      service = @services[name.to_sym][:object]
+        unless service.respond_to?( operation )
+          return { :operation => operation, :status => 'error', :message => "Operation '#{operation}' is not supported in #{service.class} service"}
+        end
 
-      unless service.respond_to?( operation )
-        return { :operation => operation, :status => 'error', :message => "Operation '#{operation}' is not supported in #{service.class} service"}
+        if service.method( operation ).arity != params.size and service.method( operation ).arity >= 0
+          return { :operation => operation, :status => 'error', :message => "Operation '#{operation}' takes #{service.method( operation ).arity } argument, but provided #{params.size}"}
+        end
+
+        @log.debug "Executing #{operation} operation for #{service.class}..."
+
+        service.send( operation, *params )
       end
 
-      if service.method( operation ).arity != params.size and service.method( operation ).arity >= 0
-        return { :operation => operation, :status => 'error', :message => "Operation '#{operation}' takes #{service.method( operation ).arity } argument, but provided #{params.size}"}
+      def service_exists?( name )
+        !@services[name.to_sym].nil?
       end
 
-      @log.debug "Executing #{operation} operation for #{service.class}..."
-
-      service.send( operation, *params )
-    end
-
-    def service_exists?( name )
-      !@services[name.to_sym].nil?
+      def underscore(camel_cased_word)
+        camel_cased_word.to_s.gsub(/::/, '/').
+                gsub(/([a-z\d])([A-Z])/, '\1_\2').
+                tr("-", "_").
+                downcase
+      end
     end
   end
-
-#attr_reader :services
 end
-
