@@ -1,11 +1,13 @@
 require 'ct-agent/services/base-service'
-require 'ct-agent/services/jboss/update-proxy-list-command'
+require 'ct-agent/services/jboss/commands/update-proxy-list-command'
+require 'ct-agent/services/jboss/commands/update-gossip-host-address-command'
 
 module CoolingTower
   class JBossASService < BaseService
     def initialize
       register_service( :jboss_as, 'JBoss Application Server' )
 
+      @jboss_config_file      = '/etc/sysconfig/jboss-as'
       @jboss_home             = '/opt/jboss-as'
       @default_configuration  = 'default'
       @service_name           = 'jboss-as6'
@@ -70,7 +72,11 @@ module CoolingTower
       invalid = true
 
       begin
-        invalid = false unless data.nil? and JSON.parse( data ).is_a?(Hash)
+        unless data.nil?
+          data = JSON.parse( data )
+
+          invalid = false if data.is_a?(Hash)
+        end
       rescue
       end
 
@@ -79,12 +85,18 @@ module CoolingTower
         return { :status => 'error', :msg => "No or invalid data specified to configure" }
       end
 
+      status = @status
       @status = :reconfiguring
 
       @log.info "Reconfiguring JBoss AS..."
 
       begin
-        UpdateProxyListCommand.new( @jboss_home, :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
+        UpdateGossipHostAddressCommand.new( @jboss_config_file, :log => @log ).execute( data['gossip_host'] ) unless data['gossip_host'].nil?
+
+        # TODO if JBoss isn't started Ð start the service and wait!
+        if status = :started
+          UpdateProxyListCommand.new( @jboss_home, :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
+        end
       rescue
         @db.save_event( :configure, :failed )
         return { :status => 'error', :msg => "An error occurred while updating JBoss configuration. Some changes could be not saved." }

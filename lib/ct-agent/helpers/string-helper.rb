@@ -18,38 +18,31 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'logger'
-require 'rubygems'
-require 'open4'
-
-class ExecHelper
-  def initialize( options = {} )
-    @log = options[:log] || Logger.new(STDOUT)
-  end
-
-  def execute( command )
-    @log.debug "Executing command: '#{command}'"
-
-    begin
-      Open4::popen4( command ) do |pid, stdin, stdout, stderr|
-        threads = []
-
-        threads << Thread.new(stdout) do |input_str|
-          input_str.each do |l|
-            @log.debug l.chomp.strip
-          end
-        end
-
-        threads << Thread.new(stderr) do |input_str|
-          input_str.each do |l|
-            @log.debug l.chomp.strip
-          end
-        end
-        threads.each{|t|t.join}
-      end
-    rescue => e
-      @log.error "An error occurred while executing command: '#{command}': #{e}"
-      raise "An error occurred while executing command: '#{command}'"
+module CoolingTower
+  class StringHelper
+    def initialize( options = {} )
+      @log = options[:log] || Logger.new(STDOUT)
     end
+
+    def update_config( string, name, value )
+      if string.scan(/^#{name}=(.*)$/).size == 0
+        string << (is_last_line_empty?(string) ? "#{name}=#{value}" : "\n#{name}=#{value}")
+      else
+        string.gsub!( /^#{name}=(.*)$/, "#{name}=#{value}" )
+      end
+    end
+
+    def prop_value( string, name )
+      string.scan(/^#{name}=(.*)/).to_s
+    end
+
+    def is_last_line_empty?( string )
+      string.match(/^(.*)$\z/).nil? ? true : false
+    end
+
+    def add_new_line( string )
+      string << "\n" unless is_last_line_empty?( string )
+    end
+
   end
 end

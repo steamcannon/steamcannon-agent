@@ -45,7 +45,12 @@ module CoolingTower
 
       current_hosts.each do |host|
         unless proxies.include?(host)
-          remove_proxy( host, current_proxies[host][:port] )
+          begin
+            remove_proxy( host, current_proxies[host][:port] )
+          rescue
+            # This should not happen
+            @log.error "Unable to remove proxy #{host}:#{current_proxies[host][:port]}"
+          end
         end
       end
 
@@ -66,6 +71,9 @@ module CoolingTower
       end
 
       @log.info "Proxy list updated"
+
+      # does it needs JBoss AS restart?
+      false
     end
 
     def get_current_proxies
