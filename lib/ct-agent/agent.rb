@@ -52,16 +52,15 @@ module CoolingTower
 
     helpers do
       def validate_parameter( name )
-        halt 415, response_builder( false, "No '#{name}' parameter specified in request" ) if params[name.to_sym].nil?
+        halt 415, {
+                :status     => 'error',
+                :message    => "No '#{name}' parameter specified in request"
+        }.to_json if params[name.to_sym].nil?
       end
+    end
 
-      def response_builder( success, message )
-        {
-                :operation  => params[:operation],
-                :status     => (success ? 'ok' : 'error'),
-                :message    => message
-        }.to_json
-      end
+    get '/status' do
+      { :status => 'ok' }.to_json
     end
 
     get '/services' do
