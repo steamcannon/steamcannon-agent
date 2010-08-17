@@ -61,7 +61,7 @@ module CoolingTower
       @cmd.should_receive(:read_credentials).and_return({})
       @cmd.should_receive(:write_credentials).with({ 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'})
 
-      @cmd.execute(  { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} )
+      @cmd.execute(  { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} ).should == true
     end
 
     it "should not update S3 credentials" do
@@ -69,7 +69,7 @@ module CoolingTower
       @cmd.should_receive(:read_credentials).and_return({ 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'})
       @cmd.should_not_receive(:write_credentials)
 
-      @cmd.execute( { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} )
+      @cmd.execute( { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} ).should == false
     end
 
 

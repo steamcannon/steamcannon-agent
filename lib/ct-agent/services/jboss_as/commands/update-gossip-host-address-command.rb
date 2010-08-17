@@ -35,8 +35,12 @@ module CoolingTower
     def execute( gossip_host )
       @log.info "Updating JBoss AS GossipRouter Host to '#{gossip_host}'..."
 
+      unless gossip_host.is_a?(String)
+        raise "Provided Gossip Host address is not valid, got #{gossip_host.class}, should be a String."
+      end
+
       @jboss_as_config = File.read(JBossASService::JBOSS_AS_SYSCONFIG_FILE)
-      @current_gossip_host = @string_helper.prop_value( @jboss_as_config, gossip_host )
+      @current_gossip_host = @string_helper.prop_value( @jboss_as_config, JBOSS_GOSSIP_HOST )
 
       @log.debug "Current Gossip host value is '#{@current_gossip_host}'" if @current_gossip_host.length > 0
 
