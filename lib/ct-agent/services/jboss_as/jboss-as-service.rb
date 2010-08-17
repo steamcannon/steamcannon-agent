@@ -43,68 +43,64 @@ module CoolingTower
     end
 
     def restart
-      @db.save_event( :restart, :received )
+      parent_event = @db.save_event( :restart, :received )
 
-      @status = :restarting
-
-      Thread.new do
-        manage_service( :restart )
+      if [:starting, :reconfiguring, :stopping].include?( @status )
+        return fail( :restart, parent_event, "Current service status ('#{@status}') does not allow restarting." )
       end
 
+      @log.debug "Current status is '#{@status}', we can restart JBoss AS."
+
+      previous_status = @status
+      @status = :restarting
+
       @log.info "JBoss AS is restarting..."
+
+      manage_service( :restart, parent_event, previous_status, :started, true )
 
       { :status => 'ok', :response => { :status => @status } }
     end
 
     def start
-      @db.save_event( :start, :received )
+      parent_event = @db.save_event( :start, :received )
 
+      # if is already started
       if @status == :started
-        @db.save_event( :start, :finished )
-        return { :status => 'ok', :response => { :status => @status } }
+        return success(:start, parent_event)
       end
 
       # if is NOT in stopped state
       unless @status == :stopped
-        @db.save_event( :start, :failed )
-        return { :status => 'error', :msg => "JBoss is currently in '#{@status}' state. It needs to be in 'stopped' state to execute this action." }
+        return fail( :start, parent_event, "JBoss is currently in '#{@status}' state. It needs to be in 'stopped' state to execute this action." )
       end
+
+      previous_status = @status
+      @status = :starting
 
       @log.info "Starting JBoss AS..."
 
-      @status = :starting
-
-      Thread.new do
-        manage_service( :start )
-
-        @status = :started
-        @db.save_event( :start, :finished )
-      end
+      manage_service( :start, parent_event, previous_status, :started, true )
 
       { :status => 'ok', :response => { :status => @status } }
     end
 
     def stop
-      @db.save_event( :stop, :received )
+      parent_event = @db.save_event( :stop, :received )
 
-      Thread.new do
-        manage_service( :stop )
+      if @status == :stopped
+        return success(:stop, parent_event)
       end
 
-      if [:stopped, :stopping].include?( @status )
-        return { :status => 'ok', :response => { :status => @status, :call => :ignored } }
+      unless @status == :started
+        return fail( :stop, parent_event, "JBoss is currently in '#{@status}' state. It needs to be in 'started' state to execute this action." )
       end
 
-      if [ :starting, :reconfiguring ].include?( @status )
-        # delay the call?!
-        # run in a thread, return current status?
-
-        return { :status => 'ok', :response => { :status => @status, :call => :delayed } }
-      end
+      previous_status = @status
+      @status = :stopping
 
       @log.info "JBoss AS is stopping..."
 
-      @status = :stopping
+      manage_service( :stop, parent_event, previous_status, :stopped, true )
 
       { :status => 'ok', :response => { :status => @status } }
     end
@@ -114,7 +110,8 @@ module CoolingTower
     end
 
     def configure( data )
-      @db.save_event( :configure, :received )
+      operation     = current_operation
+      parent_event  = @db.save_event( operation, :received )
 
       if @status == :reconfiguring
         @db.save_event( :configure, :failed )
@@ -150,9 +147,9 @@ module CoolingTower
           restart = true if UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data['s3_ping'] ) unless data['s3_ping'].nil?
 
           unless data['proxy_list'].nil?
+            # TODO more, more conditions!
             if status != :started
-
-              unless manage_service( :start )
+              unless manage_service( :start, parent_event, status, :started )
                 @db.save_event( :configure, :failed )
                 Thread.current.exit
               end
@@ -161,10 +158,8 @@ module CoolingTower
             restart = true if UpdateProxyListCommand.new( :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
           end
 
-          @status = status
-
           if restart
-            unless manage_service( :restart )
+            unless manage_service( :restart, parent_event, status, :started )
               @db.save_event( :configure, :failed )
               Thread.current.exit
             end
@@ -226,17 +221,36 @@ module CoolingTower
     end
 
     protected
+    def success( operation, parent_event)
+      @db.save_event( operation, :finished, parent_event )
+      { :status => 'ok', :response => { :status => @status } }
+    end
 
-    def manage_service( operation )
-      @log.info "Trying to #{operation} '#{@service_name}' service..."
+    def fail( operation, parent_event, msg )
+      @log.warn msg
+      @db.save_event( operation, :failed, parent_event, msg )
+      { :status => 'error', :msg => msg }
+    end
+
+    def manage_service( operation, parent_event, fail_status, success_status, threaded = false )
+      if threaded
+        Thread.new { execute_service( operation, parent_event, fail_status, success_status ) }
+      else
+        execute_service( operation, parent_event, fail_status, success_status )
+      end
+    end
+
+    def execute_service( operation, parent_event, fail_status, success_status )
       begin
-        @db.save_event( operation, :received )
         @exec_helper.execute( "service #{@service_name} #{operation}" )
-        @db.save_event( operation, :finished )
-        @log.info "#{operation} operation executed on service #{@service_name}"
+        @status = success_status
+        @db.save_event( operation, :finished, parent_event )
         true
       rescue
-        @db.save_event( operation, :failed )
+        # TODO do we need to ensure this is the right status?
+        # back to old status
+        @status = fail_status
+        @db.save_event( operation, :failed, parent_event )
         false
       end
     end

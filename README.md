@@ -1,7 +1,7 @@
 Dependencies
 ============
 
-        gem install sinatra dm-core dm-sqlite-adapter dm-migrations json open4
+        gem install sinatra dm-core dm-sqlite-adapter dm-migrations dm-is-tree json open4
         gem install ./gems/thin-1.2.8.gem
 
 Tests

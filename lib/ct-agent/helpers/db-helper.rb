@@ -74,9 +74,9 @@ module CoolingTower
       end
     end
 
-    def save_event( operation, status )
+    def save_event( operation, status, parent = nil, msg = nil )
       begin
-        return Event.create( :operation => operation, :status => status, :service => @service )
+        return Event.create( :operation => operation, :status => status, :service => @service, :msg => msg, :parent => parent )
       rescue => e
         @log.error e.backtrace
         false
