@@ -47,6 +47,32 @@ module CoolingTower
       credentials['secret_access_key'].should eql("secretaccesskey")
       credentials['bucket'].should eql("")
     end
+
+    it "should raise if provided AWS credentials is not a hash" do
+      begin
+        @cmd.execute( nil )
+      rescue => e
+        e.message.should == "Credentials are in invalid format, got NilClass, should be a Hash."
+      end
+    end
+
+    it "should update S3 credentials" do
+      File.should_receive(:read).with("/etc/sysconfig/jboss-as").and_return("")
+      @cmd.should_receive(:read_credentials).and_return({})
+      @cmd.should_receive(:write_credentials).with({ 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'})
+
+      @cmd.execute(  { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} )
+    end
+
+    it "should not update S3 credentials" do
+      File.should_receive(:read).with("/etc/sysconfig/jboss-as").and_return("")
+      @cmd.should_receive(:read_credentials).and_return({ 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'})
+      @cmd.should_not_receive(:write_credentials)
+
+      @cmd.execute( { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} )
+    end
+
+
   end
 end
 

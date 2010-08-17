@@ -73,6 +73,22 @@ module CoolingTower
       @exec_helper.should_receive(:execute).with( "/opt/jboss-as/bin/twiddle.sh -o localhost -u admin -p admin get jboss.web:service=ModCluster ProxyInfo" ).once.and_return("ProxyInfo={/10.210.30.227:80=Node: [1],Name: localhost.localdomain-10.211.94.34,Balancer: mycluster,Domain: ,Host: 10.211.94.34,Port: 8009,Type: }")
       @cmd.get_current_proxies.size.should == 1
     end
+
+    it "should execute twiddle_execute to add one proxy" do
+      @cmd.should_receive(:twiddle_execute).with("invoke jboss.web:service=ModCluster addProxy 10.1.0.1 80")
+      @cmd.add_proxy( "10.1.0.1", 80 )
+    end
+
+    it "should execute twiddle_execute to remove one proxy" do
+      @cmd.should_receive(:twiddle_execute).with("invoke jboss.web:service=ModCluster removeProxy 10.1.0.1 80")
+      @cmd.remove_proxy( "10.1.0.1", 80 )
+    end
+
+    it "should execute twiddle using exec_helper" do
+      @exec_helper.should_receive(:execute).with("/opt/jboss-as/bin/twiddle.sh -o localhost -u admin -p admin invoke jboss.web:service=ModCluster removeProxy 10.1.0.1 80")
+      @cmd.twiddle_execute( "invoke jboss.web:service=ModCluster removeProxy 10.1.0.1 80" )
+    end
+
   end
 end
 
