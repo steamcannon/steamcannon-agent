@@ -94,6 +94,35 @@ module CoolingTower
       @service.should_not_receive( :manage_service )
       @service.start.should == {:status=>"ok", :response=>{:status=>:started}}
     end
+
+    #
+    # CONFIGURE
+    #
+    it "should not configure JBoss AS because of wrong state" do
+      @service.instance_variable_set(:@status, :starting)
+
+      @db.should_receive( :save_event ).with( :configure, :received ).and_return("1")
+      @db.should_receive( :save_event ).with( :configure, :failed, "1", "JBoss is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action." )
+      @service.should_not_receive( :update_configuration )
+      @service.configure( {} ).should == { :status => 'error', :msg => "JBoss is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action." }
+    end
+
+    it "should not configure JBoss AS because of invalid data provided" do
+      @service.instance_variable_set(:@status, :stopped)
+
+      @db.should_receive( :save_event ).with( :configure, :received ).and_return("1")
+      @db.should_receive( :save_event ).with( :configure, :failed, "1", "No or invalid data specified to configure" )
+      @service.should_not_receive( :update_configuration )
+      @service.configure( nil ).should == { :status => 'error', :msg => "No or invalid data specified to configure" }
+    end
+
+    it "should configure JBoss AS" do
+      @service.instance_variable_set(:@status, :stopped)
+
+      @db.should_receive( :save_event ).with( :configure, :received ).and_return("1")
+      @service.should_receive( :update_configuration )
+      @service.configure( {}.to_json ).should == { :status=>"ok", :response => { :status => :configuring } }
+    end
   end
 end
 

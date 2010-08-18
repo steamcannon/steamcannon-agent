@@ -22,6 +22,7 @@ require 'ct-agent/services/jboss_as/commands/update-s3ping-credentials-command'
 require 'ct-agent/services/jboss_as/commands/update-gossip-host-address-command'
 require 'ct-agent/services/jboss_as/commands/update-proxy-list-command'
 require 'ct-agent/managers/service-manager'
+require 'json'
 
 module CoolingTower
   class JBossASService
@@ -39,13 +40,13 @@ module CoolingTower
       @default_configuration  = 'default'
       @service_name           = 'jboss-as6'
 
-      @status                 = :stopped # available statuses: :starting, :started, :reconfiguring, :stopping, :stopped
+      @status                 = :stopped # available statuses: :starting, :started, :configuring, :stopping, :stopped
     end
 
     def restart
       parent_event = @db.save_event( :restart, :received )
 
-      if [:starting, :reconfiguring, :stopping].include?( @status )
+      if [:starting, :configuring, :stopping].include?( @status )
         return fail( :restart, parent_event, "Current service status ('#{@status}') does not allow restarting." )
       end
 
@@ -110,68 +111,33 @@ module CoolingTower
     end
 
     def configure( data )
-      operation     = current_operation
-      parent_event  = @db.save_event( operation, :received )
+      parent_event = @db.save_event( :configure, :received )
 
-      if @status == :reconfiguring
-        @db.save_event( :configure, :failed )
-        return { :status => 'error', :msg => "Previous reconfiguration still running, please be patient" }
+      unless @status == :started or @status == :stopped
+        return fail( :configure, parent_event, "JBoss is currently in '#{@status}' state. It needs to be in 'started' or 'stopped' state to execute this action." )
       end
 
-      invalid = true
+      invalid_data = true
 
       begin
         unless data.nil?
           data = JSON.parse( data )
 
-          invalid = false if data.is_a?(Hash)
+          invalid_data = false if data.is_a?(Hash)
         end
       rescue
       end
 
-      if invalid
-        @db.save_event( :configure, :failed )
-        return { :status => 'error', :msg => "No or invalid data specified to configure" }
+      if invalid_data
+        return fail( :configure, parent_event, "No or invalid data specified to configure" )
       end
 
-      status = @status
-      @status = :reconfiguring
+      previous_status = @status
+      @status = :configuring
 
-      @log.info "Reconfiguring JBoss AS..."
+      @log.info "Configuring JBoss AS..."
 
-      Thread.new do
-        begin
-          restart = false
-
-          restart = true if UpdateGossipHostAddressCommand.new( :log => @log ).execute( data['gossip_host'] ) unless data['gossip_host'].nil?
-          restart = true if UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data['s3_ping'] ) unless data['s3_ping'].nil?
-
-          unless data['proxy_list'].nil?
-            # TODO more, more conditions!
-            if status != :started
-              unless manage_service( :start, parent_event, status, :started )
-                @db.save_event( :configure, :failed )
-                Thread.current.exit
-              end
-            end
-
-            restart = true if UpdateProxyListCommand.new( :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
-          end
-
-          if restart
-            unless manage_service( :restart, parent_event, status, :started )
-              @db.save_event( :configure, :failed )
-              Thread.current.exit
-            end
-          end
-
-          @db.save_event( :configure, :finished )
-        rescue => e
-          @log.error e
-          @log.error "An error occurred while updating JBoss configuration."
-          @db.save_event( :configure, :failed )
-        end
-      end
+      update_configuration( parent_event, previous_status )
 
       { :status => 'ok', :response => { :status => @status} }
     end
@@ -230,6 +196,42 @@ module CoolingTower
       @log.warn msg
       @db.save_event( operation, :failed, parent_event, msg )
       { :status => 'error', :msg => msg }
+    end
+
+    def update_configuration( parent_event, previous_status )
+      Thread.new do
+        begin
+          restart = false
+
+          restart = true if UpdateGossipHostAddressCommand.new( :log => @log ).execute( data['gossip_host'] ) unless data['gossip_host'].nil?
+          restart = true if UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data['s3_ping'] ) unless data['s3_ping'].nil?
+
+          unless data['proxy_list'].nil?
+            # TODO more, more conditions!
+            if previous_status != :started
+              unless manage_service( :start, parent_event, previous_status, :started )
+                @db.save_event( :configure, :failed )
+                Thread.current.exit
+              end
+            end
+
+            restart = true if UpdateProxyListCommand.new( :log => @log ).execute( data['proxy_list'] ) unless data['proxy_list'].nil?
+          end
+
+          if restart
+            unless manage_service( :restart, parent_event, previous_status, :started )
+              @db.save_event( :configure, :failed )
+              Thread.current.exit
+            end
+          end
+
+          @db.save_event( :configure, :finished )
+        rescue => e
+          @log.error e
+          @log.error "An error occurred while updating JBoss configuration."
+          @db.save_event( :configure, :failed )
+        end
+      end
     end
 
     def manage_service( operation, parent_event, fail_status, success_status, threaded = false )
