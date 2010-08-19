@@ -1,5 +1,3 @@
-require 'ct-agent/services/commands/restart-command'
-require 'ct-agent/services/commands/start-command'
 require 'ct-agent/services/jboss_as/commands/update-gossip-host-address-command'
 require 'ct-agent/services/jboss_as/commands/update-proxy-list-command'
 require 'ct-agent/services/jboss_as/commands/update-s3ping-credentials-command'
@@ -56,7 +54,7 @@ module CoolingTower
         return { :status => 'error', :msg => msg }
       end
 
-      @service.state = :updating
+      @service.state = :configuring
 
       if @threaded
         Thread.new { configure( data, event ) }
@@ -80,7 +78,7 @@ module CoolingTower
 
         unless data[:proxy_list].nil?
           unless @state == :started
-            unless StartCommand.new( @service ).execute( event )[:status] == 'ok'
+            unless @service.service_helper.execute( :start, :event => event, :background => false )[:status] == 'ok'
               msg = "Starting JBoss AS failed, couldn't finish updating JBoss AS"
               @log.error msg
               @service.state = @state
@@ -96,7 +94,7 @@ module CoolingTower
         end
 
         if restart
-          unless RestartCommand.new( @service ).execute( event )[:status] == 'ok'
+          unless @service.service_helper.execute( :restart, :event => event, :background => false )[:status] == 'ok'
             msg = "Restarting JBoss AS failed, couldn't finish updating JBoss AS"
             @log.error msg
             @service.state = @state

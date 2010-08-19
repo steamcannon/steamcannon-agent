@@ -21,9 +21,7 @@
 require 'ct-agent/services/jboss_as/commands/update-s3ping-credentials-command'
 require 'ct-agent/services/jboss_as/commands/update-gossip-host-address-command'
 require 'ct-agent/services/jboss_as/commands/update-proxy-list-command'
-require 'ct-agent/services/commands/restart-command'
-require 'ct-agent/services/commands/start-command'
-require 'ct-agent/services/commands/stop-command'
+require 'ct-agent/helpers/service-helper'
 require 'ct-agent/services/jboss_as/commands/configure-command'
 require 'ct-agent/managers/service-manager'
 require 'json'
@@ -38,12 +36,15 @@ module CoolingTower
 
     attr_reader :db
     attr_reader :name
+    attr_reader :service_helper
 
     def initialize( options = {} )
       @db = ServiceManager.register( self, 'JBoss Application Server' )
 
       @log            = options[:log]             || Logger.new(STDOUT)
       @exec_helper    = options[:exec_helper]     || ExecHelper.new( :log => @log )
+
+      @service_helper = ServiceHelper.new( self, :log => @log )
 
       @jboss_config_file      = '/etc/sysconfig/jboss-as'
       @default_configuration  = 'default'
@@ -54,15 +55,15 @@ module CoolingTower
     end
 
     def restart
-      RestartCommand.new( self, :log => @log, :threaded => true ).execute
+      @service_helper.execute( :restart, :backgroud => true )
     end
 
     def start
-      StartCommand.new( self, :log => @log, :threaded => true ).execute
+      @service_helper.execute( :start, :backgroud => true )
     end
 
     def stop
-      StopCommand.new( self, :log => @log, :threaded => true ).execute
+      @service_helper.execute( :stop, :backgroud => true )
     end
 
     def configure( data )

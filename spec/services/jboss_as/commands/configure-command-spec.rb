@@ -5,6 +5,9 @@ module CoolingTower
 
     before(:each) do
       @service        = mock( 'Service' )
+      @service_helper = mock( ServiceHelper )
+
+      @service.stub!( :service_helper ).and_return( @service_helper )
 
       @service.should_receive(:state).and_return( :stopped )
 
@@ -48,7 +51,7 @@ module CoolingTower
       db1.should_receive( :save_event ).with( :configure, :started ).and_return("1")
       @service.should_receive(:db).and_return( db1 )
 
-      @service.should_receive(:state=).with(:updating)
+      @service.should_receive(:state=).with(:configuring)
       @service.should_receive(:state).and_return(:stopped)
 
       @cmd.should_receive( :configure ).with( {}, "1" )
@@ -69,8 +72,7 @@ module CoolingTower
         UpdateS3PingCredentialsCommand.should_not_receive(:new)
         UpdateProxyListCommand.should_not_receive(:new)
 
-        RestartCommand.should_not_receive(:new)
-        StartCommand.should_not_receive(:new)
+        @service_helper.should_not_receive( :execute )
 
         @cmd.configure( {}, "1" )
       end
@@ -87,8 +89,8 @@ module CoolingTower
 
         UpdateS3PingCredentialsCommand.should_not_receive(:new)
         UpdateProxyListCommand.should_not_receive(:new)
-        RestartCommand.should_not_receive(:new)
-        StartCommand.should_not_receive(:new)
+
+        @service_helper.should_not_receive( :execute )
 
         @service.should_receive(:state=).with(:stopped)
 
@@ -111,8 +113,8 @@ module CoolingTower
         UpdateS3PingCredentialsCommand.should_receive(:new).with( :log => @log ).and_return( s3_ping_cmd )
 
         UpdateProxyListCommand.should_not_receive(:new)
-        RestartCommand.should_not_receive(:new)
-        StartCommand.should_not_receive(:new)
+
+        @service_helper.should_not_receive( :execute )
 
         @service.should_receive(:state=).ordered.with(:stopped)
 
@@ -129,15 +131,8 @@ module CoolingTower
 
         UpdateProxyListCommand.should_receive(:new).with( :log => @log ).and_return( proxy_list_cmd )
 
-        start_cmd = mock(StartCommand)
-        start_cmd.should_receive(:execute).with( "1" ).and_return( :status => 'ok' )
-
-        StartCommand.should_receive(:new).with( @service ).and_return( start_cmd )
-
-        restart_cmd = mock(RestartCommand)
-        restart_cmd.should_receive(:execute).with( "1" ).and_return( :status => 'ok' )
-
-        RestartCommand.should_receive(:new).with( @service ).and_return( restart_cmd )
+        @service_helper.should_receive( :execute ).with( :start, :event => "1", :background => false ).and_return( :status => 'ok' )
+        @service_helper.should_receive( :execute ).with( :restart, :event => "1", :background => false ).and_return( :status => 'ok' )
 
         @service.should_receive(:state=).ordered.with(:started)
 

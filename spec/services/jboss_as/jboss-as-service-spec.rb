@@ -31,6 +31,7 @@ module CoolingTower
 
       @service        = JBossASService.new( :log => @log  )
       @exec_helper    = @service.instance_variable_get(:@exec_helper)
+      @service_helper = @service.instance_variable_get(:@service_helper)
     end
 
     it "should return status" do
@@ -47,29 +48,17 @@ module CoolingTower
     end
 
     it "should execute start" do
-      cmd = mock(StartCommand)
-      cmd.should_receive(:execute).with( no_args ).and_return( { :status => "ok", :response => { :state => :starting } } )
-
-      StartCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
-
+      @service_helper.should_receive(:execute).with( :start, :backgroud => true ).and_return( { :status => "ok", :response => { :state => :starting } } )
       @service.start.should == { :status => "ok", :response => { :state => :starting } }
     end
 
     it "should execute stop" do
-      cmd = mock(StopCommand)
-      cmd.should_receive(:execute).with( no_args ).and_return( { :status => "ok", :response => { :state => :stopping } } )
-
-      StopCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
-
+      @service_helper.should_receive(:execute).with( :stop, :backgroud => true ).and_return( { :status => "ok", :response => { :state => :stopping } } )
       @service.stop.should == { :status => "ok", :response => { :state => :stopping } }
     end
 
     it "should execute restart" do
-      cmd = mock(RestartCommand)
-      cmd.should_receive(:execute).with( no_args ).and_return( { :status => "ok", :response => { :state => :restarting } } )
-
-      RestartCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
-
+      @service_helper.should_receive(:execute).with( :restart, :backgroud => true ).and_return( { :status => "ok", :response => { :state => :restarting } } )
       @service.restart.should == { :status => "ok", :response => { :state => :restarting } }
     end
   end
