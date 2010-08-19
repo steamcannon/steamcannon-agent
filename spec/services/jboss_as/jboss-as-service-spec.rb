@@ -1,127 +1,76 @@
+# JBoss, Home of Professional Open Source
+# Copyright 2009, Red Hat Middleware LLC, and individual contributors
+# by the @authors tag. See the copyright.txt in the distribution for a
+# full listing of individual contributors.
+#
+# This is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this software; if not, write to the Free
+# Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+# 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+
 require 'ct-agent/services/jboss_as/jboss-as-service'
-require 'ct-agent/helpers/db-helper'
 
 module CoolingTower
   describe JBossASService do
 
     before(:each) do
-
-      @db = mock(DBHelper)
+      @db   = mock(DBHelper)
+      @log  = Logger.new('/dev/null')
 
       ServiceManager.should_receive(:register).and_return( @db )
 
-      @service        = JBossASService.new( :log => Logger.new('/dev/null') )
+      @service        = JBossASService.new( :log => @log  )
       @exec_helper    = @service.instance_variable_get(:@exec_helper)
     end
 
-    #
-    # RESTART
-    #
-
-    it "should restart JBoss AS service" do
-      @db.should_receive( :save_event ).with( :restart, :received ).and_return("1")
-      @service.should_receive(:manage_service).with( :restart, "1", :stopped, :started, true )
-      @service.restart.should == { :status => 'ok', :response => { :status => :restarting } }
+    it "should return status" do
+      @service.status.should == { :status => "ok", :response => { :state => :stopped } }
     end
 
-    it "should not restart JBoss AS service because service is in wrong state" do
-      @service.instance_variable_set(:@status, :stopping)
+    it "should execute configure" do
+      cmd = mock(ConfigureCommand)
+      cmd.should_receive(:execute).with( :a => :b ).and_return( { :status => "ok", :response => { :state => :stopped } } )
 
-      @db.should_receive( :save_event ).with( :restart, :received ).and_return("1")
-      @db.should_receive( :save_event ).with( :restart, :failed, "1", "Current service status ('stopping') does not allow restarting." )
+      ConfigureCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
 
-      @service.should_not_receive( :manage_service )
-
-      @service.restart.should == { :status => 'error', :msg => "Current service status ('stopping') does not allow restarting." }
+      @service.configure( :a => :b ).should == { :status => "ok", :response => { :state => :stopped } }
     end
 
-    #
-    # STOP
-    #
+    it "should execute start" do
+      cmd = mock(StartCommand)
+      cmd.should_receive(:execute).with( no_args ).and_return( { :status => "ok", :response => { :state => :starting } } )
 
-    it "should stop JBoss AS service" do
-      @service.instance_variable_set(:@status, :started)
+      StartCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
 
-      @db.should_receive( :save_event ).with( :stop, :received ).and_return("1")
-      @service.should_receive(:manage_service).with( :stop, "1", :started, :stopped, true )
-      @service.stop.should == { :status => 'ok', :response => { :status => :stopping } }
+      @service.start.should == { :status => "ok", :response => { :state => :starting } }
     end
 
-    it "should not stop JBoss AS service because of wrong state" do
-      @service.instance_variable_set(:@status, :starting)
+    it "should execute stop" do
+      cmd = mock(StopCommand)
+      cmd.should_receive(:execute).with( no_args ).and_return( { :status => "ok", :response => { :state => :stopping } } )
 
-      @db.should_receive( :save_event ).with( :stop, :received ).and_return("1")
-      @db.should_receive( :save_event ).with( :stop, :failed, "1", "JBoss is currently in 'starting' state. It needs to be in 'started' state to execute this action." )
-      @service.should_not_receive( :manage_service )
-      @service.stop.should == { :status => 'error', :msg => "JBoss is currently in 'starting' state. It needs to be in 'started' state to execute this action." }
+      StopCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
+
+      @service.stop.should == { :status => "ok", :response => { :state => :stopping } }
     end
 
-    it "should not stop JBoss AS service because it is already stopped" do
-      @service.instance_variable_set(:@status, :stopped)
+    it "should execute restart" do
+      cmd = mock(RestartCommand)
+      cmd.should_receive(:execute).with( no_args ).and_return( { :status => "ok", :response => { :state => :restarting } } )
 
-      @db.should_receive( :save_event ).with( :stop, :received ).and_return("1")
-      @db.should_receive( :save_event ).with( :stop, :finished, "1" )
-      @service.should_not_receive( :manage_service )
-      @service.stop.should == {:status=>"ok", :response=>{:status=>:stopped}}
-    end
+      RestartCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
 
-    #
-    # START
-    #
-
-    it "should start JBoss AS service" do
-      @service.instance_variable_set(:@status, :stopped)
-
-      @db.should_receive( :save_event ).with( :start, :received ).and_return("1")
-      @service.should_receive(:manage_service).with( :start, "1", :stopped, :started, true )
-      @service.start.should == { :status => 'ok', :response => { :status => :starting } }
-    end
-
-    it "should not start JBoss AS service because of wrong state" do
-      @service.instance_variable_set(:@status, :starting)
-
-      @db.should_receive( :save_event ).with( :start, :received ).and_return("1")
-      @db.should_receive( :save_event ).with( :start, :failed, "1", "JBoss is currently in 'starting' state. It needs to be in 'stopped' state to execute this action." )
-      @service.should_not_receive( :manage_service )
-      @service.start.should == { :status => 'error', :msg => "JBoss is currently in 'starting' state. It needs to be in 'stopped' state to execute this action." }
-    end
-
-    it "should not start JBoss AS service because it is already started" do
-      @service.instance_variable_set(:@status, :started)
-
-      @db.should_receive( :save_event ).with( :start, :received ).and_return("1")
-      @db.should_receive( :save_event ).with( :start, :finished, "1" )
-      @service.should_not_receive( :manage_service )
-      @service.start.should == {:status=>"ok", :response=>{:status=>:started}}
-    end
-
-    #
-    # CONFIGURE
-    #
-    it "should not configure JBoss AS because of wrong state" do
-      @service.instance_variable_set(:@status, :starting)
-
-      @db.should_receive( :save_event ).with( :configure, :received ).and_return("1")
-      @db.should_receive( :save_event ).with( :configure, :failed, "1", "JBoss is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action." )
-      @service.should_not_receive( :update_configuration )
-      @service.configure( {} ).should == { :status => 'error', :msg => "JBoss is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action." }
-    end
-
-    it "should not configure JBoss AS because of invalid data provided" do
-      @service.instance_variable_set(:@status, :stopped)
-
-      @db.should_receive( :save_event ).with( :configure, :received ).and_return("1")
-      @db.should_receive( :save_event ).with( :configure, :failed, "1", "No or invalid data specified to configure" )
-      @service.should_not_receive( :update_configuration )
-      @service.configure( nil ).should == { :status => 'error', :msg => "No or invalid data specified to configure" }
-    end
-
-    it "should configure JBoss AS" do
-      @service.instance_variable_set(:@status, :stopped)
-
-      @db.should_receive( :save_event ).with( :configure, :received ).and_return("1")
-      @service.should_receive( :update_configuration )
-      @service.configure( {}.to_json ).should == { :status=>"ok", :response => { :status => :configuring } }
+      @service.restart.should == { :status => "ok", :response => { :state => :restarting } }
     end
   end
 end

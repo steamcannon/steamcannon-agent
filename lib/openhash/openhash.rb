@@ -32,7 +32,7 @@ class OpenHash < Hash
   def <<(x)
     case x
       when Hash
-        update(x)
+        configure(x)
       when Array
         x.each_slice(2) do |(k, v)|
           self[k] = v
