@@ -4,6 +4,7 @@ require 'dm-migrations'
 require 'sinatra/base'
 require 'ct-agent/helpers/log-helper'
 require 'ct-agent/helpers/config-helper'
+require 'ct-agent/helpers/exec-helper'
 require 'ct-agent/managers/db-manager'
 require 'ct-agent/managers/service-manager'
 require 'rack'
@@ -51,7 +52,7 @@ module CoolingTower
     end
 
     get '/status' do
-      { :status => 'ok' }.to_json
+      { :status => 'ok', :response => {:load => ExecHelper.new( :log => Logger.new('/dev/null') ).execute("cat /proc/loadavg") } }.to_json
     end
 
     get '/services' do
