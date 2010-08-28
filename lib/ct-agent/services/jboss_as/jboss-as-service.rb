@@ -51,8 +51,6 @@ module CoolingTower
       @jboss_as_configuration   = 'default'
       @name                     = 'jboss-as'
 
-      FileUtils.mkdir_p( "#{JBOSS_AS_HOME}/tmp" )
-
       # TODO should we also include :error status?
       @state                  = :stopped # available statuses: :starting, :started, :configuring, :stopping, :stopped
     end

@@ -52,6 +52,8 @@ module CoolingTower
 
       @log.debug "Received new artifact: #{name}"
 
+      FileUtils.mkdir_p( "#{JBossASService::JBOSS_AS_HOME}/tmp" )
+
       location        = "#{JBossASService::JBOSS_AS_HOME}/server/#{@service.jboss_as_configuration}/deploy/#{name}"
       tmp_location    = "#{JBossASService::JBOSS_AS_HOME}/tmp/file_#{name}_#{rand(9999999999).to_s.center(10, rand(9).to_s)}"
 

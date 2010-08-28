@@ -48,6 +48,7 @@ module CoolingTower
 
       File.should_receive(:open)
       FileUtils.should_receive(:mv)
+      FileUtils.should_receive(:mkdir_p).with("/opt/jboss-as/tmp")
 
       @db.should_receive( :save_event ).with( :deploy, :finished, :parent=>"1" )
 
