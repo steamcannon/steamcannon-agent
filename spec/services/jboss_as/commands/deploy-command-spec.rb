@@ -61,6 +61,8 @@ module CoolingTower
       @service.should_receive(:jboss_as_configuration).and_return("default")
       @db.should_receive( :save_artifact ).with( :type=>"application/json", :name=>"name.war", :size=>1234, :location=>"/opt/jboss-as/server/default/deploy/name.war" )
 
+      FileUtils.should_receive(:mkdir_p).with("/opt/jboss-as/tmp")
+
       file = mock("File")
       file.should_receive(:size).and_return(1234)
 
