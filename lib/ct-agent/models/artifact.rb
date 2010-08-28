@@ -28,4 +28,6 @@ class Artifact
   property :id, Serial
   property :location, String
   property :name, String
+  property :type, String
+  property :size, Integer
 end

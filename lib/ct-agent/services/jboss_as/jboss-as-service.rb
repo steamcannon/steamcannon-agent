@@ -18,13 +18,13 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'ct-agent/services/jboss_as/commands/update-s3ping-credentials-command'
-require 'ct-agent/services/jboss_as/commands/update-gossip-host-address-command'
-require 'ct-agent/services/jboss_as/commands/update-proxy-list-command'
 require 'ct-agent/helpers/service-helper'
 require 'ct-agent/services/jboss_as/commands/configure-command'
+require 'ct-agent/services/jboss_as/commands/deploy-command'
+require 'ct-agent/services/jboss_as/commands/undeploy-command'
 require 'ct-agent/managers/service-manager'
 require 'json'
+require 'fileutils'
 
 module CoolingTower
   class JBossASService
@@ -37,6 +37,7 @@ module CoolingTower
     attr_reader :db
     attr_reader :name
     attr_reader :service_helper
+    attr_reader :jboss_as_configuration
 
     def initialize( options = {} )
       @db = ServiceManager.register( self, 'JBoss Application Server' )
@@ -46,9 +47,11 @@ module CoolingTower
 
       @service_helper = ServiceHelper.new( self, :log => @log )
 
-      @jboss_config_file      = '/etc/sysconfig/jboss-as'
-      @default_configuration  = 'default'
-      @name                   = 'jboss-as6'
+      @jboss_as_sysconfig_file  = '/etc/sysconfig/jboss-as'
+      @jboss_as_configuration   = 'default'
+      @name                     = 'jboss-as'
+
+      FileUtils.mkdir_p( "#{JBOSS_AS_HOME}/tmp" )
 
       # TODO should we also include :error status?
       @state                  = :stopped # available statuses: :starting, :started, :configuring, :stopping, :stopped
@@ -86,36 +89,11 @@ module CoolingTower
     end
 
     def deploy( artifact )
-      @db.save_event( :deploy, :received )
-
-      #TODO base 64 decode artifact
-      # validate the parameter, do the job, etc
-      # Tempfile
-      # FileUtils.cp( tempfile, "#{JBOSS_AS_HOME}/server/#{@default_configuration}/deploy/" )
-
-      name = 'abc.war'
-
-      if a = @db.save_artifact( :name => name, :location => "#{JBOSS_AS_HOME}/server/#{@default_configuration}/deploy/#{name}" )
-        @db.save_event( :deploy, :finished )
-        { :status => 'ok', :response => { :artifact_id => a.id } }
-      else
-        @db.save_event( :deploy, :failed )
-        { :status => 'error', :msg => "Error while saving artifact" }
-      end
+      DeployCommand.new( self, :log => @log ).execute( artifact )
     end
 
     def undeploy( artifact_id )
-      @db.save_event( :undeploy, :received )
-
-      # TODO: remove artifact from JBoss
-
-      if @db.remove_artifact( artifact_id )
-        @db.save_event( :undeploy, :finished )
-        { :status => 'ok' }
-      else
-        @db.save_event( :undeploy, :failed )
-        { :status => 'error', :msg => "Error occurred while removing artifact with id = '#{artifact_id}'" }
-      end
+      UndeployCommand.new( self, :log => @log ).execute( artifact_id )
     end
   end
 end

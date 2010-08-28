@@ -32,5 +32,5 @@ class Event
   property :status, String
   property :parent_id, Integer  
   property :msg, String
-  property :time, DateTime, :default => Time.now
+  property :time, DateTime
 end
