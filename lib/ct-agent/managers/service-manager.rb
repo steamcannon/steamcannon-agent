@@ -25,17 +25,19 @@ require 'ct-agent/helpers/db-helper'
 module CoolingTower
   class ServiceManager
     class << self
+      attr_accessor :services
+
       def prepare( config, log )
         @config  = config
         @log     = log
 
         @services = {}
 
-        Dir["lib/ct-agent/services/**/*-service.rb"].each  do |file|
+        Dir.glob("lib/ct-agent/services/**/*-service.rb").each  do |file|
           require file.match(/^lib\/(.*)\.rb$/)[1]
         end
 
-        load_services
+        self
       end
 
       def load_services
@@ -77,7 +79,7 @@ module CoolingTower
           return { :operation => operation, :status => 'error', :message => "Operation '#{operation}' is not supported in #{service.class} service"}
         end
 
-        if service.method( operation ).arity != params.size and service.method( operation ).arity >= 0
+        if !params.empty? and service.method( operation ).arity != params.size and service.method( operation ).arity >= 0
           return { :operation => operation, :status => 'error', :message => "Operation '#{operation}' takes #{service.method( operation ).arity } argument, but provided #{params.size}"}
         end
 

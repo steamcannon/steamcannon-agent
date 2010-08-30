@@ -44,7 +44,7 @@ module CoolingTower
     log.trace config.to_yaml
 
     DBManager.new( :log => log ).prepare_db
-    ServiceManager.prepare( config, log )
+    ServiceManager.prepare( config, log ).load_services
 
     set :raise_errors, false
     set :logging, false
