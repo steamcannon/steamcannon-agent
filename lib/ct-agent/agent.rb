@@ -100,8 +100,8 @@ module CoolingTower
       end
 
       post "/services/#{service_info[:name]}/configure" do
-        validate_parameter( 'data' )
-        ServiceManager.execute_operation( service_info[:name], 'configure', params[:data] ).to_json
+        validate_parameter( 'config' )
+        ServiceManager.execute_operation( service_info[:name], 'configure', params[:config] ).to_json
       end
 
       delete "/services/#{service_info[:name]}/artifacts/:id" do

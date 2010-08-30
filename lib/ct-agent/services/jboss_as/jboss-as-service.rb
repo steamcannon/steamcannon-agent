@@ -67,8 +67,8 @@ module CoolingTower
       @service_helper.execute( :stop, :backgroud => true )
     end
 
-    def configure( data )
-      ConfigureCommand.new( self, :log => @log, :threaded => true  ).execute( data )
+    def configure( config )
+      ConfigureCommand.new( self, :log => @log, :threaded => true  ).execute( config )
     end
 
     def status
