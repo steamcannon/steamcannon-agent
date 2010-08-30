@@ -1,3 +1,4 @@
 services:                 # default: no services? all service?
   - JBossAS
+  - Mock
 log_level: trace
