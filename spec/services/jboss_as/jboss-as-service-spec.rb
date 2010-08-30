@@ -61,6 +61,34 @@ module CoolingTower
       @service_helper.should_receive(:execute).with( :restart, :backgroud => true ).and_return( { :status => "ok", :response => { :state => :restarting } } )
       @service.restart.should == { :status => "ok", :response => { :state => :restarting } }
     end
+
+    it "should return empty list of artifacts" do
+      @db.should_receive(:artifacts).and_return([])
+      @service.artifacts.should == { :status => "ok", :response=>[] }
+    end
+
+    it "should return list of artifacts" do
+      @db.should_receive(:artifacts).and_return([ Artifact.new(:name=>"abc", :id => 1), Artifact.new(:name=>"def", :id => 2) ])
+      @service.artifacts.should == { :status => "ok", :response=>[ {:name=>"abc", :id=>1 }, {:name=>"def", :id=>2}] }
+    end
+
+    it "should execute deploy" do
+      cmd = mock(DeployCommand)
+      cmd.should_receive(:execute).with( "artifact" ).and_return( { :status => "ok", :response => { :state => :stopped } } )
+
+      DeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
+
+      @service.deploy( "artifact" ).should == { :status => "ok", :response => { :state => :stopped } }
+    end
+
+    it "should execute undeploy" do
+      cmd = mock(UndeployCommand)
+      cmd.should_receive(:execute).with( 1 ).and_return( { :status => "ok", :response => { :state => :stopped } } )
+
+      UndeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
+
+      @service.undeploy( 1 ).should == { :status => "ok", :response => { :state => :stopped } }
+    end
   end
 end
 
