@@ -4,6 +4,11 @@ Dependencies
         gem install sinatra dm-core dm-sqlite-adapter dm-migrations dm-is-tree json open4
         gem install ./gems/thin-1.2.8.gem
 
+Build
+-----
+
+        gem install rake echoe
+
 Tests
 -----
 
@@ -34,5 +39,6 @@ API description
         POST http://localhost:4567/services/SERVICE/restart
 
         POST http://localhost:4567/services/SERVICE/artifacts, params: artifact
+        POST http://localhost:4567/services/SERVICE/configure, params: config
 
         DELETE http://localhost:4567/services/SERVICE/artifacts/ARTIFACT_ID
