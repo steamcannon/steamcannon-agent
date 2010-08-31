@@ -16,11 +16,11 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'ct-agent/services/jboss_as/commands/update-gossip-host-address-command'
-require 'ct-agent/services/jboss_as/commands/update-proxy-list-command'
-require 'ct-agent/services/jboss_as/commands/update-s3ping-credentials-command'
+require 'sc-agent/services/jboss_as/commands/update-gossip-host-address-command'
+require 'sc-agent/services/jboss_as/commands/update-proxy-list-command'
+require 'sc-agent/services/jboss_as/commands/update-s3ping-credentials-command'
 
-module CoolingTower
+module SteamCannon
   class ConfigureCommand
     def initialize( service, options = {})
       @cmds     = {}

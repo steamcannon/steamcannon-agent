@@ -18,13 +18,13 @@ Running
 =======
 
         git clone git://github.com/steamcannon/steamcannon-agent.git
-        cd ct-manager
+        cd steamcannon-agent
         ruby -I lib/ bin/sc-agent -C config/thin/development.yaml start
 
 Tests
 -----
 
-        cd ct-manager/spec
+        cd steamcannon-agent/spec
         rake
 
 Building

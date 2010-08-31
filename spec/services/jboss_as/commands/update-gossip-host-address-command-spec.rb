@@ -1,6 +1,6 @@
-require 'ct-agent/services/jboss_as/commands/update-gossip-host-address-command'
+require 'sc-agent/services/jboss_as/commands/update-gossip-host-address-command'
 
-module CoolingTower
+module SteamCannon
   describe UpdateGossipHostAddressCommand do
 
     before(:each) do

@@ -17,9 +17,9 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'logger'
-require 'ct-agent/models/artifact'
+require 'sc-agent/models/artifact'
 
-module CoolingTower
+module SteamCannon
   class DBHelper
     def initialize( name, options = {} )
       @log = options[:log] || Logger.new(STDOUT)

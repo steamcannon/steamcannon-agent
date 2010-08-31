@@ -1,6 +1,6 @@
-require 'ct-agent/services/jboss_as/commands/update-proxy-list-command'
+require 'sc-agent/services/jboss_as/commands/update-proxy-list-command'
 
-module CoolingTower
+module SteamCannon
   describe UpdateProxyListCommand do
 
     before(:each) do

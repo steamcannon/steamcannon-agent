@@ -1,6 +1,6 @@
-require 'ct-agent/services/jboss_as/commands/undeploy-command'
+require 'sc-agent/services/jboss_as/commands/undeploy-command'
 
-module CoolingTower
+module SteamCannon
   describe UndeployCommand do
 
     before(:each) do

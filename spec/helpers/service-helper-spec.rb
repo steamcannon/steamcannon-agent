@@ -1,6 +1,6 @@
-require 'ct-agent/helpers/service-helper'
+require 'sc-agent/helpers/service-helper'
 
-module CoolingTower
+module SteamCannon
   describe ServiceHelper do
 
     def prepare_cmd( state )

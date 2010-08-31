@@ -20,16 +20,16 @@ require 'rubygems'
 require 'dm-core'
 require 'dm-migrations'
 require 'sinatra/base'
-require 'ct-agent/helpers/log-helper'
-require 'ct-agent/helpers/config-helper'
-require 'ct-agent/helpers/exec-helper'
-require 'ct-agent/managers/db-manager'
-require 'ct-agent/managers/service-manager'
+require 'sc-agent/helpers/log-helper'
+require 'sc-agent/helpers/config-helper'
+require 'sc-agent/helpers/exec-helper'
+require 'sc-agent/managers/db-manager'
+require 'sc-agent/managers/service-manager'
 require 'rack'
 require 'thin/controllers/controller'
 require 'json'
 
-module CoolingTower
+module SteamCannon
   class Agent < Sinatra::Base
     log = LogHelper.new( :location => 'log/agent.log' )
 

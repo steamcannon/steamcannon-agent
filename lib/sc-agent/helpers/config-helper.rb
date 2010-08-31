@@ -17,11 +17,11 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'openhash/openhash'
-require 'ct-agent/helpers/client-helper'
+require 'sc-agent/helpers/client-helper'
 require 'logger'
 require 'yaml'
 
-module CoolingTower
+module SteamCannon
   class ConfigHelper
     def initialize( options = {} )
       @log            = options[:log]           || Logger.new(STDOUT)

@@ -1,6 +1,6 @@
 require 'rack'
-require 'ct-agent/agent'
+require 'sc-agent/agent'
 
 use Rack::CommonLogger
 
-run CoolingTower::Agent
+run SteamCannon::Agent

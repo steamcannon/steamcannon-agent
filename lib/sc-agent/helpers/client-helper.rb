@@ -16,31 +16,36 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-module CoolingTower
-  class StringHelper
+require 'rubygems'
+require 'restclient'
+require 'logger'
+
+module SteamCannon
+  class ClientHelper
     def initialize( options = {} )
-      @log = options[:log] || Logger.new(STDOUT)
+      @timeout    = options[:timeout] || 2
+      @log        = options[:log]     || Logger.new(STDOUT)
     end
 
-    def update_config( string, name, value )
-      if string.scan(/^#{name}=(.*)$/).size == 0
-        string << (is_last_line_empty?(string) ? "#{name}=#{value}" : "\n#{name}=#{value}")
-      else
-        string.gsub!( /^#{name}=(.*)$/, "#{name}=#{value}" )
+    def get( url )
+      @log.debug "GET: #{url}"
+
+      begin
+        raw = RestClient.get( url, :timeout => @timeout )
+
+        return raw
+      rescue
+        return nil
       end
     end
 
-    def prop_value( string, name )
-      string.scan(/^#{name}=(.*)/).to_s
-    end
+    def put( url, data )
+      @log.debug "PUT: #{url}"
 
-    def is_last_line_empty?( string )
-      string.match(/^(.*)$\z/).nil? ? true : false
+      RestClient.put( url, data, :timeout => @timeout )
+      return true
+    rescue
+      return false
     end
-
-    def add_new_line( string )
-      string << "\n" unless is_last_line_empty?( string )
-    end
-
   end
 end

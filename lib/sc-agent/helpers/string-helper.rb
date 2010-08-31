@@ -16,22 +16,31 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'logger'
-require 'ct-agent/models/service'
-require 'ct-agent/models/event'
-require 'ct-agent/models/artifact'
+module SteamCannon
+  class StringHelper
+    def initialize( options = {} )
+      @log = options[:log] || Logger.new(STDOUT)
+    end
 
-class DBManager
-  def initialize( options = {} )
-    @log  = options[:log] || Logger.new(STDOUT)
+    def update_config( string, name, value )
+      if string.scan(/^#{name}=(.*)$/).size == 0
+        string << (is_last_line_empty?(string) ? "#{name}=#{value}" : "\n#{name}=#{value}")
+      else
+        string.gsub!( /^#{name}=(.*)$/, "#{name}=#{value}" )
+      end
+    end
 
-    DataMapper::Logger.new( @log, :debug )
-  end
+    def prop_value( string, name )
+      string.scan(/^#{name}=(.*)/).to_s
+    end
 
-  def prepare_db
-    DataMapper::Model.raise_on_save_failure = true
-    DataMapper.setup(:default, 'sqlite::memory:')
-    DataMapper.finalize
-    DataMapper.auto_migrate!
+    def is_last_line_empty?( string )
+      string.match(/^(.*)$\z/).nil? ? true : false
+    end
+
+    def add_new_line( string )
+      string << "\n" unless is_last_line_empty?( string )
+    end
+
   end
 end

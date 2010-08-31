@@ -1,6 +1,6 @@
-require 'ct-agent/services/jboss_as/commands/update-s3ping-credentials-command'
+require 'sc-agent/services/jboss_as/commands/update-s3ping-credentials-command'
 
-module CoolingTower
+module SteamCannon
   describe UpdateS3PingCredentialsCommand do
 
     before(:each) do

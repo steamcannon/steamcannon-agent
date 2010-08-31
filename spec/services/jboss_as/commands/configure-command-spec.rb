@@ -1,6 +1,6 @@
-require 'ct-agent/services/jboss_as/commands/configure-command'
+require 'sc-agent/services/jboss_as/commands/configure-command'
 
-module CoolingTower
+module SteamCannon
   describe ConfigureCommand do
 
     before(:each) do

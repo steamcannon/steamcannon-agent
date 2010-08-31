@@ -16,15 +16,15 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'ct-agent/helpers/service-helper'
-require 'ct-agent/services/jboss_as/commands/configure-command'
-require 'ct-agent/services/jboss_as/commands/deploy-command'
-require 'ct-agent/services/jboss_as/commands/undeploy-command'
-require 'ct-agent/managers/service-manager'
+require 'sc-agent/helpers/service-helper'
+require 'sc-agent/services/jboss_as/commands/configure-command'
+require 'sc-agent/services/jboss_as/commands/deploy-command'
+require 'sc-agent/services/jboss_as/commands/undeploy-command'
+require 'sc-agent/managers/service-manager'
 require 'json'
 require 'fileutils'
 
-module CoolingTower
+module SteamCannon
   class JBossASService
 
     JBOSS_AS_SYSCONFIG_FILE = '/etc/sysconfig/jboss-as'

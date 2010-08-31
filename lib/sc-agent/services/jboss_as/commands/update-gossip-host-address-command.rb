@@ -16,10 +16,10 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'ct-agent/helpers/string-helper'
-require 'ct-agent/helpers/client-helper'
+require 'sc-agent/helpers/string-helper'
+require 'sc-agent/helpers/client-helper'
 
-module CoolingTower
+module SteamCannon
   class UpdateGossipHostAddressCommand
 
     JBOSS_GOSSIP_HOST = 'JBOSS_GOSSIP_HOST'

@@ -1,6 +1,6 @@
-require 'ct-agent/helpers/exec-helper'
+require 'sc-agent/helpers/exec-helper'
 
-module CoolingTower
+module SteamCannon
   describe ExecHelper do
     before(:each) do
       @helper = ExecHelper.new( :log => Logger.new('/dev/null') )

@@ -16,11 +16,11 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'ct-agent/helpers/config-helper'
-require 'ct-agent/helpers/log-helper'
-require 'ct-agent/helpers/db-helper'
+require 'sc-agent/helpers/config-helper'
+require 'sc-agent/helpers/log-helper'
+require 'sc-agent/helpers/db-helper'
 
-module CoolingTower
+module SteamCannon
   class ServiceManager
     class << self
       attr_accessor :services
@@ -31,7 +31,7 @@ module CoolingTower
 
         @services = {}
 
-        Dir.glob("lib/ct-agent/services/**/*-service.rb").each  do |file|
+        Dir.glob("lib/sc-agent/services/**/*-service.rb").each  do |file|
           require file.match(/^lib\/(.*)\.rb$/)[1]
         end
 
@@ -43,7 +43,7 @@ module CoolingTower
 
         @config['services'].each do |service_name|
           @log.trace "Loading #{service_name} service..."
-          eval("CoolingTower::#{service_name}Service").new( :log => @log, :config => @config )
+          eval("SteamCannon::#{service_name}Service").new( :log => @log, :config => @config )
           @log.trace "Service #{service_name} loaded."
         end unless @config['services'].nil?
 

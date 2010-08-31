@@ -16,36 +16,22 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'rubygems'
-require 'restclient'
 require 'logger'
+require 'sc-agent/models/service'
+require 'sc-agent/models/event'
+require 'sc-agent/models/artifact'
 
-module CoolingTower
-  class ClientHelper
-    def initialize( options = {} )
-      @timeout    = options[:timeout] || 2
-      @log        = options[:log]     || Logger.new(STDOUT)
-    end
+class DBManager
+  def initialize( options = {} )
+    @log  = options[:log] || Logger.new(STDOUT)
 
-    def get( url )
-      @log.debug "GET: #{url}"
+    DataMapper::Logger.new( @log, :debug )
+  end
 
-      begin
-        raw = RestClient.get( url, :timeout => @timeout )
-
-        return raw
-      rescue
-        return nil
-      end
-    end
-
-    def put( url, data )
-      @log.debug "PUT: #{url}"
-
-      RestClient.put( url, data, :timeout => @timeout )
-      return true
-    rescue
-      return false
-    end
+  def prepare_db
+    DataMapper::Model.raise_on_save_failure = true
+    DataMapper.setup(:default, 'sqlite::memory:')
+    DataMapper.finalize
+    DataMapper.auto_migrate!
   end
 end

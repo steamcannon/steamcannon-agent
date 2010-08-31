@@ -18,9 +18,9 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'ct-agent/managers/service-manager'
+require 'sc-agent/managers/service-manager'
 
-module CoolingTower
+module SteamCannon
   describe ServiceManager do
 
     before(:each) do
@@ -33,7 +33,7 @@ module CoolingTower
     it "should prepare ServiceManager" do
       config = {'services' => 'Mock'}
 
-      Dir.should_receive(:glob).with("lib/ct-agent/services/**/*-service.rb").and_return(['lib/abc/test.rb'])
+      Dir.should_receive(:glob).with("lib/sc-agent/services/**/*-service.rb").and_return(['lib/abc/test.rb'])
       @manager.should_receive(:require).with('abc/test')
 
       @manager.prepare( config, @log )
@@ -56,7 +56,7 @@ module CoolingTower
       service = mock('MockService')
       service.should_receive(:new).with( :log => @log, :config => config )
 
-      @manager.should_receive(:eval).with("CoolingTower::MockService").and_return(service)
+      @manager.should_receive(:eval).with("SteamCannon::MockService").and_return(service)
       @manager.load_services
     end
 

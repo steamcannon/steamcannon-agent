@@ -17,10 +17,10 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'logger'
-require  'ct-agent/helpers/exec-helper'
-require  'ct-agent/services/jboss_as/jboss-as-service'
+require  'sc-agent/helpers/exec-helper'
+require  'sc-agent/services/jboss_as/jboss-as-service'
 
-module CoolingTower
+module SteamCannon
   class UpdateProxyListCommand
     def initialize( options = {} )
       @log            = options[:log]           || Logger.new(STDOUT)

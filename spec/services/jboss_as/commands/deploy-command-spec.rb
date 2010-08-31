@@ -1,6 +1,6 @@
-require 'ct-agent/services/jboss_as/commands/deploy-command'
+require 'sc-agent/services/jboss_as/commands/deploy-command'
 
-module CoolingTower
+module SteamCannon
   describe DeployCommand do
 
     before(:each) do
