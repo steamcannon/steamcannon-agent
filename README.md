@@ -27,6 +27,15 @@ Tests
         cd ct-manager/spec
         rake
 
+Building
+========
+
+To build the gem you need to execute
+
+        rake package
+
+Gem will be placed under pkg/ directory.
+
 API description
 ===============
 
