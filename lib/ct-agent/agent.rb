@@ -93,6 +93,10 @@ module CoolingTower
         end
       end
 
+      get "/services/#{service_info[:name]}/artifacts/:id" do
+        ServiceManager.execute_operation( service_info[:name], 'artifact', params[:id] ).to_json
+      end
+
       # args
       post "/services/#{service_info[:name]}/artifacts" do
         validate_parameter( 'artifact' )

@@ -19,6 +19,7 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'ct-agent/services/jboss_as/jboss-as-service'
+require 'openhash/openhash'
 
 module CoolingTower
   describe JBossASService do
@@ -36,6 +37,27 @@ module CoolingTower
 
     it "should return status" do
       @service.status.should == { :status => "ok", :response => { :state => :stopped } }
+    end
+
+    it "should not return the selected artifact because of unexpected error" do
+      @db.should_receive(:artifact).with( 1 ).and_raise("boom")
+      @service.artifact( "1" ).should == {:msg=>"Could not retrieve artifact with id = 1", :status=>"error"}
+    end
+
+    it "should not return the selected artifact" do
+      @db.should_receive(:artifact).with( 1 ).and_return( nil )
+      @service.artifact( "1" ).should == {:msg=>"Could not retrieve artifact with id = 1", :status=>"error"}
+    end
+
+    it "should return the selected artifact" do
+      artifact = mock(Artifact)
+
+      artifact.should_receive(:name).and_return('name')
+      artifact.should_receive(:type).and_return('abc')
+      artifact.should_receive(:size).and_return(1234)
+
+      @db.should_receive(:artifact).with( 1 ).and_return( artifact )
+      @service.artifact( "1" ).should == {:status=>"ok", :response => { :type => 'abc', :name => 'name', :size => 1234 }}
     end
 
     it "should execute configure" do

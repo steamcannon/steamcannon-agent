@@ -100,6 +100,22 @@ module CoolingTower
       { :status => 'ok', :response => { :state => @state } }
     end
 
+    def artifact( artifact_id )
+      begin
+        artifact = @db.artifact( artifact_id.to_i )
+      rescue => e
+        @log.error e
+      end
+
+      unless artifact.nil?
+        { :status => 'ok', :response => { :name => artifact.name, :size => artifact.size, :type => artifact.type } }
+      else
+        msg = "Could not retrieve artifact with id = #{artifact_id}"
+        @log.error msg
+        { :status => 'error', :msg => msg }
+      end
+    end
+
     def artifacts
       artifacts = []
 
