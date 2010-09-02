@@ -12,3 +12,4 @@ timeout: 30
 max_persistent_conns: 100
 daemonize: true
 ssl: true
+ssl_verify: true

@@ -60,29 +60,29 @@ class LogHelper
   end
 
   def initialize(options = {})
-    location = options[:location] || 'log/manager.log'
+    location = options[:location] || 'log/agent.log'
     threshold = options[:threshold] || :info
     type = options[:type] || [:stdout, :file]
+    format = options[:format] || "%Y-%m-%d %H:%M:%S "
 
     unless type.is_a?(Array)
       type = [type.to_s.to_sym]
     end
 
     threshold = THRESHOLDS[threshold.to_sym] unless threshold.nil?
-    formatter = Logger::Formatter.new
 
     if type.include?(:file)
       FileUtils.mkdir_p(File.dirname(location))
 
       @file_log = Logger.new(location, 10, 1024000)
       @file_log.level = (threshold == Logger::TRACE ? Logger::TRACE : Logger::DEBUG)
-      @file_log.formatter = formatter
+      @file_log.datetime_format = format
     end
 
     if type.include?(:stdout)
       @stdout_log = Logger.new(STDOUT.dup)
       @stdout_log.level = threshold || Logger::INFO
-      @stdout_log.formatter = formatter
+      @stdout_log.datetime_format = format
     end
   end
 

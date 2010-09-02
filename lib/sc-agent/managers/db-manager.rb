@@ -17,6 +17,8 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'logger'
+require 'dm-core'
+require 'dm-migrations'
 require 'sc-agent/models/service'
 require 'sc-agent/models/event'
 require 'sc-agent/models/artifact'

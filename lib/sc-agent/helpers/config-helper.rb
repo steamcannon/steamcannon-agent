@@ -27,7 +27,10 @@ module SteamCannon
       @log            = options[:log]           || Logger.new(STDOUT)
 
       defaults = {
-              'log_level' => :info
+              'log_level'           => :info,
+              'ssl_dir'             => '/etc/steamcannon/agent/ssl',
+              'ssl_key_file_name'   => 'private.key',
+              'ssl_cert_file_name'  => 'cert.pem'
       }
 
       @config_location = 'config/agent.yaml'

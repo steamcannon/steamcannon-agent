@@ -18,8 +18,16 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+#$stderr.reopen('/dev/null')
+
 require 'rubygems'
 require 'thin'
+require 'sc-agent/helpers/bootstrap-helper'
+
+bootstrap_helper = SteamCannon::BootstrapHelper.new
+bootstrap_helper.prepare
+
+CSTEAM_CONFIG = bootstrap_helper.config
 
 module Thin
   module Controllers
@@ -34,7 +42,7 @@ module Thin
 
         if @options[:ssl]
           server.ssl = true
-          server.ssl_options = { :private_key_file => "ssl/private.key", :cert_chain_file =>  "ssl/cert.pem", :verify_peer => true }
+          server.ssl_options = { :private_key_file => "#{CSTEAM_CONFIG['ssl_dir']}/#{CSTEAM_CONFIG['ssl_key_file_name']}", :cert_chain_file => "#{CSTEAM_CONFIG['ssl_dir']}/#{CSTEAM_CONFIG['ssl_cert_file_name']}", :verify_peer => @options[:ssl_verify] }
         end
 
         # Set options

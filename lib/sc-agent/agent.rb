@@ -17,33 +17,14 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'rubygems'
-require 'dm-core'
-require 'dm-migrations'
 require 'sinatra/base'
-require 'sc-agent/helpers/log-helper'
-require 'sc-agent/helpers/config-helper'
-require 'sc-agent/helpers/exec-helper'
-require 'sc-agent/managers/db-manager'
+require 'sc-agent/helpers/bootstrap-helper'
 require 'sc-agent/managers/service-manager'
-require 'rack'
 require 'thin/controllers/controller'
 require 'json'
 
 module SteamCannon
   class Agent < Sinatra::Base
-    log = LogHelper.new( :location => 'log/agent.log' )
-
-    log.info "Launching Agent..."
-
-    config = ConfigHelper.new( :log => log ).config
-
-    log.change_threshold( config.log_level.to_sym )
-
-    log.trace config.to_yaml
-
-    DBManager.new( :log => log ).prepare_db
-    ServiceManager.prepare( config, log ).load_services
-
     set :raise_errors, false
     set :logging, false
     set :lock, false
@@ -70,7 +51,7 @@ module SteamCannon
     end
 
     get '/status' do
-      { :status => 'ok', :response => {:load => ExecHelper.new( :log => Logger.new('/dev/null') ).execute("cat /proc/loadavg") } }.to_json
+      { :status => 'ok', :response => { :load => `cat /proc/loadavg`.strip.chomp } }.to_json
     end
 
     get '/services' do

@@ -4,9 +4,10 @@ debug: true
 trace: false
 port: 4567
 rackup: config/rackup.ru
-log: log/agent.log
+log: log/web.log
 max_conns: 100
 timeout: 30
 max_persistent_conns: 100
 daemonize: false
-ssl: false
+ssl: true
+ssl_verify: false
