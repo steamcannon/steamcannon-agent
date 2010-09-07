@@ -24,14 +24,15 @@ require 'yaml'
 module SteamCannon
   class ConfigHelper
     def initialize( options = {} )
-      @log            = options[:log]           || Logger.new(STDOUT)
-      @cloud_helper   = options[:cloud_helper]  || CloudHelper.new( :log => @log )
+      @log          = options[:log] || Logger.new(STDOUT)
+      @cloud_helper = options[:cloud_helper] || CloudHelper.new( :log => @log )
 
       defaults = {
-              'log_level'           => :info,
-              'ssl_dir'             => '/etc/steamcannon/agent/ssl',
-              'ssl_key_file_name'   => 'private.key',
-              'ssl_cert_file_name'  => 'cert.pem'
+              'log_level'                 => :info,
+              'ssl_dir'                   => '/var/lib/steamcannon/ssl',
+              'ssl_key_file_name'         => 'key.pem',
+              'ssl_cert_file_name'        => 'cert.pem',
+              'ssl_server_cert_file_name' => 'server_cert.pem'
       }
 
       @config_location = 'config/agent.yaml'
@@ -45,7 +46,7 @@ module SteamCannon
         exit 1
       end
 
-      @config.platform = @cloud_helper.discover_platform
+       @config.platform = @cloud_helper.discover_platform
     end
    
     attr_reader :config

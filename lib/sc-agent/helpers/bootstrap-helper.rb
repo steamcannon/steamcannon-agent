@@ -20,6 +20,7 @@ require 'sc-agent/helpers/log-helper'
 require 'sc-agent/managers/db-manager'
 require 'sc-agent/managers/service-manager'
 require 'sc-agent/helpers/config-helper'
+require 'sc-agent/helpers/cloud-helper'
 require 'sc-agent/helpers/ssl-helper'
 require 'fileutils'
 require 'rack'
@@ -27,6 +28,7 @@ require 'rack'
 module SteamCannon
   class BootstrapHelper
     attr_reader :config
+    attr_reader :ssl_data
 
     def initialize
       @log = LogHelper.new( :location => 'log/agent.log', :threshold => :debug )
@@ -35,53 +37,15 @@ module SteamCannon
     def prepare
       @log.info "Initializing Agent..."
 
-      read_config
-      prepare_certificate
-
-      DBManager.new( :log => @log ).prepare_db
-      ServiceManager.prepare( @config, @log ).load_services
-    end
-
-    def read_config
       @config = ConfigHelper.new( :log => @log ).config
       @log.change_threshold( @config.log_level.to_sym )
 
       @log.trace @config.to_yaml
-    end
 
-    def prepare_certificate
-      @log.debug "Initializing certificate..."
+      @ssl_data = SSLHelper.new( @config, :log => @log ).ssl_data
 
-      key_file    = "#{@config['ssl_dir']}/#{@config['ssl_key_file_name']}"
-      cert_file   = "#{@config['ssl_dir']}/#{@config['ssl_cert_file_name']}"
-
-      unless File.directory?( @config['ssl_dir'] ) and File.exists?( key_file ) and File.exists?( cert_file )
-
-        begin
-          FileUtils.mkdir_p( @config['ssl_dir'] )
-        rescue => e
-          @log.error e
-          @log.error "Couldn't create directory '#{@config['ssl_dir']}' do you have sufficient rights?"
-          abort
-        end
-
-        @log.info "Generating new self-signed certificate..."
-
-        cert, key = SSLHelper.new.create_self_signed_cert( 1024, [["C", "US"],["ST", "NC"], ["O", "Red Hat"], ["CN", "localhost"]] )
-
-        File.open( key_file, 'w') { |f| f.write( key.to_pem ) }
-
-        File.open( cert_file, 'w') do |f|
-          f.write( cert.to_text )
-          f.write( cert.to_pem )
-        end
-
-        @log.debug "Self-signed certificate successfully generated."
-      else
-        @log.debug "Certificate already exists."
-      end
-
-      @log.debug "Certificate initialization done."
+      DBManager.new( :log => @log ).prepare_db
+      ServiceManager.prepare( @config, @log ).load_services
     end
   end
 end

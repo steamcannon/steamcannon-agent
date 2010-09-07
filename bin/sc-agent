@@ -27,61 +27,12 @@ require 'sc-agent/helpers/bootstrap-helper'
 bootstrap_helper = SteamCannon::BootstrapHelper.new
 bootstrap_helper.prepare
 
-CSTEAM_CONFIG = bootstrap_helper.config
+SSL_DATA = bootstrap_helper.ssl_data
 
 module Thin
-  module Controllers
-    class Controller
-      def start
-        # Constantize backend class
-        @options[:backend] = eval(@options[:backend], TOPLEVEL_BINDING) if @options[:backend]
-
-        server = Server.new(@options[:socket] || @options[:address], # Server detects kind of socket
-                            @options[:port], # Port ignored on UNIX socket
-                            @options)
-
-        if @options[:ssl]
-          server.ssl = true
-          server.ssl_options = { :private_key_file => "#{CSTEAM_CONFIG['ssl_dir']}/#{CSTEAM_CONFIG['ssl_key_file_name']}", :cert_chain_file => "#{CSTEAM_CONFIG['ssl_dir']}/#{CSTEAM_CONFIG['ssl_cert_file_name']}", :verify_peer => @options[:ssl_verify] }
-        end
-
-        # Set options
-        server.pid_file = @options[:pid]
-        server.log_file = @options[:log]
-        server.timeout = @options[:timeout]
-        server.maximum_connections = @options[:max_conns]
-        server.maximum_persistent_connections = @options[:max_persistent_conns]
-        server.threaded = @options[:threaded]
-        server.no_epoll = @options[:no_epoll] if server.backend.respond_to?(:no_epoll=)
-
-        # Detach the process, after this line the current process returns
-        server.daemonize if @options[:daemonize]
-
-        # +config+ must be called before changing privileges since it might require superuser power.
-        server.config
-
-        server.change_privilege @options[:user], @options[:group] if @options[:user] && @options[:group]
-
-        # If a Rack config file is specified we eval it inside a Rack::Builder block to create
-        # a Rack adapter from it. Or else we guess which adapter to use and load it.
-        if @options[:rackup]
-          server.app = load_rackup_config
-        else
-          server.app = load_adapter
-        end
-
-        # If a prefix is required, wrap in Rack URL mapper
-        server.app = Rack::URLMap.new(@options[:prefix] => server.app) if @options[:prefix]
-
-        # If a stats URL is specified, wrap in Stats adapter
-        server.app = Stats::Adapter.new(server.app, @options[:stats]) if @options[:stats]
-
-        # Register restart procedure which just start another process with same options,
-        # so that's why this is done here.
-        server.on_restart { Command.run(:start, @options) }
-
-        server.start
-      end
+  class Connection
+    def ssl_verify_peer( cert )
+      SSL_DATA[:server_cert] == cert     
     end
   end
 end

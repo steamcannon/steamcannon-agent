@@ -25,7 +25,7 @@ module SteamCannon
 
     describe ".read_certificate" do
       it "should read certificate for EC2" do
-        @client_helper.should_receive(:get).with('http://169.254.169.254/1.0/user-data').and_return('{ "steamcannon_certificate": "CERT" }')
+        @client_helper.should_receive(:get).with('http://169.254.169.254/1.0/user-data').and_return('{ "steamcannon_client_cert": "CERT" }')
         @helper.read_certificate( :ec2 ).should == "CERT"
       end
 

@@ -21,8 +21,59 @@ require 'logger'
 
 module SteamCannon
   class SSLHelper
-    def initialize( options = {} )
-      @log = options[:log] || Logger.new(STDOUT)
+    def initialize( config, options = {} )
+      @config         = config
+      @log            = options[:log] || Logger.new(STDOUT)
+      @cloud_helper   = options[:cloud_helper] || CloudHelper.new( :log => @log )
+
+      @key_file          = "#{@config['ssl_dir']}/#{@config['ssl_key_file_name']}"
+      @cert_file         = "#{@config['ssl_dir']}/#{@config['ssl_cert_file_name']}"
+      @server_cert_file  = "#{@config['ssl_dir']}/server_cert.pem"
+    end
+
+    def ssl_data
+      @log.debug "Initializing certificate..."
+
+      unless File.directory?( @config['ssl_dir'] )
+        begin
+          FileUtils.mkdir_p( @config['ssl_dir'] )
+        rescue => e
+          @log.error e
+          @log.error "Couldn't create directory '#{@config['ssl_dir']}' do you have sufficient rights?"
+          abort
+        end
+      end
+
+      @log.info "Reading server certificate..."
+
+      server_cert = @cloud_helper.read_certificate( @config.platform )
+
+      raise "Couldn't load public server certificate" if server_cert.nil?
+
+      @log.debug "Server certificate read."
+
+      unless File.exists?( @key_file ) and File.exists?( @cert_file )
+        @log.info "Generating new self-signed certificate..."
+
+        generate_self_signed_cert
+
+        @log.debug "Self-signed certificate generated."
+      else
+        @log.info "Using already existing certificate."
+      end
+
+      { :cert => @cert_file, :key => @key_file, :server_cert => @server_cert_file }
+    end
+
+    def generate_self_signed_cert
+      cert, key = create_self_signed_cert( 1024, [["C", "US"], ["ST", "NC"], ["O", "Red Hat"], ["CN", "localhost"]] )
+
+      File.open( @key_file, 'w') { |f| f.write( key.to_pem ) }
+
+      File.open( @cert_file, 'w') do |f|
+        f.write( cert.to_text )
+        f.write( cert.to_pem )
+      end
     end
 
     def create_self_signed_cert( length, cn )

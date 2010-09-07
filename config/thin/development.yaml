@@ -10,4 +10,6 @@ timeout: 30
 max_persistent_conns: 100
 daemonize: false
 ssl: true
-ssl_verify: false
+ssl_verify: true
+ssl_key_file: './ssl/key.pem'
+ssl_cert_file: './ssl/cert.pem'

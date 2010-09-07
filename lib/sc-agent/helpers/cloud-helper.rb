@@ -24,7 +24,7 @@ module SteamCannon
   class CloudHelper
     def initialize( options = {} )
       @log            = options[:log]           || Logger.new(STDOUT)
-      @client_helper  = options[:client_helper] || ClientHelper.new( :log => @log )
+      @client_helper  = options[:client_helper] || ClientHelper.new( :log => @log, :timeout => 1 )
     end
 
     def discover_platform
@@ -54,12 +54,14 @@ module SteamCannon
           begin
             data = JSON.parse( @client_helper.get('http://169.254.169.254/1.0/user-data'), :symbolize_names => true )
             return nil unless data.is_a?(Hash)
-            return data[:steamcannon_certificate].nil? ? nil : data[:steamcannon_certificate]  
+            return data[:steamcannon_client_cert].nil? ? nil : data[:steamcannon_client_cert]
           rescue => e
             @log.error e
             @log.error "An error occurred while reading UserData."
             return nil
           end
+        else
+          raise "Unsupported platform: '#{platform}' to load certificate!"
       end
     end
   end

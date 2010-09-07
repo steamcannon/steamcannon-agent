@@ -13,3 +13,5 @@ max_persistent_conns: 100
 daemonize: true
 ssl: true
 ssl_verify: true
+ssl_key_file: '/var/lib/steamcannon/ssl/key.pem'
+ssl_cert_file: '/var/lib/steamcannon/ssl/cert.pem'
