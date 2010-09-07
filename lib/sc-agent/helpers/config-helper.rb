@@ -17,7 +17,7 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'openhash/openhash'
-require 'sc-agent/helpers/client-helper'
+require 'sc-agent/helpers/cloud-helper'
 require 'logger'
 require 'yaml'
 
@@ -25,6 +25,7 @@ module SteamCannon
   class ConfigHelper
     def initialize( options = {} )
       @log            = options[:log]           || Logger.new(STDOUT)
+      @cloud_helper   = options[:cloud_helper]  || CloudHelper.new( :log => @log )
 
       defaults = {
               'log_level'           => :info,
@@ -44,29 +45,9 @@ module SteamCannon
         exit 1
       end
 
-      # TODO here we need also grab certificates and config location from platform dependent
-
-      detect_platform
+      @config.platform = @cloud_helper.discover_platform
     end
-
-    def detect_platform
-      @log.info "Discovering platform..."
-
-      platform = nil
-
-      # File.read( "/etc/sysconfig/ct" )
-
-
-      # TODO remove this!!!
-      platform = :ec2
-
-      raise "Unsupported platform!" if platform.nil?
-
-      @log.info "We're on '#{platform}' platform"
-
-      @config.platform = platform
-    end
-
+   
     attr_reader :config
   end
 end

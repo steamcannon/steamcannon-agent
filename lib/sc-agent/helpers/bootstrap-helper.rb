@@ -29,7 +29,7 @@ module SteamCannon
     attr_reader :config
 
     def initialize
-      @log = LogHelper.new( :location => 'log/agent.log' )
+      @log = LogHelper.new( :location => 'log/agent.log', :threshold => :debug )
     end
 
     def prepare

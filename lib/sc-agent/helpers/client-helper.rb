@@ -28,7 +28,7 @@ module SteamCannon
     end
 
     def get( url )
-      @log.debug "GET: #{url}"
+      @log.trace "GET: #{url}"
 
       begin
         raw = RestClient.get( url, :timeout => @timeout )
@@ -40,7 +40,7 @@ module SteamCannon
     end
 
     def put( url, data )
-      @log.debug "PUT: #{url}"
+      @log.trace "PUT: #{url}"
 
       RestClient.put( url, data, :timeout => @timeout )
       return true
