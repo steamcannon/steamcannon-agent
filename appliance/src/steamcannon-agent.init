@@ -18,6 +18,7 @@
 
 PID_FILE=/var/lock/steamcannon-agent.pid
 STEAMCANNON_AGENT_HOME=/usr/share/steamcannon-agent
+STEAMCANNON_AGENT_ENVIRONMENT=production
 
 # Source function library.
 . /etc/init.d/functions
@@ -56,7 +57,7 @@ start() {
     echo -n "Starting ${NAME}: "
 
     cd $STEAMCANNON_AGENT_HOME
-    ruby -I lib/ bin/sc-agent -C config/thin/production.yaml start > /dev/null
+    ruby -I lib/ bin/sc-agent -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml start > /dev/null
     RETVAL=$?
 
     success_or_failure
@@ -78,7 +79,7 @@ stop() {
     fi
 
     cd $STEAMCANNON_AGENT_HOME
-    ruby -I lib/ bin/sc-agent -C config/thin/production.yaml stop > /dev/null
+    ruby -I lib/ bin/sc-agent -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml stop > /dev/null
     RETVAL=$?
 
     success_or_failure

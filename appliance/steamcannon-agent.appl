@@ -17,7 +17,6 @@ packages:
 post:
   base:
     - "echo 'cd /usr/share/steamcannon-agent && git pull' >> /etc/rc.local"
-    - "echo 'yum -y update steamcannon-agent' >> /etc/rc.local"
 repos:
   - name: "steamcannon-#ARCH#"
     baseurl: "http://repo.oddthesis.org/steamcannon/packages/#OS_NAME#/#OS_VERSION#/RPMS/#ARCH#"
