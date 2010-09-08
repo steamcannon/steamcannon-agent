@@ -28,7 +28,6 @@ module SteamCannon
 
       @key_file          = "#{@config['ssl_dir']}/#{@config['ssl_key_file_name']}"
       @cert_file         = "#{@config['ssl_dir']}/#{@config['ssl_cert_file_name']}"
-      @server_cert_file  = "#{@config['ssl_dir']}/server_cert.pem"
     end
 
     def ssl_data
@@ -62,7 +61,7 @@ module SteamCannon
         @log.info "Using already existing certificate."
       end
 
-      { :cert => File.read( @cert_file ), :key => File.read( @key_file ), :server_cert => File.read( @server_cert_file ) }
+      { :cert => File.read( @cert_file ), :key => File.read( @key_file ), :server_cert => server_cert }
     end
 
     def generate_self_signed_cert
