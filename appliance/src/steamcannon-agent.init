@@ -20,6 +20,8 @@ PID_FILE=/var/lock/steamcannon-agent.pid
 STEAMCANNON_AGENT_HOME=/usr/share/steamcannon-agent
 STEAMCANNON_AGENT_ENVIRONMENT=${STEAMCANNON_AGENT_ENVIRONMENT:-"development"}
 
+THIN=/usr/lib/ruby/gems/1.8/bin/thin
+
 # Source function library.
 . /etc/init.d/functions
 
@@ -38,8 +40,8 @@ fi
 
 function procrunning() {
     procid=0
-    for procid in `pidof ruby`; do
-        ps -fp $procid | grep thin > /dev/null && pid=$procid
+    for procid in `pidof thin`; do
+        ps -fp $procid | grep "thin server (0.0.0.0:7575)" > /dev/null && pid=$procid
     done
 }
 
@@ -57,7 +59,7 @@ start() {
     echo -n "Starting ${NAME}: "
 
     cd $STEAMCANNON_AGENT_HOME
-    thin -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml start > /dev/null
+    $THIN -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml start > /dev/null
     RETVAL=$?
 
     success_or_failure
@@ -72,14 +74,14 @@ stop() {
     procrunning
 
     if [ $pid = '0' ]; then
-        #echo -n -e "No process is currently running "
+        echo -n -e "No process is currently running "
         RETVAL=0
         success_or_failure
         return $RETVAL 
     fi
 
     cd $STEAMCANNON_AGENT_HOME
-    thin -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml stop > /dev/null
+    $THIN -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml stop > /dev/null
     RETVAL=$?
 
     success_or_failure
