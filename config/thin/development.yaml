@@ -3,12 +3,13 @@ address: 0.0.0.0
 debug: true
 trace: false
 port: 4567
+log: 'log/thin.log'
 rackup: config/rackup.ru
 max_conns: 100
 timeout: 30
 max_persistent_conns: 100
 daemonize: false
 ssl: true
-ssl_verify: true
-ssl_key_file: './ssl/key.pem'
-ssl_cert_file: './ssl/cert.pem'
+ssl_verify: false
+ssl_key_file: 'ssl/key.pem'
+ssl_cert_file: 'ssl/cert.pem'

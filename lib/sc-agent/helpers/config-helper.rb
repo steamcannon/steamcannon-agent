@@ -17,38 +17,42 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'openhash/openhash'
-require 'sc-agent/helpers/cloud-helper'
 require 'logger'
 require 'yaml'
 
 module SteamCannon
   class ConfigHelper
-    def initialize( options = {} )
-      @log          = options[:log] || Logger.new(STDOUT)
-      @cloud_helper = options[:cloud_helper] || CloudHelper.new( :log => @log )
-
+    def initialize
       defaults = {
               'log_level'                 => :info,
+              'log_dir'                   => '/var/log/steamcannon',
               'ssl_dir'                   => '/var/lib/steamcannon/ssl',
               'ssl_key_file_name'         => 'key.pem',
               'ssl_cert_file_name'        => 'cert.pem',
               'ssl_server_cert_file_name' => 'server_cert.pem'
       }
 
-      @config_location = 'config/agent.yaml'
-
-      # TODO this should be probably removed and a config file used provided by CT with location stored in UserData
+      @config = OpenHash.new( defaults )
 
       begin
-        @config = OpenHash.new(defaults.merge(YAML.load_file( @config_location )))
-      rescue
-        puts "Could not read config file: '#{@config_location}'."
+        thin_config_file = ARGV.collect {|x| x if x.match(/yaml$/) }.compact.first
+        @config.environment = YAML.load_file( thin_config_file )['environment']
+      rescue => e
+        puts e
+        puts "Could not read config file: '#{thin_config_file}'."
         exit 1
       end
 
-       @config.platform = @cloud_helper.discover_platform
+      begin
+        agent_config_file = "config/agent-#{@config.environment }.yaml"
+        @config.merge!(YAML.load_file( agent_config_file ))
+      rescue => e
+        puts e
+        puts "Could not read config file: '#{agent_config_file}'."
+        exit 1
+      end    
     end
-   
+
     attr_reader :config
   end
 end

@@ -62,7 +62,8 @@ module SteamCannon
             return nil
           end
         else
-          raise "Unsupported platform: '#{platform}' to load certificate!"
+          @log.warn "!! Unsupported platform: '#{platform}'. I don't know how to load certificate! Returning empty certificate."
+          return ""
       end
     end
   end

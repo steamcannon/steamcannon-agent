@@ -9,11 +9,14 @@ Requires:       shadow-utils
 Requires:       ruby git
 Requires:       initscripts
 Requires:       rubygems
-BuildRequires:  ruby-devel gcc-c++ rubygems git libxml2-devel libxslt-devel
+BuildRequires:  ruby-devel gcc-c++ rubygems git sqlite-devel openssl-devel
 Requires(post): /sbin/chkconfig
 Group:          Development/Tools
 Source0:        %{name}.init
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+# Ugly hack for thin
+Provides:       /usr/local/bin/ruby
 
 %description
 SteamCannon Agent
@@ -28,6 +31,7 @@ install -d -m 755 $RPM_BUILD_ROOT/usr/lib/ruby/gems/%{ruby_version}
 
 /usr/bin/git clone git://github.com/steamcannon/steamcannon-agent.git $RPM_BUILD_ROOT/usr/share/%{name}
 
+gem install --install-dir=$RPM_BUILD_ROOT/usr/lib/ruby/gems/%{ruby_version} --force --rdoc rack -v 1.2.0
 gem install --install-dir=$RPM_BUILD_ROOT/usr/lib/ruby/gems/%{ruby_version} --force --rdoc $RPM_BUILD_ROOT/usr/share/%{name}/gems/thin-1.2.8.gem
 gem install --install-dir=$RPM_BUILD_ROOT/usr/lib/ruby/gems/%{ruby_version} --force --rdoc sinatra dm-core dm-sqlite-adapter dm-migrations dm-is-tree json open4 rest-client
 
@@ -40,7 +44,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 /sbin/chkconfig --add %{name}
-echo "cd /usr/share/%{name} && git pull" >> /etc/rc.local
 
 %files
 %defattr(-,root,root)

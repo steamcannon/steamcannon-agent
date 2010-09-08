@@ -1,0 +1,25 @@
+name: steamcannon-agent
+summary: SteamCannon Agent for from latest git checkout
+os:
+  name: fedora
+  version: 13
+hardware:
+  partitions:
+    "/":
+      size: 1
+packages:
+  includes:
+    - bash
+    - yum
+    - vim-minimal
+    - openssh-server
+    - steamcannon-agent
+post:
+  base:
+    - "echo 'cd /usr/share/steamcannon-agent && git pull' >> /etc/rc.local"
+    - "echo 'yum -y update steamcannon-agent' >> /etc/rc.local"
+repos:
+  - name: "steamcannon-#ARCH#"
+    baseurl: "http://repo.oddthesis.org/steamcannon/packages/#OS_NAME#/#OS_VERSION#/RPMS/#ARCH#"
+  - name: "steamcannon-noarch"
+    baseurl: "http://repo.oddthesis.org/steamcannon/packages/#OS_NAME#/#OS_VERSION#/RPMS/noarch"

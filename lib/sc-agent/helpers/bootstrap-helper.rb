@@ -27,20 +27,18 @@ require 'rack'
 
 module SteamCannon
   class BootstrapHelper
-    attr_reader :config
     attr_reader :ssl_data
 
-    def initialize
-      @log = LogHelper.new( :location => 'log/agent.log', :threshold => :debug )
+    def initialize( config )
+      @config       = config
+      @log          = LogHelper.new( :location => "#{@config.log_dir}/agent.log", :threshold => @config.log_level.to_sym )
+
+      @config.platform = CloudHelper.new( :log => @log ).discover_platform
     end
 
     def prepare
-      @log.info "Initializing Agent..."
-
-      @config = ConfigHelper.new( :log => @log ).config
-      @log.change_threshold( @config.log_level.to_sym )
-
-      @log.trace @config.to_yaml
+      @log.info "Initializing SteamCannon Agent..."
+      @log.trace "Agent config:\n#{@config.to_yaml}"
 
       @ssl_data = SSLHelper.new( @config, :log => @log ).ssl_data
 
