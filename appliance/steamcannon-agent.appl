@@ -17,6 +17,9 @@ packages:
 post:
   base:
     - "echo 'cd /usr/share/steamcannon-agent && git pull' >> /etc/rc.local"
+    - "echo 'cp /usr/share/steamcannon-agent/appliance/src/steamcannon-agent.init /etc/init.d/steamcannon-agent' >> /etc/rc.local"
+    - "echo 'chmod +x /etc/init.d/steamcannon-agent' >> /etc/rc.local"
+    - "echo '/etc/init.d/steamcannon-agent restart' >> /etc/rc.local"
 repos:
   - name: "steamcannon-#ARCH#"
     baseurl: "http://repo.oddthesis.org/steamcannon/packages/#OS_NAME#/#OS_VERSION#/RPMS/#ARCH#"
