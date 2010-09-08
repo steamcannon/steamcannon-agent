@@ -1,12 +1,8 @@
-chdir: /usr/share/ct-agent
-user: ct
-group: ct
+chdir: /usr/share/steamcannon-agent
 environment: production
 address: 0.0.0.0
 port: 4567
-pid: /tmp/ct-agent.pid
 rackup: config/rackup.ru
-log: log/agent.log
 max_conns: 100
 timeout: 30
 max_persistent_conns: 100

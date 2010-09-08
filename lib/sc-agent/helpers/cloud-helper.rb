@@ -44,6 +44,7 @@ module SteamCannon
         @log.debug "Nope, it's not EC2."
         false
       else
+        @log.debug "Yes, we're on EC2."
         true
       end
     end
