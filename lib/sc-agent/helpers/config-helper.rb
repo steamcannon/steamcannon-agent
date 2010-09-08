@@ -24,6 +24,7 @@ module SteamCannon
   class ConfigHelper
     def initialize
       defaults = {
+              'environment'               => ENV['RACK_ENV'],
               'log_level'                 => :info,
               'log_dir'                   => '/var/log/steamcannon-agent',
               'ssl_dir'                   => '/var/lib/steamcannon-agent/ssl',
@@ -33,15 +34,6 @@ module SteamCannon
       }
 
       @config = OpenHash.new( defaults )
-
-      begin
-        thin_config_file = ARGV.collect {|x| x if x.match(/yaml$/) }.compact.first
-        @config.environment = YAML.load_file( thin_config_file )['environment']
-      rescue => e
-        puts e
-        puts "Could not read config file: '#{thin_config_file}'."
-        exit 1
-      end
 
       begin
         agent_config_file = "config/agent-#{@config.environment }.yaml"

@@ -30,13 +30,14 @@ module SteamCannon
     attr_reader :ssl_data
 
     def initialize( config )
-      @config       = config
-      @log          = LogHelper.new( :location => "#{@config.log_dir}/agent.log", :threshold => @config.log_level.to_sym )
-
-      @config.platform = CloudHelper.new( :log => @log ).discover_platform
+      @config = config
     end
 
     def prepare
+      @log = LogHelper.new( :location => "#{@config.log_dir}/agent.log", :threshold => @config.log_level.to_sym )
+
+      @config.platform = CloudHelper.new( :log => @log ).discover_platform
+
       @log.info "Initializing SteamCannon Agent..."
       @log.trace "Agent config:\n#{@config.to_yaml}"
 

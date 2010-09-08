@@ -1,13 +1,14 @@
 chdir: /usr/share/steamcannon-agent
 environment: production
 address: 0.0.0.0
-port: 4567
+port: 7575
 log: '/var/log/steamcannon-agent/thin.log'
 rackup: config/rackup.ru
 max_conns: 100
 timeout: 30
 max_persistent_conns: 100
 daemonize: true
+pid: '/var/run/steamcannon-agent.pid'
 ssl: true
 ssl_verify: true
 ssl_key_file: '/var/lib/steamcannon-agent/ssl/key.pem'

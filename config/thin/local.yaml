@@ -2,7 +2,7 @@ environment: development
 address: 0.0.0.0
 debug: true
 trace: false
-port: 4567
+port: 7575
 log: 'log/thin.log'
 rackup: config/rackup.ru
 max_conns: 100

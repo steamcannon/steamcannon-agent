@@ -19,7 +19,7 @@ Running
 
         git clone git://github.com/steamcannon/steamcannon-agent.git
         cd steamcannon-agent
-        ruby -I lib/ bin/sc-agent -C config/thin/local.yaml start
+        thin -C config/thin/local.yaml stop
 
 Tests
 -----

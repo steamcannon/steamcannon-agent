@@ -2,13 +2,14 @@ environment: development
 address: 0.0.0.0
 debug: true
 trace: false
-port: 4567
+port: 7575
 log: 'log/thin.log'
 rackup: config/rackup.ru
 max_conns: 100
 timeout: 30
 max_persistent_conns: 100
 daemonize: true
+pid: '/tmp/pid/steamcannon-agent.pid'
 ssl: true
 ssl_verify: false
 ssl_key_file: 'ssl/key.pem'
