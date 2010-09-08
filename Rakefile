@@ -4,7 +4,7 @@ Echoe.new("ct-agent") do |p|
   p.project     = "SteamCannon Agent"
   p.author      = "SteamCannon Team"
   p.summary     = "SteamCannon Agent responsible for managing various services such as JBoss AS"
-  p.url         = "http://www.jboss.org/steamcannon"
+  p.url         = "http://steamcannon.org/"
   p.ignore_pattern  = /^(pkg|doc|ssl|spec)|\.svn|CVS|\.bzr|\.DS|\.git|\.log|\.gem/
   p.test_pattern = 'spec/**/*'
   p.spec_pattern = 'spec/**/*'
