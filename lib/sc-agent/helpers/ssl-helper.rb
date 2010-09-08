@@ -62,7 +62,7 @@ module SteamCannon
         @log.info "Using already existing certificate."
       end
 
-      { :cert => @cert_file, :key => @key_file, :server_cert => @server_cert_file }
+      { :cert => File.read( @cert_file ), :key => File.read( @key_file ), :server_cert => File.read( @server_cert_file ) }
     end
 
     def generate_self_signed_cert
