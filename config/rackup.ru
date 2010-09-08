@@ -19,7 +19,7 @@ end
 module Thin
   class Connection
     def ssl_verify_peer( cert )
-      SteamCannon::SSL_DATA[:server_cert] == cert
+      SteamCannon::SSL_DATA[:server_cert].strip == cert.strip
     end
   end
 end
