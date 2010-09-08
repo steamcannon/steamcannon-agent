@@ -57,7 +57,7 @@ start() {
     echo -n "Starting ${NAME}: "
 
     cd $STEAMCANNON_AGENT_HOME
-    ruby -I lib/ bin/sc-agent -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml start > /dev/null
+    thin -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml start > /dev/null
     RETVAL=$?
 
     success_or_failure
@@ -72,14 +72,14 @@ stop() {
     procrunning
 
     if [ $pid = '0' ]; then
-        echo -n -e "No process is currently running "
+        #echo -n -e "No process is currently running "
         RETVAL=0
         success_or_failure
         return $RETVAL 
     fi
 
     cd $STEAMCANNON_AGENT_HOME
-    ruby -I lib/ bin/sc-agent -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml stop > /dev/null
+    thin -C config/thin/$STEAMCANNON_AGENT_ENVIRONMENT.yaml stop > /dev/null
     RETVAL=$?
 
     success_or_failure
