@@ -25,8 +25,8 @@ module SteamCannon
     def initialize
       defaults = {
               'log_level'                 => :info,
-              'log_dir'                   => '/var/log/steamcannon',
-              'ssl_dir'                   => '/var/lib/steamcannon/ssl',
+              'log_dir'                   => '/var/log/steamcannon-agent',
+              'ssl_dir'                   => '/var/lib/steamcannon-agent/ssl',
               'ssl_key_file_name'         => 'key.pem',
               'ssl_cert_file_name'        => 'cert.pem',
               'ssl_server_cert_file_name' => 'server_cert.pem'
