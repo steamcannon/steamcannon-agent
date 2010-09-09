@@ -58,7 +58,7 @@ module SteamCannon
       { :status => 'ok', :response => ServiceManager.services_info }.to_json
     end
 
-    post '/cert_bundle' do
+    post '/configure' do
       validate_parameter( 'certificate' )
       validate_parameter( 'keypair' )
       validate_parameter( 'ca' )
