@@ -34,6 +34,9 @@ module SteamCannon
       File.should_receive(:exists?).with( '/var/ssl_key_file_name' ).and_return(true)
       File.should_receive(:exists?).with( '/var/ssl_cert_file_name' ).and_return(true)
 
+      File.should_receive(:read).with( '/var/ssl_key_file_name' )
+      File.should_receive(:read).with( '/var/ssl_cert_file_name' )
+
       @helper.ssl_data
     end
 
@@ -44,6 +47,9 @@ module SteamCannon
       File.should_receive(:exists?).with( '/var/ssl_key_file_name' ).and_return(false)
 
       @helper.should_receive(:generate_self_signed_cert)
+
+      File.should_receive(:read).with( '/var/ssl_key_file_name' )
+      File.should_receive(:read).with( '/var/ssl_cert_file_name' )
 
       @helper.ssl_data
     end
