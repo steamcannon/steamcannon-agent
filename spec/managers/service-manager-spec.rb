@@ -114,7 +114,12 @@ module SteamCannon
 
         services.should_receive(:[]).with('mock').and_return( service_info )
 
-        @manager.execute_operation( 'mock', 'status' )
+        begin
+          @manager.execute_operation( 'mock', 'status' )
+          raise "This shouldn't be executed"
+        rescue => e
+           e.message.should == "Operation 'status' is not supported in Spec::Mocks::Mock service"
+        end
       end
 
       it "should not execute the operation because parameters count isn't same" do
@@ -134,7 +139,12 @@ module SteamCannon
 
         services.should_receive(:[]).with('mock').and_return( service_info )
 
-        @manager.execute_operation( 'mock', 'status', 'a' )
+        begin
+          @manager.execute_operation( 'mock', 'status', 'a' )
+          raise "This shouldn't be executed"
+        rescue => e
+          e.message.should == "Operation 'status' takes 2 arguments, but provided 1"
+        end
       end
 
       it "should execute operation on service without params" do

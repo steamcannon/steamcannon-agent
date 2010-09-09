@@ -74,11 +74,11 @@ module SteamCannon
         service = @services[name][:object]
 
         unless service.respond_to?( operation )
-          return { :operation => operation, :status => 'error', :message => "Operation '#{operation}' is not supported in #{service.class} service"}
+          raise "Operation '#{operation}' is not supported in #{service.class} service"
         end
 
         if !params.empty? and service.method( operation ).arity != params.size and service.method( operation ).arity >= 0
-          return { :operation => operation, :status => 'error', :message => "Operation '#{operation}' takes #{service.method( operation ).arity } argument, but provided #{params.size}"}
+          raise "Operation '#{operation}' takes #{service.method( operation ).arity } arguments, but provided #{params.size}"
         end
 
         @log.debug "Executing #{operation} operation for #{service.class}..."

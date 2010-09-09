@@ -1,5 +1,6 @@
 require 'rake'
 require 'spec/rake/spectask'
+require 'spec/interop/test'
 
 desc "Run all examples"
 Spec::Rake::SpecTask.new(:default) do |t|
