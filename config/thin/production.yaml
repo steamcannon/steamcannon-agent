@@ -2,7 +2,7 @@ chdir: /usr/share/steamcannon-agent
 environment: production
 address: 0.0.0.0
 port: 7575
-log: '/var/log/steamcannon-agent/thin.log'
+log: '/var/log/steamcannon-agent/agent.log'
 rackup: config/rackup.ru
 max_conns: 100
 timeout: 30

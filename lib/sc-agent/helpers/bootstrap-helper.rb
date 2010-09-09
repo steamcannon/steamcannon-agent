@@ -34,7 +34,7 @@ module SteamCannon
     end
 
     def prepare
-      @log = LogHelper.new( :location => "#{@config.log_dir}/agent.log", :threshold => @config.log_level.to_sym )
+      @log = LogHelper.new( :threshold => @config.log_level.to_sym, :type => :stdout )
 
       @config.platform = CloudHelper.new( :log => @log ).discover_platform
 
