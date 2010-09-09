@@ -70,7 +70,8 @@ module SteamCannon
 
     it "should get true because service exists" do
       services = mock('services')
-      services.should_receive(:[]).with(:abc).and_return('abc')
+      keys = {"jboss_as" => {}, "abc" => {}}
+      services.should_receive(:keys).and_return(keys)
 
       @manager.services = services
 

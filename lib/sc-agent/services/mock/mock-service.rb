@@ -25,6 +25,8 @@ module SteamCannon
     def initialize( options = {} )
       @db = ServiceManager.register( self, 'Mock' )
 
+      @log            = options[:log]             || Logger.new(STDOUT)
+
       # TODO should we also include :error status?
       @state                  = :stopped # available statuses: :starting, :started, :configuring, :stopping, :stopped
     end

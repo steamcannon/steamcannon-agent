@@ -87,7 +87,7 @@ module SteamCannon
       end
 
       def service_exists?( name )
-        !@services[name.to_sym].nil?
+        @services.keys.include?(name.to_s)
       end
 
       def underscore(camel_cased_word)

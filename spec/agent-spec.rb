@@ -3,7 +3,6 @@ ENV['RACK_ENV'] = 'test'
 require 'sinatra'
 require 'thin/logging'
 require 'sc-agent/agent'
-require 'spec'
 require 'rack/test'
 
 set :environment, :test

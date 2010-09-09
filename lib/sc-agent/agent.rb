@@ -28,14 +28,17 @@ require 'json'
 module SteamCannon
   class Agent < Sinatra::Base
 
+    #set :dump_errors, false
+    set :show_exceptions, false
     set :raise_errors, false
     set :logging, false
     set :lock, false
+    set :run, false
+    set :sessions, false
 
     error do
       exception = request.env['sinatra.error']
       status 404 if exception.is_a?( NotFound )
-      #puts exception.backtrace
       { :status => 'error', :msg => exception.message }.to_json
     end
 
