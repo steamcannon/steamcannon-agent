@@ -17,6 +17,7 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'rubygems'
+require 'logger'
 require 'sinatra/base'
 require 'sc-agent/helpers/bootstrap-helper'
 require 'sc-agent/helpers/exec-helper'
@@ -61,7 +62,7 @@ module SteamCannon
     end
 
     get '/status' do
-      load = ExecHelper.new( :log => '/dev/null' ).execute('cat /proc/loadavg').strip.chomp
+      load = ExecHelper.new( :log =>  Logger.new('/dev/null') ).execute('cat /proc/loadavg').strip.chomp
 
       { :status => 'ok', :response => { :load => load } }.to_json
     end
