@@ -62,9 +62,7 @@ module SteamCannon
     end
 
     get '/status' do
-      load = ExecHelper.new( :log =>  Logger.new('/dev/null') ).execute('cat /proc/loadavg').strip.chomp
-
-      { :status => 'ok', :response => { :load => load } }.to_json
+      { :status => 'ok', :response => { :load => ExecHelper.new( :log => Logger.new('/dev/null') ).execute('cat /proc/loadavg') } }.to_json
     end
 
     get '/services' do
