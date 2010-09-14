@@ -39,7 +39,7 @@ module SteamCannon
     error do
       exception = request.env['sinatra.error']
       status 404 if exception.is_a?( NotFound )
-      { :msg => exception.message }.to_json
+      { :message => exception.message }.to_json
     end
 
     after do
