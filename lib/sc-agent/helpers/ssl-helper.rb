@@ -44,13 +44,13 @@ module SteamCannon
         end
       end
 
-      @log.info "Reading server certificate..."
+      @log.info "Reading client CA certificate..."
 
-      server_cert = @cloud_helper.read_certificate( @config.platform )
+      client_ca_cert = @cloud_helper.read_certificate( @config.platform )
 
-      raise "Couldn't load public server certificate" if server_cert.nil?
+      raise "Could not load public client CA certificate" if client_ca_cert.nil?
 
-      @log.debug "Server certificate read."
+      @log.debug "Client CA certificate read."
 
       unless File.exists?( @key_file ) and File.exists?( @cert_file )
         @log.info "Generating new self-signed certificate..."
@@ -62,7 +62,7 @@ module SteamCannon
         @log.info "Using already existing certificate."
       end
 
-      { :cert => File.read( @cert_file ), :key => File.read( @key_file ), :server_cert => server_cert }
+      { :cert => File.read( @cert_file ), :key => File.read( @key_file ), :client_ca_cert => client_ca_cert }
     end
 
     def generate_self_signed_cert

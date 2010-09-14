@@ -17,23 +17,30 @@ module SteamCannon
   LOG       = bootstrap_helper.log
 end
 
+
 module Thin
   class Connection
     def ssl_verify_peer( cert )
-      SteamCannon::LOG.trace "Validating client certificate..."
+      
+      SteamCannon::LOG.trace "Validating peer certificate..."
 
-      same = SteamCannon::SSL_DATA[:server_cert].strip == cert.strip
+      cert_x509 = OpenSSL::X509::Certificate.new(cert)
+      ca_x509 = OpenSSL::X509::Certificate.new(SteamCannon::SSL_DATA[:client_ca_cert])
+      valid = (SteamCannon::SSL_DATA[:client_ca_cert].strip == cert.strip) || cert_x509.verify(ca_x509.public_key)
 
-      if same
+      if valid
         SteamCannon::LOG.trace "Provided certificate is valid"
       else
-        SteamCannon::LOG.trace "Provided certificate is different!"
+        SteamCannon::LOG.trace "Provided certificate is neither the client CA nor a cert signed by the client CA"
 
-        SteamCannon::LOG.trace "Certificate expected:\n#{SteamCannon::SSL_DATA[:server_cert].strip}"
+        SteamCannon::LOG.trace "Client CA certificate we have:\n#{SteamCannon::SSL_DATA[:server_cert].strip}"
+        SteamCannon::LOG.trace "Subject: #{ca_x509.subject}"
+        
         SteamCannon::LOG.trace "Certificate received:\n#{cert.strip}"
+        SteamCannon::LOG.trace "Issuer: #{cert_x509.issuer}"
       end
 
-      same
+      valid
     end
   end
 end
