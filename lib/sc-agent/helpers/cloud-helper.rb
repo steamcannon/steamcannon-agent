@@ -19,9 +19,12 @@
 require 'logger'
 require 'sc-agent/helpers/client-helper'
 require 'json'
+require 'base64'
 
 module SteamCannon
   class CloudHelper
+    VBOX_CONTROL = '/usr/bin/VBoxControl'
+
     def initialize( options = {} )
       @log            = options[:log]           || Logger.new(STDOUT)
       @client_helper  = options[:client_helper] || ClientHelper.new( :log => @log, :timeout => 1 )
@@ -31,6 +34,8 @@ module SteamCannon
       @log.info "Discovering platform..."
 
       return :ec2 if discover_ec2
+
+      return :virtualbox if discover_virtualbox
 
       @log.warn "We're on unknown platform!"
 
@@ -49,6 +54,18 @@ module SteamCannon
       end
     end
 
+    def discover_virtualbox
+      @log.debug "Discovering if we're on Virtualbox..."
+
+      if File.exists?(VBOX_CONTROL)
+        @log.debug "Yes, we're on Virtualbox."
+        true
+      else
+        @log.debug "Nope, it's not Virtualbox."
+        false
+      end
+    end
+
     def read_certificate( platform )
       case platform
         when :ec2
@@ -56,6 +73,18 @@ module SteamCannon
             data = JSON.parse( @client_helper.get('http://169.254.169.254/1.0/user-data'), :symbolize_names => true )
             return nil unless data.is_a?(Hash)
             return data[:steamcannon_client_cert].nil? ? nil : data[:steamcannon_client_cert]
+          rescue => e
+            @log.error e
+            @log.error "An error occurred while reading UserData."
+            return nil
+          end
+        when :virtualbox
+          begin
+            encoded_data = `#{VBOX_CONTROL} guestproperty get /Deltacloud/UserData | grep Value`
+            encoded_data.gsub!(/^Value: (.+)/, '\1')
+            data = JSON.parse(Base64.decode64(encoded_data), :symbolize_names => true)
+            return nil unless data.is_a?(Hash)
+            return data[:steamcannon_client_cert]
           rescue => e
             @log.error e
             @log.error "An error occurred while reading UserData."
