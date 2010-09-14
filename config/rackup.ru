@@ -14,12 +14,23 @@ module SteamCannon
   bootstrap_helper.prepare
 
   SSL_DATA  = bootstrap_helper.ssl_data
+  LOG       = bootstrap_helper.log
 end
 
 module Thin
   class Connection
     def ssl_verify_peer( cert )
-      SteamCannon::SSL_DATA[:server_cert].strip == cert.strip
+      SteamCannon::LOG.trace "Validating certificate..."
+
+      same = SteamCannon::SSL_DATA[:server_cert].strip == cert.strip
+
+      if same
+        SteamCannon::LOG.trace "Provided certificate is valid"
+      else
+        SteamCannon::LOG.trace "Provided certificate is different!"
+      end
+
+      same
     end
   end
 end

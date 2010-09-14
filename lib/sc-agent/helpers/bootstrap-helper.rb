@@ -28,6 +28,7 @@ require 'rack'
 module SteamCannon
   class BootstrapHelper
     attr_reader :ssl_data
+    attr_reader :log
 
     def initialize( config )
       @config = config
