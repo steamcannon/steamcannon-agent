@@ -101,21 +101,32 @@ module SteamCannon
       @manager.services_info.should == [{:name=>"mock_two", :full_name=>"Mock Two Service"}, {:name=>"mock_one", :full_name=>"Mock One Service"}]
     end
 
-    it "should configure the agent" do
-      Thread.stub!(:new).and_yield([])
+    describe "configure" do
+      before(:each) do
+        @ssl_helper = mock(SSLHelper)
+        @ssl_helper.stub!(:store_cert_file)
+        @ssl_helper.stub!(:store_key_file)
+        SSLHelper.stub(:new).and_return(@ssl_helper)
 
-      ssl_helper = mock(SSLHelper)
-      ssl_helper.should_receive(:store_cert_file).with('CERT')
-      ssl_helper.should_receive(:store_key_file).with('KEY')
+        @manager.stub!(:fork)
+        Process.stub!(:detach)
+      end
 
-      SSLHelper.should_receive(:new).with( @config, :log => @log ).and_return( ssl_helper )
+      it "should configure the agent" do
+        @ssl_helper.should_receive(:store_cert_file).with('CERT')
+        @ssl_helper.should_receive(:store_key_file).with('KEY')
 
-      exec_helper = mock(ExecHelper)
-      exec_helper.should_receive(:execute).with('service steamcannon-agent restart')
+        SSLHelper.should_receive(:new).with( @config, :log => @log ).and_return( @ssl_helper )
 
-      ExecHelper.should_receive(:new).with( :log => @log ).and_return( exec_helper )
+        @manager.configure( 'CERT', 'KEY' )
+      end
 
-      @manager.configure( 'CERT', 'KEY' )
+      it "should fork and detach child process for restarting" do
+        @manager.should_receive(:fork).and_return(1)
+        Process.should_receive(:detach).with(1)
+
+        @manager.configure( 'CERT', 'KEY' )
+      end
     end
 
     describe '.execute_operation' do
