@@ -33,8 +33,7 @@ module SteamCannon
 
     def restart
       unless [:started, :stopped].include?(@state)
-        msg = "Current service status ('#{@state}') does not allow to restart the service."
-        return { :status => 'error', :msg => msg }
+        raise "Current service status ('#{@state}') does not allow to restart the service."
       end
 
       @state = :restarting

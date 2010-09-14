@@ -29,17 +29,23 @@ module SteamCannon
       @service.should_receive(:state=).with(:starting)
       @service.should_receive(:state).and_return( :starting )
 
-      @helper.execute( :start ).should == { :status => 'ok', :response => { :state => :starting } }
+      @helper.execute( :start ).should == { :state => :starting }
     end
 
     it "should not start service because of wrong state" do
       prepare_cmd( :stopping )
-      @helper.execute( :start ).should == { :status => 'error', :msg => "Current service status ('stopping') does not allow to start the service." }
+
+      begin
+        @helper.execute( :start )
+        raise "Should raise"
+      rescue => e
+        e.message.should == "Current service status ('stopping') does not allow to start the service."
+      end
     end
 
     it "should not start service because it is already started" do
       prepare_cmd( :started )
-      @helper.execute( :start ).should == { :status => 'ok', :response => { :state => :started } }
+      @helper.execute( :start ).should == { :state => :started }
     end
 
     describe ".start" do
@@ -88,17 +94,23 @@ module SteamCannon
       @service.should_receive(:state=).with(:stopping)
       @service.should_receive(:state).and_return( :stopping )
 
-      @helper.execute( :stop ).should == { :status => 'ok', :response => { :state => :stopping } }
+      @helper.execute( :stop ).should == { :state => :stopping }
     end
 
     it "should not stop service because of wrong state" do
       prepare_cmd( :stopping )
-      @helper.execute( :stop ).should == { :status => 'error', :msg => "Current service status ('stopping') does not allow to stop the service." }
+
+      begin
+        @helper.execute( :stop )
+        raise "Should raise"
+      rescue => e
+        e.message.should == "Current service status ('stopping') does not allow to stop the service."
+      end
     end
 
     it "should not stop service because it is already stopped" do
       prepare_cmd( :stopped )
-      @helper.execute( :stop ).should == { :status => 'ok', :response => { :state => :stopped } }
+      @helper.execute( :stop ).should == { :state => :stopped }
     end
 
     describe ".stop" do
@@ -146,12 +158,18 @@ module SteamCannon
       @service.should_receive(:state=).with(:restarting)
       @service.should_receive(:state).and_return( :restarting )
 
-      @helper.execute( :restart ).should == { :status => 'ok', :response => { :state => :restarting } }
+      @helper.execute( :restart ).should == { :state => :restarting }
     end
 
     it "should not restart service because service is in wrong state" do
       prepare_cmd( :stopping )
-      @helper.execute( :restart ).should == { :status => 'error', :msg => "Current service status ('stopping') does not allow to restart the service." }
+
+      begin
+        @helper.execute( :restart )
+        raise "Should raise"
+      rescue => e
+        e.message.should == "Current service status ('stopping') does not allow to restart the service."
+      end
     end
 
     describe ".restart" do

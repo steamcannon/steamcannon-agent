@@ -96,13 +96,19 @@ module SteamCannon
 
         unless data[:proxy_list].nil?
           unless @state == :started
-            unless @service.service_helper.execute( :start, :event => event, :background => false )[:status] == 'ok'
+            begin
+              @service.service_helper.execute( :start, :event => event, :background => false )
+            rescue
               msg = "Starting JBoss AS failed, couldn't finish updating JBoss AS"
               @log.error msg
               @service.state = @state
               @service.db.save_event( :configure, :failed, :msg => msg )
               substate = :stopped
               return false
+            end
+
+            unless [:status] == 'ok'
+
             end
 
             substate = :started
@@ -112,7 +118,9 @@ module SteamCannon
         end
 
         if restart
-          unless @service.service_helper.execute( :restart, :event => event, :background => false )[:status] == 'ok'
+          begin
+            @service.service_helper.execute( :restart, :event => event, :background => false )
+          rescue
             msg = "Restarting JBoss AS failed, couldn't finish updating JBoss AS"
             @log.error msg
             @service.state = @state

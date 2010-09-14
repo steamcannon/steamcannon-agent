@@ -45,7 +45,7 @@ class ServiceHelper
     unless @actions[action][:required].include?(@state)
       msg = "Current service status ('#{@state}') does not allow to #{action} the service."
       @log.error msg
-      return { :status => 'error', :msg => msg }
+      raise msg
     end
 
     @service.db.save_event( action, :started, :parent => event )
@@ -62,7 +62,7 @@ class ServiceHelper
   end
 
   def status
-    { :status => 'ok', :response => { :state => @service.state } }
+    { :state => @service.state }
   end
 
   def start( event )
