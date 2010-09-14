@@ -28,6 +28,7 @@ module SteamCannon
 
       @key_file          = "#{@config['ssl_dir']}/#{@config['ssl_key_file_name']}"
       @cert_file         = "#{@config['ssl_dir']}/#{@config['ssl_cert_file_name']}"
+      @ca_file           = "#{@config['ssl_dir']}/#{@config['ssl_ca_file_name']}"
     end
 
     def ssl_data
@@ -67,12 +68,16 @@ module SteamCannon
     def generate_self_signed_cert
       cert, key = create_self_signed_cert( 1024, [["C", "US"], ["ST", "NC"], ["O", "Red Hat"], ["CN", "localhost"]] )
 
-      File.open( @key_file, 'w') { |f| f.write( key.to_pem ) }
+      store_key_file( key.to_pem )
+      store_cert_file( cert.to_text + cert.to_pem )
+    end
 
-      File.open( @cert_file, 'w') do |f|
-        f.write( cert.to_text )
-        f.write( cert.to_pem )
-      end
+    def store_key_file( data )
+      File.open( @key_file, 'w') { |f| f.write( data) }
+    end
+
+    def store_cert_file( data )
+      File.open( @cert_file, 'w') { |f| f.write( data) }
     end
 
     def create_self_signed_cert( length, cn )

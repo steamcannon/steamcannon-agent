@@ -18,8 +18,16 @@ module SteamCannon
       rsa.is_a?(OpenSSL::PKey::RSA).should == true
     end
 
-    it "should generate self-signet cert and save it to a file" do
-      @helper.should_receive(:create_self_signed_cert).with(1024, [["C", "US"], ["ST", "NC"], ["O", "Red Hat"], ["CN", "localhost"]]).and_return([ "cert", "key" ])
+    it "should generate self-signed cert and save it to a file" do
+      cert = mock('Cert')
+      key = mock('key')
+
+      key.should_receive(:to_pem).and_return('key_pem')
+
+      cert.should_receive(:to_text).and_return('cert_text')
+      cert.should_receive(:to_pem).and_return('cert_pem')
+
+      @helper.should_receive(:create_self_signed_cert).with(1024, [["C", "US"], ["ST", "NC"], ["O", "Red Hat"], ["CN", "localhost"]]).and_return([ cert, key ])
 
       File.should_receive(:open).with("/var/ssl_key_file_name", "w")
       File.should_receive(:open).with("/var/ssl_cert_file_name", "w")

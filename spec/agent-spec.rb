@@ -188,5 +188,13 @@ module SteamCannon
 
       last_response.status.should == 200
     end
+
+    it "should configure and restart the service" do
+      ServiceManager.should_receive(:configure).with( 'CERT', 'KEY' )
+
+      post '/configure', :certificate => 'CERT', :keypair => 'KEY'
+
+      last_response.status.should == 200
+    end
   end
 end

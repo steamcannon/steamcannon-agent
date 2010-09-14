@@ -29,7 +29,6 @@ require 'json'
 module SteamCannon
   class Agent < Sinatra::Base
 
-    #set :dump_errors, false
     set :show_exceptions, false
     set :raise_errors, false
     set :logging, false
@@ -72,9 +71,10 @@ module SteamCannon
     post '/configure' do
       validate_parameter( :certificate )
       validate_parameter( :keypair )
-      validate_parameter( :ca )
-      # reconfigure here
-      { :status => 'ok', :response => '????'}.to_json
+
+      ServiceManager.configure( params[:certificate], params[:keypair] )
+
+      { :status => 'ok' }.to_json
     end
 
     get '/services/:service/:operation'do

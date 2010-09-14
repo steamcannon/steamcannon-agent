@@ -26,8 +26,8 @@ module SteamCannon
     before(:each) do
       @log  = Logger.new('/dev/null')
 
-      config = {'services' => 'Mock'}
-      @manager = ServiceManager.prepare( config, @log )
+      @config = {'services' => 'Mock'}
+      @manager = ServiceManager.prepare( @config, @log )
     end
 
     it "should prepare ServiceManager" do
@@ -101,6 +101,23 @@ module SteamCannon
       @manager.services_info.should == [{:name=>"mock_two", :full_name=>"Mock Two Service"}, {:name=>"mock_one", :full_name=>"Mock One Service"}]
     end
 
+    it "should configure the agent" do
+      Thread.stub!(:new).and_yield([])
+
+      ssl_helper = mock(SSLHelper)
+      ssl_helper.should_receive(:store_cert_file).with('CERT')
+      ssl_helper.should_receive(:store_key_file).with('KEY')
+
+      SSLHelper.should_receive(:new).with( @config, :log => @log ).and_return( ssl_helper )
+
+      exec_helper = mock(ExecHelper)
+      exec_helper.should_receive(:execute).with('service steamcannon-agent restart')
+
+      ExecHelper.should_receive(:new).with( :log => @log ).and_return( exec_helper )
+
+      @manager.configure( 'CERT', 'KEY' )
+    end
+
     describe '.execute_operation' do
       it "should not execute the operation because service doesn't support the call" do
         services = mock('services')
@@ -119,7 +136,7 @@ module SteamCannon
           @manager.execute_operation( 'mock', 'status' )
           raise "This shouldn't be executed"
         rescue => e
-           e.message.should == "Operation 'status' is not supported in Spec::Mocks::Mock service"
+          e.message.should == "Operation 'status' is not supported in Spec::Mocks::Mock service"
         end
       end
 

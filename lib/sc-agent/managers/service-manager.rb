@@ -19,6 +19,7 @@
 require 'sc-agent/helpers/config-helper'
 require 'sc-agent/helpers/log-helper'
 require 'sc-agent/helpers/db-helper'
+require 'sc-agent/helpers/ssl-helper'
 
 module SteamCannon
   class ServiceManager
@@ -36,6 +37,22 @@ module SteamCannon
         end
 
         self
+      end
+
+      def configure( cert, keypair )
+        @log.info "Reconfiguring Agent..."
+
+        ssl_helper = SSLHelper.new( @config, :log => @log )
+
+        @log.debug  "Saving received certificates..."
+
+        ssl_helper.store_cert_file( cert )
+        ssl_helper.store_key_file( keypair )
+
+        Thread.new do
+          @log.info "Executing service restart..."
+          ExecHelper.new( :log => @log ).execute('service steamcannon-agent restart')
+        end
       end
 
       def load_services
