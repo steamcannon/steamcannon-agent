@@ -49,10 +49,12 @@ module SteamCannon
         ssl_helper.store_cert_file( cert )
         ssl_helper.store_key_file( keypair )
 
-        Thread.new do
-          @log.info "Executing service restart..."
+        @log.info "Executing service restart..."
+        child = fork do
           ExecHelper.new( :log => @log ).execute('service steamcannon-agent restart')
         end
+        Process.detach(child)
+        exit!(0)
       end
 
       def load_services
