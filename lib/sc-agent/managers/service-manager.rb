@@ -54,7 +54,6 @@ module SteamCannon
           ExecHelper.new( :log => @log ).execute('service steamcannon-agent restart')
         end
         Process.detach(child)
-        exit!(0)
       end
 
       def load_services
