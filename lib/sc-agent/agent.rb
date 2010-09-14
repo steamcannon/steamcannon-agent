@@ -39,7 +39,7 @@ module SteamCannon
     error do
       exception = request.env['sinatra.error']
       status 404 if exception.is_a?( NotFound )
-      { :status => 'error', :msg => exception.message }.to_json
+      { :msg => exception.message }.to_json
     end
 
     after do
@@ -52,7 +52,8 @@ module SteamCannon
 
         yield if block_given?
 
-        ServiceManager.execute_operation( service, operation, *params ).to_json
+        ret_val = ServiceManager.execute_operation( service, operation, *params )
+        ret_val.to_json unless ret_val.nil?
       end
 
       def validate_parameter( name )
@@ -61,11 +62,11 @@ module SteamCannon
     end
 
     get '/status' do
-      { :status => 'ok', :response => { :load => ExecHelper.new( :log => Logger.new('/dev/null') ).execute('cat /proc/loadavg') } }.to_json
+      { :load => ExecHelper.new( :log => Logger.new('/dev/null') ).execute('cat /proc/loadavg') }.to_json
     end
 
     get '/services' do
-      { :status => 'ok', :response => ServiceManager.services_info }.to_json
+      { :services => ServiceManager.services_info }.to_json
     end
 
     post '/configure' do
@@ -73,8 +74,6 @@ module SteamCannon
       validate_parameter( :keypair )
 
       ServiceManager.configure( params[:certificate], params[:keypair] )
-
-      { :status => 'ok' }.to_json
     end
 
     get '/services/:service/:operation'do

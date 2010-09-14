@@ -36,17 +36,29 @@ module SteamCannon
     end
 
     it "should return status" do
-      @service.status.should == { :status => "ok", :response => { :state => :stopped } }
+      @service.status.should == { :state => :stopped }
     end
 
     it "should not return the selected artifact because of unexpected error" do
       @db.should_receive(:artifact).with( 1 ).and_raise("boom")
-      @service.artifact( "1" ).should == {:msg=>"Could not retrieve artifact with id = 1", :status=>"error"}
+
+      begin
+        @cmd.execute( @service.artifact( "1" ) )
+        raise "Should raise"
+      rescue => e
+        e.message.should == "Could not retrieve artifact with id = 1"
+      end
     end
 
     it "should not return the selected artifact" do
       @db.should_receive(:artifact).with( 1 ).and_return( nil )
-      @service.artifact( "1" ).should == {:msg=>"Could not retrieve artifact with id = 1", :status=>"error"}
+
+      begin
+        @cmd.execute( @service.artifact( "1" ) )
+        raise "Should raise"
+      rescue => e
+        e.message.should == "Could not retrieve artifact with id = 1"
+      end
     end
 
     it "should return the selected artifact" do
@@ -57,59 +69,59 @@ module SteamCannon
       artifact.should_receive(:size).and_return(1234)
 
       @db.should_receive(:artifact).with( 1 ).and_return( artifact )
-      @service.artifact( "1" ).should == {:status=>"ok", :response => { :type => 'abc', :name => 'name', :size => 1234 }}
+      @service.artifact( "1" ).should == {:type => 'abc', :name => 'name', :size => 1234 }
     end
 
     it "should execute configure" do
       cmd = mock(ConfigureCommand)
-      cmd.should_receive(:execute).with( :a => :b ).and_return( { :status => "ok", :response => { :state => :stopped } } )
+      cmd.should_receive(:execute).with( :a => :b ).and_return( { :state => :stopped } )
 
       ConfigureCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
 
-      @service.configure( :a => :b ).should == { :status => "ok", :response => { :state => :stopped } }
+      @service.configure( :a => :b ).should == { :state => :stopped }
     end
 
     it "should execute start" do
-      @service_helper.should_receive(:execute).with( :start, :backgroud => true ).and_return( { :status => "ok", :response => { :state => :starting } } )
-      @service.start.should == { :status => "ok", :response => { :state => :starting } }
+      @service_helper.should_receive(:execute).with( :start, :backgroud => true ).and_return( { :state => :starting } )
+      @service.start.should == { :state => :starting }
     end
 
     it "should execute stop" do
-      @service_helper.should_receive(:execute).with( :stop, :backgroud => true ).and_return( { :status => "ok", :response => { :state => :stopping } } )
-      @service.stop.should == { :status => "ok", :response => { :state => :stopping } }
+      @service_helper.should_receive(:execute).with( :stop, :backgroud => true ).and_return( { :state => :stopping } )
+      @service.stop.should == { :state => :stopping }
     end
 
     it "should execute restart" do
-      @service_helper.should_receive(:execute).with( :restart, :backgroud => true ).and_return( { :status => "ok", :response => { :state => :restarting } } )
-      @service.restart.should == { :status => "ok", :response => { :state => :restarting } }
+      @service_helper.should_receive(:execute).with( :restart, :backgroud => true ).and_return( { :state => :restarting } )
+      @service.restart.should == { :state => :restarting }
     end
 
     it "should return empty list of artifacts" do
       @db.should_receive(:artifacts).and_return([])
-      @service.artifacts.should == { :status => "ok", :response=>[] }
+      @service.artifacts.should == { :artifacts => [] }
     end
 
     it "should return list of artifacts" do
       @db.should_receive(:artifacts).and_return([ Artifact.new(:name=>"abc", :id => 1), Artifact.new(:name=>"def", :id => 2) ])
-      @service.artifacts.should == { :status => "ok", :response=>[ {:name=>"abc", :id=>1 }, {:name=>"def", :id=>2}] }
+      @service.artifacts.should == { :artifacts => [ {:name=>"abc", :id=>1 }, {:name=>"def", :id=>2}] }
     end
 
     it "should execute deploy" do
       cmd = mock(DeployCommand)
-      cmd.should_receive(:execute).with( "artifact" ).and_return( { :status => "ok", :response => { :state => :stopped } } )
+      cmd.should_receive(:execute).with( "artifact" ).and_return( { :state => :stopped } )
 
       DeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
 
-      @service.deploy( "artifact" ).should == { :status => "ok", :response => { :state => :stopped } }
+      @service.deploy( "artifact" ).should == { :state => :stopped }
     end
 
     it "should execute undeploy" do
       cmd = mock(UndeployCommand)
-      cmd.should_receive(:execute).with( 1 ).and_return( { :status => "ok", :response => { :state => :stopped } } )
+      cmd.should_receive(:execute).with( 1 ).and_return( { :state => :stopped } )
 
       UndeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
 
-      @service.undeploy( 1 ).should == { :status => "ok", :response => { :state => :stopped } }
+      @service.undeploy( 1 ).should == { :state => :stopped }
     end
   end
 end

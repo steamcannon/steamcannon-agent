@@ -36,14 +36,14 @@ module SteamCannon
         msg = "Service is currently in '#{@state}' state. It needs to be in 'started' or 'stopped' state to execute this action."
         @log.error msg
         @service.db.save_event( :deploy, :failed, :msg => msg, :parent => event )
-        return { :status => 'error', :msg => msg }
+        raise msg
       end
 
       unless is_artifact_valid?( artifact )
         msg = "No or invalid artifact provided"
         @log.error msg
         @service.db.save_event( :deploy, :failed, :msg => msg, :parent => event )
-        return { :status => 'error', :msg => msg }
+        raise msg
       end
 
       name = artifact[:filename]
@@ -72,10 +72,12 @@ module SteamCannon
         @log.trace "Artifact #{name} deployed."
 
         @service.db.save_event( :deploy, :finished, :parent => event )
-        { :status => 'ok', :response => { :artifact_id => a.id } }
+        { :artifact_id => a.id }
       else
-        @service.db.save_event( :deploy, :failed, :parent => event )
-        { :status => 'error', :msg => "Error while saving artifact #{name}" }
+        msg = "Error while saving artifact #{name}"
+        @service.db.save_event( :deploy, :failed, :parent => event, :msg => msg )
+        @log.error msg
+        raise msg
       end
     end
 

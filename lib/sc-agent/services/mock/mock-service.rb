@@ -49,8 +49,7 @@ module SteamCannon
 
     def start
       unless [:stopped].include?(@state)
-        msg = "Current service status ('#{@state}') does not allow to start the service."
-        return { :status => 'error', :msg => msg }
+        raise "Current service status ('#{@state}') does not allow to start the service."
       end
 
       @state = :starting
@@ -65,8 +64,7 @@ module SteamCannon
 
     def stop
       unless [:started].include?(@state)
-        msg = "Current service status ('#{@state}') does not allow to stop the service."
-        return { :status => 'error', :msg => msg }
+        raise "Current service status ('#{@state}') does not allow to stop the service."
       end
 
       @state = :stopping
@@ -81,8 +79,7 @@ module SteamCannon
 
     def configure( data )
       unless [:started, :stopped].include?(@state)
-        msg = "Current service status ('#{@state}') does not allow to configure the service."
-        return { :status => 'error', :msg => msg }
+        raise "Current service status ('#{@state}') does not allow to configure the service."
       end
 
       previous_state = @state
@@ -97,7 +94,7 @@ module SteamCannon
     end
 
     def status
-      { :status => 'ok', :response => { :state => @state } }
+      { :state => @state }
     end
 
     def artifact( artifact_id )
@@ -108,11 +105,11 @@ module SteamCannon
       end
 
       unless artifact.nil?
-        { :status => 'ok', :response => { :name => artifact.name, :size => artifact.size, :type => artifact.type } }
+        { :name => artifact.name, :size => artifact.size, :type => artifact.type }
       else
         msg = "Could not retrieve artifact with id = #{artifact_id}"
         @log.error msg
-        { :status => 'error', :msg => msg }
+        raise msg
       end
     end
 
@@ -123,27 +120,25 @@ module SteamCannon
         artifacts << { :name => artifact.name, :id => artifact.id }
       end
 
-      { :status => 'ok', :response => artifacts }
+      { :artifacts => artifacts }
     end
 
     def deploy( artifact )
       unless [:started, :stopped].include?(@state)
-        msg = "Current service status ('#{@state}') does not allow to restart the service."
-        return { :status => 'error', :msg => msg }
+        raise "Current service status ('#{@state}') does not allow to restart the service."
       end
 
       if a = @db.save_artifact( :name => artifact[:filename], :location => "/opt/mockservice/deploy/#{artifact[:filename]}", :size => artifact[:tempfile].size, :type => artifact[:type] )
-        { :status => 'ok', :response => { :artifact_id => a.id } }
+        { :artifact_id => a.id }
       else
-        { :status => 'error', :msg => "Error while saving artifact #{artifact[:filename]}" }
+        raise "Error while saving artifact #{artifact[:filename]}" 
       end
     end
 
     def undeploy( artifact_id )
       if @db.remove_artifact( artifact_id )
-        { :status => 'ok' }
       else
-        { :status => 'error', :msg => "Error occurred while removing artifact with id = '#{artifact_id}'" }
+        raise "Error occurred while removing artifact with id = '#{artifact_id}'"
       end
     end
   end

@@ -30,7 +30,12 @@ module SteamCannon
       db2.should_receive( :save_event ).with( :configure, :failed, :msg=>"Service is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action." )
       @service.should_receive(:db).and_return( db2 )
 
-      @cmd.execute( {}.to_json ).should == {:msg=>"Service is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action.", :status=>"error"}
+      begin
+        @cmd.execute( {}.to_json )
+        raise "Should raise"
+      rescue => e
+        e.message.should == "Service is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action."
+      end
     end
 
     it "should not configure because of invalid data provided" do
@@ -44,7 +49,12 @@ module SteamCannon
       db2.should_receive( :save_event ).with( :configure, :failed, :msg => "No or invalid data provided to configure service." )
       @service.should_receive(:db).and_return( db2 )
 
-      @cmd.execute( nil ).should == { :msg => "No or invalid data provided to configure service.", :status => "error"}
+      begin
+        @cmd.execute( nil )
+        raise "Should raise"
+      rescue => e
+        e.message.should == "No or invalid data provided to configure service."
+      end
     end
 
     it "should configure service" do
@@ -59,7 +69,7 @@ module SteamCannon
 
       @cmd.should_receive( :configure ).with( {}, "1" )
 
-      @cmd.execute( {}.to_json ).should == { :status => "ok", :response => { :state => :stopped } }
+      @cmd.execute( {}.to_json ).should == { :state => :stopped }
     end
 
     describe ".configure" do

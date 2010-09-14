@@ -51,7 +51,7 @@ module SteamCannon
         msg = "Service is currently in '#{@state}' state. It needs to be in 'started' or 'stopped' state to execute this action."
         @log.error msg
         @service.db.save_event( :configure, :failed, :msg => msg )
-        return { :status => 'error', :msg => msg }
+        raise msg
       end
 
       invalid_data = true
@@ -69,7 +69,7 @@ module SteamCannon
         msg = "No or invalid data provided to configure service."
         @log.error msg
         @service.db.save_event( :configure, :failed, :msg => msg )
-        return { :status => 'error', :msg => msg }
+        raise msg
       end
 
       @service.state = :configuring
@@ -80,7 +80,7 @@ module SteamCannon
         configure( data, event )
       end
 
-      { :status => 'ok', :response => { :state => @service.state } }
+      { :state => @service.state }
     end
 
     def configure( data, event = nil )

@@ -33,10 +33,10 @@ module SteamCannon
       event = @service.db.save_event( :undeploy, :started )
 
       unless is_valid_artifact_id?( artifact_id )
-        msg = "No or invalid artifact_id provided"
+        msg = "No or invalid artifact id provided"
         @log.error msg
         @service.db.save_event( :undeploy, :failed, :msg => msg, :parent => event )
-        return { :status => 'error', :msg => msg }
+        raise msg
       end
 
       artifact = @service.db.artifact( artifact_id.to_i )
@@ -45,17 +45,18 @@ module SteamCannon
         msg = "Artifact with id '#{artifact_id}' not found"
         @log.error msg
         @service.db.save_event( :undeploy, :failed, :msg => msg, :parent => event )
-        return { :status => 'error', :msg => msg }
+        raise msg
       end
 
       FileUtils.rm( artifact.location, :force => true )
 
       if @service.db.remove_artifact( artifact_id )
         @service.db.save_event( :undeploy, :finished, :parent => event )
-        { :status => 'ok' }
       else
-        @service.db.save_event( :undeploy, :failed, :parent => event )
-        { :status => 'error', :msg => "Error occurred while removing artifact with id = '#{artifact_id}'" }
+        msg = "Error occurred while removing artifact with id = '#{artifact_id}'"
+        @log.error msg
+        @service.db.save_event( :undeploy, :failed, :parent => event, :msg => msg )      
+        raise msg
       end
     end
 

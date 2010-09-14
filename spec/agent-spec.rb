@@ -18,7 +18,7 @@ module SteamCannon
     end
 
     def parse_response( response )
-      JSON.parse( response.body, :symbolize_names => true)
+      JSON.parse( response.body, :symbolize_names => true) if response.body.length > 0
     end
 
     it "should return current status" do
@@ -32,8 +32,7 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 200
-      response[:status].should == 'ok'
-      response[:response][:load].should == '0.04 0.05 0.00 1/91 1851'
+      response[:load].should == '0.04 0.05 0.00 1/91 1851'
     end
 
     it "should return error if something wents wrong" do
@@ -44,7 +43,6 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 500
-      response[:status].should == 'error'
       response[:msg].should == 'something'
     end
 
@@ -62,8 +60,6 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 404
-
-      response[:status].should == 'error'
       response[:msg].should == "Service 'test' doesn't exists."
     end
 
@@ -76,20 +72,16 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 500
-      response[:status].should == 'error'
       response[:msg].should == "Operation 'operation' is not supported in Test service"
     end
 
     it "should execute stop operation on service" do
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
-      ServiceManager.should_receive(:execute_operation).with('test', 'stop').and_return( { :status => 'ok'} )
+      ServiceManager.should_receive(:execute_operation).with('test', 'stop')
 
       post '/services/test/stop'
 
-      response = parse_response( last_response )
-
       last_response.status.should == 200
-      response[:status].should == 'ok'
     end
 
     it "should not execute abc operation on service" do
@@ -101,20 +93,19 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 500
-      response[:status].should == 'error'
       response[:msg].should == "Operation 'abc' is not allowed. Allowed operations: start, stop, restart."
     end
 
     it "should get the artifact" do
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
-      ServiceManager.should_receive(:execute_operation).with('test', 'artifact', '1').and_return( { :status => 'ok'} )
+      ServiceManager.should_receive(:execute_operation).with('test', 'artifact', '1').and_return( { :artifact => 'artifact'} )
 
       get '/services/test/artifacts/1'
 
       response = parse_response( last_response )
 
       last_response.status.should == 200
-      response[:status].should == 'ok'
+      response[:artifact].should == 'artifact'
     end
 
     it "should get 404 because artifact doesn't exists anymore" do
@@ -126,7 +117,6 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 404
-      response[:status].should == 'error'
       response[:msg].should == 'No artifact'
     end
 
@@ -138,21 +128,19 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 404
-      response[:status].should == 'error'
       response[:msg].should == "No 'artifact' parameter specified in request"
     end
 
     it "should deploy a new artifact" do
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
-      ServiceManager.should_receive(:execute_operation).with('test', 'deploy', 'something').and_return( { :status => "ok", :response => { :artifact_id => 1 } } )
+      ServiceManager.should_receive(:execute_operation).with('test', 'deploy', 'something').and_return( { :artifact_id => 1 } )
 
       post '/services/test/artifacts', :artifact => 'something'
 
       response = parse_response( last_response )
 
       last_response.status.should == 200
-      response[:status].should == 'ok'
-      response[:response][:artifact_id].should == 1
+      response[:artifact_id].should == 1
     end
 
     it "should not configure the service because no config was specified" do
@@ -163,21 +151,19 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 404
-      response[:status].should == 'error'
       response[:msg].should == "No 'config' parameter specified in request"
     end
 
     it "should configure the service" do
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
-      ServiceManager.should_receive(:execute_operation).with('test', 'configure', 'something').and_return( { :status => "ok", :response => { :state => :started } } )
+      ServiceManager.should_receive(:execute_operation).with('test', 'configure', 'something').and_return( { :state => :started } )
 
       post '/services/test/configure', :config => 'something'
 
       response = parse_response( last_response )
 
       last_response.status.should == 200
-      response[:status].should == 'ok'
-      response[:response][:state].should == 'started'
+      response[:state].should == 'started'
     end
 
     it "should delete the artifact" do

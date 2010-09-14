@@ -70,7 +70,7 @@ module SteamCannon
     end
 
     def status
-      { :status => 'ok', :response => { :state => @state } }
+      { :state => @state }
     end
 
     def artifact( artifact_id )
@@ -81,11 +81,11 @@ module SteamCannon
       end
 
       unless artifact.nil?
-        { :status => 'ok', :response => { :name => artifact.name, :size => artifact.size, :type => artifact.type } }
+        { :name => artifact.name, :size => artifact.size, :type => artifact.type }
       else
         msg = "Could not retrieve artifact with id = #{artifact_id}"
         @log.error msg
-        { :status => 'error', :msg => msg }
+        raise msg
       end
     end
 
@@ -96,7 +96,7 @@ module SteamCannon
         artifacts << { :name => artifact.name, :id => artifact.id }
       end
 
-      { :status => 'ok', :response => artifacts }
+      { :artifacts => artifacts }
     end
 
     def deploy( artifact )
