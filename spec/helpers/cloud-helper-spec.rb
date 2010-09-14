@@ -36,7 +36,7 @@ module SteamCannon
 
     describe ".read_certificate" do
       it "should read certificate for EC2" do
-        @client_helper.should_receive(:get).with('http://169.254.169.254/1.0/user-data').and_return('{ "steamcannon_client_cert": "CERT" }')
+        @client_helper.should_receive(:get).with('http://169.254.169.254/1.0/user-data').and_return('{ "steamcannon_ca_cert": "CERT" }')
         @helper.read_certificate( :ec2 ).should == "CERT"
       end
 
@@ -51,7 +51,7 @@ module SteamCannon
       end
 
       it "should read certificate for Virtualbox" do
-        @helper.should_receive('`').and_return("Value: " + Base64.encode64('{ "steamcannon_client_cert": "CERT" }'))
+        @helper.should_receive('`').and_return("Value: " + Base64.encode64('{ "steamcannon_ca_cert": "CERT" }'))
         @helper.read_certificate(:virtualbox).should == "CERT"
       end
 

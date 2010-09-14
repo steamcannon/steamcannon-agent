@@ -72,7 +72,7 @@ module SteamCannon
           begin
             data = JSON.parse( @client_helper.get('http://169.254.169.254/1.0/user-data'), :symbolize_names => true )
             return nil unless data.is_a?(Hash)
-            return data[:steamcannon_client_cert].nil? ? nil : data[:steamcannon_client_cert]
+            return data[:steamcannon_ca_cert].nil? ? nil : data[:steamcannon_ca_cert]
           rescue => e
             @log.error e
             @log.error "An error occurred while reading UserData."
@@ -84,7 +84,7 @@ module SteamCannon
             encoded_data.gsub!(/^Value: (.+)/, '\1')
             data = JSON.parse(Base64.decode64(encoded_data), :symbolize_names => true)
             return nil unless data.is_a?(Hash)
-            return data[:steamcannon_client_cert]
+            return data[:steamcannon_ca_cert]
           rescue => e
             @log.error e
             @log.error "An error occurred while reading UserData."
