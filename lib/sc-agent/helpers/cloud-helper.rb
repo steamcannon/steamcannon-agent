@@ -57,7 +57,7 @@ module SteamCannon
     def discover_virtualbox
       @log.debug "Discovering if we're on Virtualbox..."
 
-      if File.exists?(VBOX_CONTROL)
+      if File.exist?(VBOX_CONTROL)
         @log.debug "Yes, we're on Virtualbox."
         true
       else

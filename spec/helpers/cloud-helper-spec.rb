@@ -18,8 +18,19 @@ module SteamCannon
       @helper.discover_ec2.should == false
     end
 
+    it "should discover if we're on Virtualbox" do
+      File.should_receive(:exist?).with(CloudHelper::VBOX_CONTROL).and_return(true)
+      @helper.discover_virtualbox.should == true
+    end
+
+    it "should discover if we're on Virtualbox and return false if not" do
+      File.should_receive(:exist?).with(CloudHelper::VBOX_CONTROL).and_return(false)
+      @helper.discover_virtualbox.should == false
+    end
+
     it "should discover platform" do
       @helper.should_receive(:discover_ec2).and_return(false)
+      @helper.should_receive(:discover_virtualbox).and_return(false)
       @helper.discover_platform.should == :unknown
     end
 
@@ -37,6 +48,21 @@ module SteamCannon
       it "should read certificate for EC2 and return nil because UserData is not in JSON format" do
         @client_helper.should_receive(:get).with('http://169.254.169.254/1.0/user-data').and_return('{sdf}')
         @helper.read_certificate( :ec2 ).should == nil
+      end
+
+      it "should read certificate for Virtualbox" do
+        @helper.should_receive('`').and_return("Value: " + Base64.encode64('{ "steamcannon_client_cert": "CERT" }'))
+        @helper.read_certificate(:virtualbox).should == "CERT"
+      end
+
+      it "should read certificate for Virtualbox and return nil because there is no certificate in UserData" do
+        @helper.should_receive('`').and_return("Value: " + Base64.encode64('{}'))
+        @helper.read_certificate(:virtualbox).should == nil
+      end
+
+      it "should read certificate for Virtualbox and return nil because UserData is not in JSON format" do
+        @helper.should_receive('`').and_return("Value: " + Base64.encode64('{sdf}'))
+        @helper.read_certificate(:virtualbox).should == nil
       end
     end
   end
