@@ -43,7 +43,7 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 500
-      response[:msg].should == 'something'
+      response[:message].should == 'something'
     end
 
     it "should return the correct content-type" do
@@ -60,7 +60,7 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 404
-      response[:msg].should == "Service 'test' doesn't exists."
+      response[:message].should == "Service 'test' doesn't exists."
     end
 
     it "should return 500 because operation is not allowed" do
@@ -72,7 +72,7 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 500
-      response[:msg].should == "Operation 'operation' is not supported in Test service"
+      response[:message].should == "Operation 'operation' is not supported in Test service"
     end
 
     it "should execute stop operation on service" do
@@ -93,7 +93,7 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 500
-      response[:msg].should == "Operation 'abc' is not allowed. Allowed operations: start, stop, restart."
+      response[:message].should == "Operation 'abc' is not allowed. Allowed operations: start, stop, restart."
     end
 
     it "should get the artifact" do
@@ -117,7 +117,7 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 404
-      response[:msg].should == 'No artifact'
+      response[:message].should == 'No artifact'
     end
 
     it "should not deploy a new artifact because no artifact was specified" do
@@ -128,7 +128,7 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 404
-      response[:msg].should == "No 'artifact' parameter specified in request"
+      response[:message].should == "No 'artifact' parameter specified in request"
     end
 
     it "should deploy a new artifact" do
@@ -151,7 +151,7 @@ module SteamCannon
       response = parse_response( last_response )
 
       last_response.status.should == 404
-      response[:msg].should == "No 'config' parameter specified in request"
+      response[:message].should == "No 'config' parameter specified in request"
     end
 
     it "should configure the service" do
