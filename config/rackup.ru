@@ -20,7 +20,7 @@ end
 module Thin
   class Connection
     def ssl_verify_peer( cert )
-      SteamCannon::LOG.trace "Validating certificate..."
+      SteamCannon::LOG.trace "Validating client certificate..."
 
       same = SteamCannon::SSL_DATA[:server_cert].strip == cert.strip
 
@@ -28,6 +28,9 @@ module Thin
         SteamCannon::LOG.trace "Provided certificate is valid"
       else
         SteamCannon::LOG.trace "Provided certificate is different!"
+
+        SteamCannon::LOG.trace "Certificate expected:\n#{SteamCannon::SSL_DATA[:server_cert].strip}"
+        SteamCannon::LOG.trace "Certificate received:\n#{cert.strip}"
       end
 
       same
