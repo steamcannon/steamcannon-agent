@@ -71,7 +71,14 @@ module SteamCannon
       case platform
         when :ec2
           begin
-            data = JSON.parse( @client_helper.get('http://169.254.169.254/1.0/user-data'), :symbolize_names => true )
+            user_data = @client_helper.get('http://169.254.169.254/1.0/user-data')
+
+            if user_data.nil?
+              @log.error "No UserData provided"
+              return nil
+            end
+
+            data = JSON.parse( user_data, :symbolize_names => true )
             return nil unless data.is_a?(Hash)
             return data[:steamcannon_ca_cert].nil? ? nil : data[:steamcannon_ca_cert]
           rescue => e

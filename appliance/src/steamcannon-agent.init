@@ -18,7 +18,7 @@
 
 PID_FILE=/var/lock/steamcannon-agent.pid
 STEAMCANNON_AGENT_HOME=/usr/share/steamcannon-agent
-STEAMCANNON_AGENT_ENVIRONMENT=${STEAMCANNON_AGENT_ENVIRONMENT:-"development"}
+STEAMCANNON_AGENT_ENVIRONMENT=${STEAMCANNON_AGENT_ENVIRONMENT:-"production"}
 
 THIN=/usr/lib/ruby/gems/1.8/bin/thin
 

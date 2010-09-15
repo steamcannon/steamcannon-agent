@@ -22,6 +22,9 @@ require 'yaml'
 
 module SteamCannon
   class ConfigHelper
+
+    CONFIG_FILE = '/etc/sysconfig/steamcannon-agent'
+
     def initialize
       defaults = {
               'environment'               => ENV['RACK_ENV'],
@@ -36,7 +39,7 @@ module SteamCannon
       @config = OpenHash.new( defaults )
 
       begin
-        agent_config_file = "config/agent-#{@config.environment }.yaml"
+        agent_config_file = ( File.exists?( CONFIG_FILE ) ? CONFIG_FILE : "config/agent-#{@config.environment }.yaml" )
         @config.merge!(YAML.load_file( agent_config_file ))
       rescue => e
         puts e
