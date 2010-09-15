@@ -44,7 +44,7 @@ module Thin
       else
         SteamCannon::LOG.trace "Provided certificate is neither the client CA nor a cert signed by the client CA"
 
-        SteamCannon::LOG.trace "Client CA certificate we have:\n#{SteamCannon::SSL_DATA[:server_cert].strip}"
+        SteamCannon::LOG.trace "Client CA certificate we have:\n#{SteamCannon::SSL_DATA[:client_ca_cert].strip}"
         SteamCannon::LOG.trace "Subject: #{ca_x509.subject}"
         
         SteamCannon::LOG.trace "Certificate received:\n#{cert.strip}"
