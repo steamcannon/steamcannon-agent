@@ -18,6 +18,7 @@
 
 require 'logger'
 require 'sc-agent/helpers/client-helper'
+require 'sc-agent/helpers/ssl-helper'
 require 'json'
 require 'base64'
 
@@ -91,7 +92,7 @@ module SteamCannon
             return nil
           end
         else
-          @log.warn "!! Unsupported platform: '#{platform}'. I don't know how to load certificate! Returning empty certificate."
+          @log.warn "!! Unsupported platform: '#{platform}'. I don't know how to load certificate! Returning empty string"
           return ""
       end
     end

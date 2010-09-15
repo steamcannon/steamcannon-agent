@@ -24,11 +24,22 @@ module Thin
       
       SteamCannon::LOG.trace "Validating peer certificate..."
 
-      cert_x509 = OpenSSL::X509::Certificate.new(cert)
-      ca_x509 = OpenSSL::X509::Certificate.new(SteamCannon::SSL_DATA[:client_ca_cert])
-      valid = (SteamCannon::SSL_DATA[:client_ca_cert].strip == cert.strip) || cert_x509.verify(ca_x509.public_key)
+      if SteamCannon::SSL_DATA[:client_ca_cert].nil? or SteamCannon::SSL_DATA[:client_ca_cert].length == 0
+        SteamCannon::LOG.warn "No CA certificate to validate peer"
+        return false
+      end
 
-      if valid
+      ca_x509 = OpenSSL::X509::Certificate.new(SteamCannon::SSL_DATA[:client_ca_cert])
+
+      begin
+        cert_x509 = OpenSSL::X509::Certificate.new(cert)
+      rescue => e
+        SteamCannon::LOG.trace e.message
+        SteamCannon::LOG.trace "Provided certificate is invalid"
+        return false
+      end
+
+      if (SteamCannon::SSL_DATA[:client_ca_cert].strip == cert.strip) || cert_x509.verify(ca_x509.public_key)
         SteamCannon::LOG.trace "Provided certificate is valid"
       else
         SteamCannon::LOG.trace "Provided certificate is neither the client CA nor a cert signed by the client CA"

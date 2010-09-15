@@ -50,6 +50,12 @@ module SteamCannon
 
       raise "Could not load public client CA certificate" if client_ca_cert.nil?
 
+      begin
+        OpenSSL::X509::Certificate.new( client_ca_cert ) if client_ca_cert.length > 0
+      rescue
+        raise "Provided public client CA certificate is invalid"
+      end
+
       @log.debug "Client CA certificate read."
 
       unless File.exists?( @key_file ) and File.exists?( @cert_file )

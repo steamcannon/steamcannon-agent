@@ -2,6 +2,21 @@ require 'sc-agent/helpers/ssl-helper'
 
 module SteamCannon
   describe SSLHelper do
+    CERT = "-----BEGIN CERTIFICATE-----
+MIICKTCCAZKgAwIBAgIBATANBgkqhkiG9w0BAQUFADAsMR0wGwYDVQQKDBRTdGVh
+bUNhbm5vbiBJbnN0YW5jZTELMAkGA1UEAwwCQ0EwHhcNMTAwOTE0MTcwMzU4WhcN
+MjAwOTExMTcwMzU4WjAwMR0wGwYDVQQKDBRTdGVhbUNhbm5vbiBJbnN0YW5jZTEP
+MA0GA1UEAwwGQ2xpZW50MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCYqK3k
+TPczvpuR7s2UO0g4wky7sLiYh6g/x34XbHlD1pV8kv/ozAxT3F2xwfSbvQ+E1d5D
+epK/1bENumyH7+VW5rbTZ2MMJPAfcy9aaFyWkSCoOVpK9a6dztrXlnhfo6li1jN2
+PCv2my8vlukr6bGw7AhGf/+6RzZ4abQgbY7scQIDAQABo1cwVTAPBgNVHRMBAf8E
+BTADAQEAMA4GA1UdDwEB/wQEAwIF4DATBgNVHSUEDDAKBggrBgEFBQcDAjAdBgNV
+HQ4EFgQU/EhN8j+UpKlCKWSH6CtDhdeFLHYwDQYJKoZIhvcNAQEFBQADgYEAEMV+
+CGjD3+jzmTYNIHzrBe6obKydBu1YWRkM3j2V3TOat9VXn2sJHA5IAfHJEueFSPjk
+K/tY1fjVeM9tqei8pll9Yhv4itDc0DJb3W8giUUiY9KAaaNK9/oW5YpxbIkHyQZv
+zwPRO10aTa/17290D2pegEuJ1T/vJm6rwdCw2cg=
+-----END CERTIFICATE-----"
+
     before(:each) do
 
       options = OpenHash.new({ 'ssl_dir' => '/var', 'ssl_key_file_name' => 'ssl_key_file_name', 'ssl_cert_file_name' => 'ssl_cert_file_name', 'platform' => :ec2 })
@@ -37,7 +52,7 @@ module SteamCannon
 
     it "should return ssl data when files already exists" do
       File.should_receive(:directory?).with( '/var' ).and_return(true)
-      @cloud_helper.should_receive(:read_certificate).with(:ec2).and_return("CERT")
+      @cloud_helper.should_receive(:read_certificate).with(:ec2).and_return(CERT)
 
       File.should_receive(:exists?).with( '/var/ssl_key_file_name' ).and_return(true)
       File.should_receive(:exists?).with( '/var/ssl_cert_file_name' ).and_return(true)
@@ -50,7 +65,7 @@ module SteamCannon
 
     it "should return ssl data and generate cert + key" do
       File.should_receive(:directory?).with( '/var' ).and_return(true)
-      @cloud_helper.should_receive(:read_certificate).with(:ec2).and_return("CERT")
+      @cloud_helper.should_receive(:read_certificate).with(:ec2).and_return(CERT)
 
       File.should_receive(:exists?).with( '/var/ssl_key_file_name' ).and_return(false)
 
