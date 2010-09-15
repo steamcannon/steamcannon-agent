@@ -39,7 +39,9 @@ module Thin
         return false
       end
 
-      if (SteamCannon::SSL_DATA[:client_ca_cert].strip == cert.strip) || cert_x509.verify(ca_x509.public_key)
+      valid = (SteamCannon::SSL_DATA[:client_ca_cert].strip == cert.strip) || cert_x509.verify(ca_x509.public_key)
+
+      if valid
         SteamCannon::LOG.trace "Provided certificate is valid"
       else
         SteamCannon::LOG.trace "Provided certificate is neither the client CA nor a cert signed by the client CA"
