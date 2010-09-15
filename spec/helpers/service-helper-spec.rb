@@ -26,8 +26,9 @@ module SteamCannon
 
       @helper.should_receive(:start).with( nil )
 
-      @service.should_receive(:state=).with(:starting)
-      @service.should_receive(:state).and_return( :starting )
+      @service.should_receive(:state).ordered.and_return( :stopped )
+      @service.should_receive(:state=).ordered.with(:starting)
+      @service.should_receive(:state).ordered.and_return( :starting )
 
       @helper.execute( :start ).should == { :state => :starting }
     end
@@ -66,6 +67,8 @@ module SteamCannon
       it "should try to start the service but fail returning false" do
         prepare_cmd( :stopped )
 
+        @helper.instance_variable_set(:@state, :stopped )
+
         @exec_helper.should_receive(:execute).with('service jboss-as start').and_raise('Abc')
 
         @service.should_receive(:state=).with(:stopped)
@@ -91,6 +94,7 @@ module SteamCannon
 
       @helper.should_receive(:stop).with( nil )
 
+      @service.should_receive(:state).and_return( :started )
       @service.should_receive(:state=).with(:stopping)
       @service.should_receive(:state).and_return( :stopping )
 
@@ -130,6 +134,8 @@ module SteamCannon
       it "should try to stop the service but fail returning false" do
         prepare_cmd( :started )
 
+        @helper.instance_variable_set(:@state, :started )
+
         @exec_helper.should_receive(:execute).with('service jboss-as stop').and_raise("aaa")
 
         @service.should_receive(:state=).with(:started)
@@ -155,6 +161,7 @@ module SteamCannon
 
       @helper.should_receive(:restart).with( nil )
 
+      @service.should_receive(:state).and_return( :started )
       @service.should_receive(:state=).with(:restarting)
       @service.should_receive(:state).and_return( :restarting )
 

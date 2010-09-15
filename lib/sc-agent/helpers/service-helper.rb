@@ -22,7 +22,6 @@ require 'logger'
 class ServiceHelper
   def initialize( service, options = {} )
     @service        = service
-    @state          = @service.state
 
     @log            = options[:log]             || Logger.new(STDOUT)
     @exec_helper    = options[:exec_helper]     || ExecHelper.new( :log => @log )
@@ -35,6 +34,8 @@ class ServiceHelper
   end
 
   def execute( action, options = {} )
+    @state = @service.state
+
     threaded = options[:backgroud] || false
     event    = options[:event]
 
