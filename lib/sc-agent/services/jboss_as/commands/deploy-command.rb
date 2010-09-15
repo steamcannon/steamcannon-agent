@@ -66,8 +66,13 @@ module SteamCannon
 
         @log.trace "Artifact #{name} written to a temporary file"
 
-        # Then move the file
-        FileUtils.mv( tmp_location, location, :force => true )
+        begin
+          # Then move the file
+          FileUtils.mv( tmp_location, location )
+        rescue => e
+          @log.error e.backtrace
+          raise "Artifact couldn't be deployed."
+        end
 
         @log.trace "Artifact #{name} deployed."
 

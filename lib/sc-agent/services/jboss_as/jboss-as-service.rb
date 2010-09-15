@@ -45,7 +45,6 @@ module SteamCannon
 
       @service_helper = ServiceHelper.new( self, :log => @log )
 
-      @jboss_as_sysconfig_file  = '/etc/sysconfig/jboss-as'
       @jboss_as_configuration   = 'default'
       @name                     = 'jboss-as'
 
