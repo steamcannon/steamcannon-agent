@@ -13,7 +13,7 @@ module SteamCannon
       File.should_receive(:open).once
 
       @cmd.instance_variable_set(:@jboss_config, jboss_config_with_credentials)
-      @cmd.write_credentials( { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} )
+      @cmd.write_credentials( { :access_key => 'a', :secret_access_key => 'b', :bucket => 'c'} )
 
       jboss_config = @cmd.instance_variable_get(:@jboss_config)
 
@@ -28,7 +28,7 @@ module SteamCannon
       File.should_receive(:open).once
 
       @cmd.instance_variable_set(:@jboss_config, jboss_config_empty)
-      @cmd.write_credentials( { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} )
+      @cmd.write_credentials( { :access_key => 'a', :secret_access_key => 'b', :bucket => 'c'} )
 
       jboss_config = @cmd.instance_variable_get(:@jboss_config)
 
@@ -43,9 +43,9 @@ module SteamCannon
       @cmd.instance_variable_set(:@jboss_config, jboss_config_mixed)
       credentials = @cmd.read_credentials
 
-      credentials['access_key'].should eql("accesskey")
-      credentials['secret_access_key'].should eql("secretaccesskey")
-      credentials['bucket'].should eql("")
+      credentials[:access_key].should eql("accesskey")
+      credentials[:secret_access_key].should eql("secretaccesskey")
+      credentials[:bucket].should eql("")
     end
 
     it "should raise if provided AWS credentials is not a hash" do
@@ -59,17 +59,17 @@ module SteamCannon
     it "should update S3 credentials" do
       File.should_receive(:read).with("/etc/sysconfig/jboss-as").and_return("")
       @cmd.should_receive(:read_credentials).and_return({})
-      @cmd.should_receive(:write_credentials).with({ 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'})
+      @cmd.should_receive(:write_credentials).with({ :access_key => 'a', :secret_access_key => 'b', :bucket => 'c'})
 
-      @cmd.execute(  { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} ).should == true
+      @cmd.execute(  { :access_key => 'a', :secret_access_key => 'b', :bucket => 'c'}  ).should == true
     end
 
     it "should not update S3 credentials" do
       File.should_receive(:read).with("/etc/sysconfig/jboss-as").and_return("")
-      @cmd.should_receive(:read_credentials).and_return({ 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'})
+      @cmd.should_receive(:read_credentials).and_return({ :access_key => 'a', :secret_access_key => 'b', :bucket => 'c'})
       @cmd.should_not_receive(:write_credentials)
 
-      @cmd.execute( { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} ).should == false
+      @cmd.execute( { :access_key => 'a', :secret_access_key => 'b', :bucket => 'c'} ).should == false
     end
 
 

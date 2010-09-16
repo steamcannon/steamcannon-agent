@@ -59,10 +59,10 @@ module SteamCannon
     def write_credentials( aws_credentials )
       @log.info "Writing new AWS credentials to JBoss AS config file..."
 
-      @string_helper.update_config( @jboss_config, ACCESS_KEY, aws_credentials['access_key'] )
-      @string_helper.update_config( @jboss_config, SECRET_ACCESS_KEY, aws_credentials['secret_access_key'] )
-      @string_helper.update_config( @jboss_config, BUCKET, aws_credentials['bucket'] )
-      @string_helper.update_config( @jboss_config, LOCATION, aws_credentials['location'] )
+      @string_helper.update_config( @jboss_config, ACCESS_KEY, aws_credentials[:access_key] )
+      @string_helper.update_config( @jboss_config, SECRET_ACCESS_KEY, aws_credentials[:secret_access_key] )
+      @string_helper.update_config( @jboss_config, BUCKET, aws_credentials[:bucket] )
+      @string_helper.update_config( @jboss_config, LOCATION, aws_credentials[:location] )
 
       @string_helper.add_new_line(@jboss_config)
 
@@ -74,10 +74,10 @@ module SteamCannon
 
       credentials = {}
 
-      credentials['access_key']        = @string_helper.prop_value( @jboss_config, ACCESS_KEY )
-      credentials['secret_access_key'] = @string_helper.prop_value( @jboss_config, SECRET_ACCESS_KEY )
-      credentials['bucket']            = @string_helper.prop_value( @jboss_config, BUCKET )
-      credentials['location']          = @string_helper.prop_value( @jboss_config, LOCATION )
+      credentials[:access_key]        = @string_helper.prop_value( @jboss_config, ACCESS_KEY )
+      credentials[:secret_access_key] = @string_helper.prop_value( @jboss_config, SECRET_ACCESS_KEY )
+      credentials[:bucket]            = @string_helper.prop_value( @jboss_config, BUCKET )
+      credentials[:location]          = @string_helper.prop_value( @jboss_config, LOCATION )
 
       credentials
     end
