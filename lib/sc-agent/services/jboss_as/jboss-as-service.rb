@@ -45,7 +45,7 @@ module SteamCannon
 
       @service_helper = ServiceHelper.new( self, :log => @log )
 
-      @jboss_as_configuration   = 'default'
+      @jboss_as_configuration   = 'cluster-ec2'
       @name                     = 'jboss-as'
 
       # TODO should we also include :error status?
