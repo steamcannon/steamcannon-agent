@@ -29,7 +29,7 @@ class ServiceHelper
     @actions        = {
             :start    => { :required => [:stopped], :transition => :starting, :target => :started },
             :stop     => { :required => [:started], :transition => :stopping, :target => :stopped },
-            :restart  => { :required => [:started, :stopped], :transition => :restarting }
+            :restart  => { :required => [:configuring, :started, :stopped], :transition => :restarting }
     }
   end
 
