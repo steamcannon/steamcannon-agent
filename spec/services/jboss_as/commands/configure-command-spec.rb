@@ -121,7 +121,7 @@ module SteamCannon
         UpdateGossipHostAddressCommand.should_receive(:new).with( :log => @log ).and_return( gossip_host_cmd )
 
         s3_ping_cmd = mock(UpdateS3PingCredentialsCommand)
-        s3_ping_cmd.should_receive( :execute ).with( { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} ).and_return( true )
+        s3_ping_cmd.should_receive( :execute ).with( { 'pre_signed_put_url' => 'a', 'pre_signed_delete_url' => 'b' } ).and_return( true )
 
         UpdateS3PingCredentialsCommand.should_receive(:new).with( :log => @log ).and_return( s3_ping_cmd )
 
@@ -131,7 +131,7 @@ module SteamCannon
 
         @service.should_receive(:state=).ordered.with(:stopped)
 
-        @cmd.configure( { :gossip_host => "10.1.0.1", :s3_ping => { 'access_key' => 'a', 'secret_access_key' => 'b', 'bucket' => 'c'} }, "1" ) == true
+        @cmd.configure( { :gossip_host => "10.1.0.1", :s3_ping => { 'pre_signed_put_url' => 'a', 'pre_signed_delete_url' => 'b' } }, "1" ) == true
       end
 
       it "should update proxy_list and start JBoss AS" do

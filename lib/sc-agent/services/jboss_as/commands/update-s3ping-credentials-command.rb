@@ -22,10 +22,8 @@ require 'sc-agent/helpers/client-helper'
 module SteamCannon
   class UpdateS3PingCredentialsCommand
 
-    ACCESS_KEY        = 'JBOSS_JGROUPS_S3_PING_ACCESS_KEY'
-    SECRET_ACCESS_KEY = 'JBOSS_JGROUPS_S3_PING_SECRET_ACCESS_KEY'
-    BUCKET            = 'JBOSS_JGROUPS_S3_PING_BUCKET'
-    LOCATION          = 'JBOSS_JGROUPS_S3_PING_LOCATION'
+    PRE_SIGNED_PUT_URL    = 'JBOSS_JGROUPS_S3_PING_PRE_SIGNED_PUT_URL'
+    PRE_SIGNED_DELETE_URL = 'JBOSS_JGROUPS_S3_PING_PRE_SIGNED_DELETE_URL'
 
     def initialize( options = {} )
       @log             = options[:log]            || Logger.new(STDOUT)
@@ -59,10 +57,8 @@ module SteamCannon
     def write_credentials( aws_credentials )
       @log.info "Writing new AWS credentials to JBoss AS config file..."
 
-      @string_helper.update_config( @jboss_config, ACCESS_KEY, aws_credentials[:access_key] )
-      @string_helper.update_config( @jboss_config, SECRET_ACCESS_KEY, aws_credentials[:secret_access_key] )
-      @string_helper.update_config( @jboss_config, BUCKET, aws_credentials[:bucket] )
-      @string_helper.update_config( @jboss_config, LOCATION, aws_credentials[:location] )
+      @string_helper.update_config( @jboss_config, PRE_SIGNED_PUT_URL, aws_credentials[:pre_signed_put_url] )
+      @string_helper.update_config( @jboss_config, PRE_SIGNED_DELETE_URL, aws_credentials[:pre_signed_delete_url] )
 
       @string_helper.add_new_line(@jboss_config)
 
@@ -74,10 +70,8 @@ module SteamCannon
 
       credentials = {}
 
-      credentials[:access_key]        = @string_helper.prop_value( @jboss_config, ACCESS_KEY )
-      credentials[:secret_access_key] = @string_helper.prop_value( @jboss_config, SECRET_ACCESS_KEY )
-      credentials[:bucket]            = @string_helper.prop_value( @jboss_config, BUCKET )
-      credentials[:location]          = @string_helper.prop_value( @jboss_config, LOCATION )
+      credentials[:pre_signed_put_url]    = @string_helper.prop_value( @jboss_config, PRE_SIGNED_PUT_URL )
+      credentials[:pre_signed_delete_url] = @string_helper.prop_value( @jboss_config, PRE_SIGNED_DELETE_URL )
 
       credentials
     end
