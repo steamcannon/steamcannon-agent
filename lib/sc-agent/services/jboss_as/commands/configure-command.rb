@@ -90,8 +90,6 @@ module SteamCannon
         restart = true if UpdateGossipHostAddressCommand.new( :log => @log ).execute( data[:gossip_host] ) unless data[:gossip_host].nil?
         restart = true if UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data[:s3_ping] ) unless data[:s3_ping].nil?
 
-        restart = false if @state == :stopped
-
         substate = @state
 
         unless data[:proxy_list].nil?

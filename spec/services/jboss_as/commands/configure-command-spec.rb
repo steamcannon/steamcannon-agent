@@ -110,7 +110,7 @@ module SteamCannon
         @cmd.configure( { :gossip_host => "10.1.0.1" }, "1" ) == true
       end
 
-      it "should update gossip host and s3_ping, but restart isn't executed because we're in 'stopped' state" do
+      it "should update gossip host and s3_ping and restart" do
         db1 = mock("db1")
         db1.should_receive( :save_event ).with( :configure, :finished )
         @service.should_receive(:db).and_return( db1 )
@@ -127,7 +127,7 @@ module SteamCannon
 
         UpdateProxyListCommand.should_not_receive(:new)
 
-        @service_helper.should_not_receive( :execute )
+        @service_helper.should_receive( :execute )
 
         @service.should_receive(:state=).ordered.with(:stopped)
 
