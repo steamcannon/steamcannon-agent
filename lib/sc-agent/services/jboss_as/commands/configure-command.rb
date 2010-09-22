@@ -90,8 +90,6 @@ module SteamCannon
         restart = true if UpdateGossipHostAddressCommand.new( :log => @log ).execute( data[:gossip_host] ) unless data[:gossip_host].nil?
         restart = true if UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data[:s3_ping] ) unless data[:s3_ping].nil?
 
-        restart = false if @state == :stopped
-
         substate = @state
 
         unless data[:proxy_list].nil?
@@ -119,7 +117,8 @@ module SteamCannon
 
         if restart
           begin
-            @service.service_helper.execute( :restart, :event => event, :background => false )
+            action = substate == :started ? :restart : :start
+            @service.service_helper.execute( action, :event => event, :background => false )
           rescue
             msg = "Restarting JBoss AS failed, couldn't finish updating JBoss AS"
             @log.error msg

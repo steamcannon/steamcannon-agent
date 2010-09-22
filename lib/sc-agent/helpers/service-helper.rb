@@ -27,7 +27,7 @@ class ServiceHelper
     @exec_helper    = options[:exec_helper]     || ExecHelper.new( :log => @log )
 
     @actions        = {
-            :start    => { :required => [:stopped], :transition => :starting, :target => :started },
+            :start    => { :required => [:stopped, :configuring], :transition => :starting, :target => :started },
             :stop     => { :required => [:started], :transition => :stopping, :target => :stopped },
             :restart  => { :required => [:started, :stopped], :transition => :restarting }
     }

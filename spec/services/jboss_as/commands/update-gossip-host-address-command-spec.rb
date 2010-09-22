@@ -18,19 +18,19 @@ module SteamCannon
     end
 
     it "should not update if gossip_host is the same" do
-      File.should_receive(:read).with("/etc/sysconfig/jboss-as").and_return("JBOSS_GOSSIP_HOST=10.1.0.1")
+      File.should_receive(:read).with("/etc/sysconfig/jboss-as").and_return("JBOSS_GOSSIP_HOST='10.1.0.1'")
       File.should_not_receive(:open)
       @cmd.execute( "10.1.0.1" ).should == false
     end
 
     it "should gossip_host update" do
-      File.should_receive(:read).with("/etc/sysconfig/jboss-as").and_return("JBOSS_GOSSIP_HOST=10.1.0.1")
+      File.should_receive(:read).with("/etc/sysconfig/jboss-as").and_return("JBOSS_GOSSIP_HOST='10.1.0.1'")
 
       f = mock(File)
-      f.should_receive(:write ).with('JBOSS_GOSSIP_HOST=10.1.0.2')
+      f.should_receive(:write ).with("JBOSS_GOSSIP_HOST='10.1.0.2'")
 
       File.should_receive(:open).with("/etc/sysconfig/jboss-as", "w").and_yield(f)
-      
+
       @cmd.execute( "10.1.0.2" ).should == true
     end
 

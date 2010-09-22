@@ -23,15 +23,15 @@ module SteamCannon
     end
 
     def update_config( string, name, value )
-      if string.scan(/^#{name}=(.*)$/).size == 0
-        string << (is_last_line_empty?(string) ? "#{name}=#{value}" : "\n#{name}=#{value}")
+      if string.scan(/^#{name}='(.*)'$/).size == 0
+        string << (is_last_line_empty?(string) ? "#{name}='#{value}'" : "\n#{name}='#{value}'")
       else
-        string.gsub!( /^#{name}=(.*)$/, "#{name}=#{value}" )
+        string.gsub!( /^#{name}='(.*)'$/, "#{name}='#{value}'" )
       end
     end
 
     def prop_value( string, name )
-      string.scan(/^#{name}=(.*)/).to_s
+      string.scan(/^#{name}='(.*)'/).to_s
     end
 
     def is_last_line_empty?( string )

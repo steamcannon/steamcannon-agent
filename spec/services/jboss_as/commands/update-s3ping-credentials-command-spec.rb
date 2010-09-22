@@ -17,8 +17,8 @@ module SteamCannon
 
       jboss_config = @cmd.instance_variable_get(:@jboss_config)
 
-      jboss_config.scan(/^JBOSS_JGROUPS_S3_PING_PRE_SIGNED_PUT_URL=(.*)$/).to_s.should eql("a")
-      jboss_config.scan(/^JBOSS_JGROUPS_S3_PING_PRE_SIGNED_DELETE_URL=(.*)$/).to_s.should eql("b")
+      jboss_config.scan(/^JBOSS_JGROUPS_S3_PING_PRE_SIGNED_PUT_URL=(.*)$/).to_s.should eql("'a'")
+      jboss_config.scan(/^JBOSS_JGROUPS_S3_PING_PRE_SIGNED_DELETE_URL=(.*)$/).to_s.should eql("'b'")
     end
 
     it "should add credentials" do
@@ -31,8 +31,8 @@ module SteamCannon
 
       jboss_config = @cmd.instance_variable_get(:@jboss_config)
 
-      jboss_config.scan(/^JBOSS_JGROUPS_S3_PING_PRE_SIGNED_PUT_URL=(.*)$/).to_s.should eql("a")
-      jboss_config.scan(/^JBOSS_JGROUPS_S3_PING_PRE_SIGNED_DELETE_URL=(.*)$/).to_s.should eql("b")
+      jboss_config.scan(/^JBOSS_JGROUPS_S3_PING_PRE_SIGNED_PUT_URL=(.*)$/).to_s.should eql("'a'")
+      jboss_config.scan(/^JBOSS_JGROUPS_S3_PING_PRE_SIGNED_DELETE_URL=(.*)$/).to_s.should eql("'b'")
     end
 
     it "should read credentials" do
