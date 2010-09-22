@@ -54,7 +54,8 @@ class ServiceHelper
     @log.debug "Current service status is '#{@state}', #{@actions[action][:transition]} '#{@service.name}' service"
 
     if threaded
-      Thread.new{ send( action, event ) }
+      child = fork { send( action, event ) }
+      Process.detach(child)
     else
       send( action, event )
     end
