@@ -65,7 +65,7 @@ module SteamCannon
           @log.trace "Service #{service_name} loaded."
         end unless @config['services'].nil?
 
-        @log.info "#{@config['services'].size} service(s) loaded."
+        @log.info "#{@config['services'].nil? ? 0 : @config['services'].size} service(s) loaded."
       end
 
       def register( o, full_name )

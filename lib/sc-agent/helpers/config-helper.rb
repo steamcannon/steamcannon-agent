@@ -39,11 +39,13 @@ module SteamCannon
       @config = OpenHash.new( defaults )
 
       begin
-        agent_config_file = ( File.exists?( CONFIG_FILE ) ? CONFIG_FILE : "config/agent-#{@config.environment }.yaml" )
-        @config.merge!(YAML.load_file( agent_config_file ))
+        # Merge defaults + agent-config + AMI config - giving precedence to AMI
+        agent_config_file = "config/agent-#{@config.environment }.yaml"
+        @config.merge!(YAML.load_file( agent_config_file )) if File.exists?( agent_config_file )
+        @config.merge!(YAML.load_file( CONFIG_FILE )) if File.exists?( CONFIG_FILE )
       rescue => e
         puts e
-        puts "Could not read config file: '#{agent_config_file}'."
+        puts "Could not read config file: '#{e.message}'."
         exit 1
       end    
     end
