@@ -96,6 +96,7 @@ module SteamCannon
           unless @state == :started
             begin
               @service.service_helper.execute( :start, :event => event, :background => false )
+              restart = false # No need to restart since we just started
             rescue
               msg = "Starting JBoss AS failed, couldn't finish updating JBoss AS"
               @log.error msg
