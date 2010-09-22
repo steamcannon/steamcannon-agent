@@ -58,6 +58,7 @@ module SteamCannon
         @service.db.save_event( :undeploy, :failed, :parent => event, :msg => msg )      
         raise msg
       end
+      nil
     end
 
     def is_valid_artifact_id?( artifact_id )
