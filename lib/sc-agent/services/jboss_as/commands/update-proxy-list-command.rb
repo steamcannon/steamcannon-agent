@@ -48,7 +48,7 @@ module SteamCannon
 
       @log.info "Proxy list updated"
 
-      # does it needs JBoss AS restart?
+      # does JBoss AS need to restart?
       @state != :started
     end
 
@@ -61,7 +61,7 @@ module SteamCannon
       @log.debug "Reading JBoss AS config file..."
       jboss_config = File.read(JBossASService::JBOSS_AS_SYSCONFIG_FILE)
 
-      @log.info "Writing new AWS credentials to JBoss AS config file..."
+      @log.info "Writing new proxy list to JBoss AS config file..."
       @string_helper.update_config(jboss_config, PROXY_LIST, proxy_list.join(','))
 
       File.open(JBossASService::JBOSS_AS_SYSCONFIG_FILE, 'w') {|f| f.write(jboss_config) }
