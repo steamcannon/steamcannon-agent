@@ -134,50 +134,27 @@ module SteamCannon
         @cmd.configure( { :gossip_host => "10.1.0.1", :s3_ping => { 'pre_signed_put_url' => 'a', 'pre_signed_delete_url' => 'b' } }, "1" ) == true
       end
 
-      it "should update proxy_list and start JBoss AS" do
+      it "should update proxy_list" do
         db1 = mock("db1")
         db1.should_receive( :save_event ).with( :configure, :finished )
         @service.should_receive(:db).and_return( db1 )
 
         proxy_list_cmd = mock(UpdateProxyListCommand)
-        proxy_list_cmd.should_receive( :execute ).with( { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } ).and_return( true )
+        proxy_list_cmd.should_receive( :execute ).with( { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } ).and_return( false )
 
-        UpdateProxyListCommand.should_receive(:new).with( :log => @log ).and_return( proxy_list_cmd )
+        UpdateProxyListCommand.should_receive(:new).with( :log => @log, :state => :stopped ).and_return( proxy_list_cmd )
 
-        @service_helper.should_receive( :execute ).with( :start, :event => "1", :background => false )
-        @service_helper.should_receive( :execute ).with( :restart, :event => "1", :background => false )
-
-        @service.should_receive(:state=).ordered.with(:started)
+        @service.should_receive(:state=).ordered.with(:stopped)
 
         @cmd.configure( {:proxy_list => { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } }, "1" ) == true
       end
 
-      it "should try to update proxy_list and fail gracefully when start operation on JBoss AS failed" do
-        @service_helper.should_receive( :execute ).with( :start, :event => "1", :background => false ).and_raise("something")
-        @db.should_receive( :save_event ).with( :configure, :failed, :msg => "Starting JBoss AS failed, couldn't finish updating JBoss AS" )
-        @service.should_receive(:state=).ordered.with(:stopped)
-
-        @cmd.configure( { :proxy_list => { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } }, "1" ).should == false
-      end
-
-      it "should try to update proxy_list and fail gracefully when restart operation on JBoss AS failed" do
-        @service_helper.should_receive( :execute ).with( :start, :event => "1", :background => false )
-        @service_helper.should_receive( :execute ).with( :restart, :event => "1", :background => false ).and_raise("something")
-
-        proxy_list_cmd = mock(UpdateProxyListCommand)
-        proxy_list_cmd.should_receive( :execute ).with( { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } ).and_return( true )
-
-        UpdateProxyListCommand.should_receive(:new).with( :log => @log ).and_return( proxy_list_cmd )
-
-        @db.should_receive( :save_event ).with( :configure, :failed, :msg => "Restarting JBoss AS failed, couldn't finish updating JBoss AS" )
-        @service.should_receive(:state=).ordered.with(:stopped)
-
-        @cmd.configure( { :proxy_list => { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } }, "1" ).should == false
-      end
-
       it "should return false when something bad happens" do
-        @service_helper.should_receive( :execute ).with( :start, :event => "1", :background => false ).and_raise( "Unexpected error" )
-        @db.should_receive( :save_event ).with( :configure, :failed, :msg => "Starting JBoss AS failed, couldn't finish updating JBoss AS" )
+        proxy_list_cmd = mock(UpdateProxyListCommand)
+        proxy_list_cmd.stub!(:execute).and_raise("Unexpected error")
+        UpdateProxyListCommand.should_receive(:new).and_return( proxy_list_cmd )
+
+        @db.should_receive( :save_event ).with( :configure, :failed, :msg => "An error occurred while configuring 'jboss-as' service: Unexpected error" )
         @service.should_receive(:state=).ordered.with(:stopped)
 
         @cmd.configure( { :proxy_list => { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } }, "1" ).should == false

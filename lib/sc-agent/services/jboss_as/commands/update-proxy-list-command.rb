@@ -22,9 +22,14 @@ require  'sc-agent/services/jboss_as/jboss-as-service'
 
 module SteamCannon
   class UpdateProxyListCommand
+
+    PROXY_LIST = 'JBOSS_PROXY_LIST'
+
     def initialize( options = {} )
       @log            = options[:log]           || Logger.new(STDOUT)
       @exec_helper    = options[:exec_helper]   || ExecHelper.new( { :log => @log } )
+      @string_helper  = options[:string_helper] || StringHelper.new( { :log => @log } )
+      @state          = options[:state]         || :stopped
 
       @default_front_end_port = 80
     end
@@ -38,6 +43,31 @@ module SteamCannon
 
       @log.info "Updating proxy list in JBoss AS..."
 
+      write_proxy_config(proxies)
+      update_running_jboss(proxies) if @state == :started
+
+      @log.info "Proxy list updated"
+
+      # does it needs JBoss AS restart?
+      @state != :started
+    end
+
+    def write_proxy_config(proxies)
+      proxy_list = proxies.map do |key, value|
+        host = key
+        port = value[:port]
+        "#{host}:#{port}"
+      end
+      @log.debug "Reading JBoss AS config file..."
+      jboss_config = File.read(JBossASService::JBOSS_AS_SYSCONFIG_FILE)
+
+      @log.info "Writing new AWS credentials to JBoss AS config file..."
+      @string_helper.update_config(jboss_config, PROXY_LIST, proxy_list.join(','))
+
+      File.open(JBossASService::JBOSS_AS_SYSCONFIG_FILE, 'w') {|f| f.write(jboss_config) }
+    end
+
+    def update_running_jboss(proxies)
       current_proxies = get_current_proxies
       current_hosts = current_proxies.keys
 
@@ -69,11 +99,6 @@ module SteamCannon
           @log.debug "Proxy added."
         end
       end
-
-      @log.info "Proxy list updated"
-
-      # does it needs JBoss AS restart?
-      false
     end
 
     def get_current_proxies

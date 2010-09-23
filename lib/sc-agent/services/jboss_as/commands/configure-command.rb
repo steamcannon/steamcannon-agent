@@ -91,29 +91,9 @@ module SteamCannon
         restart = true if UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data[:s3_ping] ) unless data[:s3_ping].nil?
 
         substate = @state
-
         unless data[:proxy_list].nil?
-          unless @state == :started
-            begin
-              @service.service_helper.execute( :start, :event => event, :background => false )
-              restart = false # No need to restart since we just started
-            rescue
-              msg = "Starting JBoss AS failed, couldn't finish updating JBoss AS"
-              @log.error msg
-              @service.state = @state
-              @service.db.save_event( :configure, :failed, :msg => msg )
-              substate = :stopped
-              return false
-            end
-
-            unless [:status] == 'ok'
-
-            end
-
-            substate = :started
-          end
-
-          restart = true if UpdateProxyListCommand.new( :log => @log ).execute( data[:proxy_list] ) unless data[:proxy_list].nil?
+          proxy_command = UpdateProxyListCommand.new(:log => @log, :state => substate)
+          restart = true if proxy_command.execute( data[:proxy_list] )
         end
 
         if restart
@@ -133,7 +113,7 @@ module SteamCannon
         @service.state = substate
         @service.db.save_event( :configure, :finished )
       rescue => e
-        msg = "An error occurred while configuring '#{@service.name}' service"
+        msg = "An error occurred while configuring '#{@service.name}' service: #{e}"
         @log.error e
         @log.error msg
         @service.state = @state
