@@ -22,12 +22,14 @@ require 'json'
 module SteamCannon
   class ModClusterService
 
+    # TODO: this is currently just a mock driver - it just reports
+    # that mod_cluster is :started
     def initialize( options = {} )
       @db    = ServiceManager.register( self, 'mod_cluster' )
       @log   = options[:log] || Logger.new(STDOUT)
       
       # TODO should we also include :error status?
-      @state = :stopped # available statuses: :starting, :started, :configuring, :stopping, :stopped
+      @state = :started # available statuses: :starting, :started, :configuring, :stopping, :stopped
     end
 
     def restart
@@ -61,7 +63,7 @@ module SteamCannon
     end
 
     def status
-      { :state => @state }
+      { :state => :started }
     end
 
     def artifact( artifact_id )
