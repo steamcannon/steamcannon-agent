@@ -17,6 +17,7 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'sc-agent/helpers/service-helper'
+require 'sc-agent/services/jboss_as/commands/check-status-command'
 require 'sc-agent/services/jboss_as/commands/configure-command'
 require 'sc-agent/services/jboss_as/commands/deploy-command'
 require 'sc-agent/services/jboss_as/commands/undeploy-command'
