@@ -71,19 +71,20 @@ module SteamCannon
       end
 
       it "should call the proper twiddle command" do
-        @cmd.should_receive(:twiddle_execute).with('jboss.system:type=Server Started').and_return('Started=true')
+        @cmd.should_receive(:twiddle_execute).with('get jboss.system:type=Server Started').and_return('Started=true')
         @cmd.jboss_as_running?
       end
 
       it "should return true if the service is running" do
-        @cmd.should_receive(:twiddle_execute).with('jboss.system:type=Server Started').and_return('Started=true')
+        @cmd.should_receive(:twiddle_execute).with('get jboss.system:type=Server Started').and_return('Started=true')
         @cmd.jboss_as_running?.should be_true
       end
 
-      it "should return true if the service is running" do
-        @cmd.should_receive(:twiddle_execute).with('jboss.system:type=Server Started').and_return('a failure or something')
+      it "should return false if the service is not running" do
+        @cmd.should_receive(:twiddle_execute).with('get jboss.system:type=Server Started').and_return('a failure or something')
         @cmd.jboss_as_running?.should_not be_true
       end
+
     end
 
   end

@@ -60,7 +60,7 @@ module SteamCannon
     end
 
     def jboss_as_running?
-      twiddle_execute('jboss.system:type=Server Started') =~ /Started=true/
+      twiddle_execute('get jboss.system:type=Server Started') =~ /Started=true/
     end
     
     # TODO https://jira.jboss.org/browse/CIRRAS-38
