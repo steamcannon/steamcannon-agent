@@ -16,6 +16,7 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'fileutils'
 require 'logger'
 require 'dm-core'
 require 'dm-migrations'
@@ -30,9 +31,13 @@ class DBManager
     DataMapper::Logger.new( @log, :debug )
   end
 
-  def prepare_db
+  def prepare_db(config)
     DataMapper::Model.raise_on_save_failure = true
-    DataMapper.setup(:default, 'sqlite::memory:')
+    @log.debug "Creating db dir at #{config.db_dir}"
+    FileUtils.mkdir_p(config.db_dir)
+    db_url = "sqlite://#{config.db_dir}/#{config.db_file}"
+    @log.info "Using db url: #{db_url}"
+    DataMapper.setup(:default, db_url)
     DataMapper.finalize
     DataMapper.auto_migrate!
   end

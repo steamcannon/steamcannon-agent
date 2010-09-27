@@ -44,7 +44,7 @@ module SteamCannon
 
       @ssl_data = SSLHelper.new( @config, :log => @log ).ssl_data
 
-      DBManager.new( :log => @log ).prepare_db
+      DBManager.new( :log => @log ).prepare_db(@config)
       ServiceManager.prepare( @config, @log ).load_services
     end
   end
