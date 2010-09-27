@@ -1,4 +1,4 @@
-# JBoss, Home of Professional Open Source
+
 # Copyright 2009, Red Hat Middleware LLC, and individual contributors
 # by the @authors tag. See the copyright.txt in the distribution for a
 # full listing of individual contributors.
@@ -33,6 +33,8 @@ module SteamCannon
       @service        = JBossASService.new( :log => @log  )
       @exec_helper    = @service.instance_variable_get(:@exec_helper)
       @service_helper = @service.instance_variable_get(:@service_helper)
+
+      CheckStatusCommand.stub_chain(:new, :execute)
     end
 
     it "should return status" do
@@ -122,6 +124,15 @@ module SteamCannon
       UndeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
 
       @service.undeploy( 1 ).should == { :state => :stopped }
+    end
+
+    describe 'status' do
+      it "should check the actual jboss_as status" do
+        status_command = mock(CheckStatusCommand)
+        status_command.should_receive(:execute)
+        CheckStatusCommand.should_receive(:new).and_return(status_command)
+        @service.status
+      end
     end
   end
 end

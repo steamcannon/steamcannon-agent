@@ -69,6 +69,7 @@ module SteamCannon
     end
 
     def status
+      CheckStatusCommand.new(self, :log => @log).execute
       { :state => @state }
     end
 
