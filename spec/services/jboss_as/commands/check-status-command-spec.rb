@@ -85,6 +85,10 @@ module SteamCannon
         @cmd.jboss_as_running?.should_not be_true
       end
 
+      it "should return false if the twiddle raises" do
+        @cmd.should_receive(:twiddle_execute).with('get jboss.system:type=Server Started').and_raise(RuntimeError.new)
+        @cmd.jboss_as_running?.should_not be_true
+      end
     end
 
   end

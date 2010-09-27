@@ -61,6 +61,10 @@ module SteamCannon
 
     def jboss_as_running?
       twiddle_execute('get jboss.system:type=Server Started') =~ /Started=true/
+    rescue RuntimeError => ex
+      @log.debug "Twiddle failed: #{ex}"
+      @log.debug ex.backtrace.join("\n")
+      false
     end
     
     # TODO https://jira.jboss.org/browse/CIRRAS-38
