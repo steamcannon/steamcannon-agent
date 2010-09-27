@@ -32,7 +32,7 @@ module SteamCannon
     end
 
     it "should return status" do
-      @service.status.should == { :state => :stopped }
+      @service.status.should == { :state => :started }
     end
 
     it "should not return the selected artifact because of unexpected error" do
