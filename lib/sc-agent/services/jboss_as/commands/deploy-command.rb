@@ -16,6 +16,8 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'open-uri'
+
 module SteamCannon
   class DeployCommand
     def initialize( service, options = {})
@@ -44,6 +46,10 @@ module SteamCannon
         @log.error msg
         @service.db.save_event( :deploy, :failed, :msg => msg, :parent => event )
         raise msg
+      end
+
+      if is_artifact_pull_url?(artifact)
+        artifact = pull_artifact(artifact)
       end
 
       name = artifact[:filename]
@@ -87,8 +93,38 @@ module SteamCannon
     end
 
     def is_artifact_valid?( artifact )
+      is_artifact_file_push?(artifact) or is_artifact_pull_url?(artifact)
+    end
+
+    def is_artifact_file_push?(artifact)
       return false if artifact.nil? or !artifact.is_a?(Hash) or artifact[:filename].nil? or artifact[:tempfile].nil? or artifact[:type].nil?
       true
     end
+
+    def is_artifact_pull_url?(artifact)
+      !artifact_location(artifact).nil?
+    end
+
+    def artifact_location(artifact)
+      location = nil
+      unless artifact.nil? or artifact.is_a?(Hash)
+        begin
+          json = JSON.parse(artifact, :symbolize_names => true)
+          location = json[:location]
+        rescue JSON::ParserError
+          # ignore invalid json
+        end
+      end
+      location
+    end
+
+    def pull_artifact(artifact)
+      tempfile = open(artifact_location(artifact))
+      { :filename => File.basename(tempfile.base_uri.path),
+        :tempfile => tempfile,
+        :type => tempfile.content_type
+      }
+    end
+
   end
 end

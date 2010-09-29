@@ -85,6 +85,71 @@ module SteamCannon
         e.message.should == "Error while saving artifact name.war"
       end
     end
+
+    describe "is_artifact_pull_url?" do
+      it "should return false if artifact_location is nil" do
+        @cmd.should_receive(:artifact_location).with('artifact').and_return(nil)
+        @cmd.is_artifact_pull_url?('artifact').should be(false)
+      end
+
+      it "should return true if artifact_location is not nil" do
+        @cmd.should_receive(:artifact_location).with('artifact').and_return('over there')
+        @cmd.is_artifact_pull_url?('artifact').should be(true)
+      end
+    end
+
+    describe "artifact_location" do
+      it "should return nil if artifact is nil" do
+        @cmd.artifact_location(nil).should be(nil)
+      end
+
+      it "should return nil if artifact is a file upload" do
+        @cmd.artifact_location({}).should be(nil)
+      end
+
+      it "should return nil if invalid json" do
+        @cmd.artifact_location('invalid json').should be(nil)
+      end
+
+      it "should return location if valid json and has :location key" do
+        json = { :location => 'over there' }.to_json
+        @cmd.artifact_location(json).should == 'over there'
+      end
+    end
+
+    describe "pull_artifact" do
+      before(:each) do
+        @uri = mock('uri')
+        @uri.stub!(:path).and_return('/path/to/artifact.war')
+        @tempfile = mock('tempfile')
+        @tempfile.stub!(:base_uri).and_return(@uri)
+        @tempfile.stub!(:content_type).and_return('content_type')
+        @artifact = mock('artifact')
+        @cmd.stub!(:artifact_location).and_return('location')
+        @cmd.stub!(:open).and_return(@tempfile)
+      end
+
+      it "should open the artifact's location" do
+        @cmd.should_receive(:artifact_location).with(@artifact).and_return('location')
+        @cmd.should_receive(:open).with('location').and_return(@tempfile)
+        @cmd.pull_artifact(@artifact)
+      end
+
+      it "should have filename from artifact's uri" do
+        @uri.should_receive(:path).and_return('/path/to/artifact.war')
+        @cmd.pull_artifact(@artifact)[:filename].should == 'artifact.war'
+      end
+
+      it "should have type from artifact's content_type" do
+        @tempfile.should_receive(:content_type).and_return('content_type')
+        @cmd.pull_artifact(@artifact)[:type].should == 'content_type'
+      end
+
+      it "should have tempfile from artifact's tempfile" do
+        @cmd.pull_artifact(@artifact)[:tempfile].should == @tempfile
+      end
+    end
+
   end
 end
 
