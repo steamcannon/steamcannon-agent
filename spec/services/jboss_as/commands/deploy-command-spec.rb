@@ -103,17 +103,17 @@ module SteamCannon
         @cmd.artifact_location(nil).should be(nil)
       end
 
-      it "should return nil if artifact is not a hash" do
-        @cmd.artifact_location('not a hash').should be(nil)
-      end
-
-      it "should return nil if artifact has no location" do
+      it "should return nil if artifact is a file upload" do
         @cmd.artifact_location({}).should be(nil)
       end
 
-      it "should return location if artifact has a location key" do
-        artifact = { 'location' => 'over there' }
-        @cmd.artifact_location(artifact).should == 'over there'
+      it "should return nil if invalid json" do
+        @cmd.artifact_location('invalid json').should be(nil)
+      end
+
+      it "should return location if valid json and has :location key" do
+        json = { :location => 'over there' }.to_json
+        @cmd.artifact_location(json).should == 'over there'
       end
     end
 
