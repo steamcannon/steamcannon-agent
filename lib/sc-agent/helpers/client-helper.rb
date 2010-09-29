@@ -32,9 +32,11 @@ module SteamCannon
 
       begin
         raw = RestClient::Resource.new( url, :timeout => @timeout ).get
-
+        @log.debug "GET response: #{raw.to_s[0, 50]}"
         return raw
-      rescue
+      rescue Exception => ex
+        @log.error "GET failed: #{ex.message}"
+        @log.error ex.backtrace.join("\n")
         return nil
       end
     end
@@ -44,7 +46,9 @@ module SteamCannon
 
       RestClient::Resource.new( url, data, :timeout => @timeout ).put
       return true
-    rescue
+    rescue Exception => ex
+      @log.error "PUT failed: #{ex.message}"
+      @log.error ex.backtrace.join("\n")
       return false
     end
   end
