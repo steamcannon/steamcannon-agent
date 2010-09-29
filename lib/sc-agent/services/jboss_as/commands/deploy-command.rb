@@ -106,16 +106,7 @@ module SteamCannon
     end
 
     def artifact_location(artifact)
-      location = nil
-      unless artifact.nil? or artifact.is_a?(Hash)
-        begin
-          json = JSON.parse(artifact, :symbolize_names => true)
-          location = json[:location]
-        rescue JSON::ParserError
-          # ignore invalid json
-        end
-      end
-      location
+      artifact and artifact['location']
     end
 
     def pull_artifact(artifact)
