@@ -49,6 +49,7 @@ module SteamCannon
       end
 
       if is_artifact_pull_url?(artifact)
+        @log.debug "Pulling artifact"
         artifact = pull_artifact(artifact)
       end
 
