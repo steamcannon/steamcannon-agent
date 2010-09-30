@@ -48,14 +48,12 @@ module SteamCannon
       event = @service.db.save_event( :configure, :started )
 
 
-=begin
       unless [:started, :stopped].include?( @state )
         msg = "Service is currently in '#{@state}' state. It needs to be in 'started' or 'stopped' state to execute this action."
         @log.error msg
         @service.db.save_event( :configure, :failed, :msg => msg )
         raise msg
       end
-=end
 
       invalid_data = true
 

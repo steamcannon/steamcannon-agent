@@ -20,7 +20,6 @@ module SteamCannon
     end
 
 
-=begin
     it "should not configure because of wrong state" do
       @cmd.instance_variable_set(:@state, :starting)
 
@@ -39,8 +38,6 @@ module SteamCannon
         e.message.should == "Service is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action."
       end
     end
-=end
-
 
     it "should not configure because of invalid data provided" do
       @service.instance_variable_set(:@state, :stopped)
