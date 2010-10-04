@@ -134,6 +134,12 @@ module SteamCannon
         @service.status
       end
     end
+
+    describe 'deploy_path' do
+      it "should return the path for a given filename" do
+        @service.deploy_path('blah.war').should == "#{JBossASService::JBOSS_AS_HOME}/server/#{@service.jboss_as_configuration}/deploy/blah.war"
+      end
+    end
   end
 end
 

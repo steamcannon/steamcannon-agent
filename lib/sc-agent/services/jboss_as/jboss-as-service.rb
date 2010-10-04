@@ -107,5 +107,9 @@ module SteamCannon
     def undeploy( artifact_id )
       UndeployCommand.new( self, :log => @log ).execute( artifact_id )
     end
+
+    def deploy_path(name)
+      "#{JBOSS_AS_HOME}/server/#{jboss_as_configuration}/deploy/#{name}"
+    end
   end
 end

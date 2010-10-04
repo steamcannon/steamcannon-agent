@@ -59,7 +59,7 @@ module SteamCannon
 
       FileUtils.mkdir_p( "#{JBossASService::JBOSS_AS_HOME}/tmp" )
 
-      location        = "#{JBossASService::JBOSS_AS_HOME}/server/#{@service.jboss_as_configuration}/deploy/#{name}"
+      location        = @service.deploy_path(name)
       tmp_location    = "#{JBossASService::JBOSS_AS_HOME}/tmp/file_#{name}_#{rand(9999999999).to_s.center(10, rand(9).to_s)}"
 
       if a = @service.db.save_artifact( :name => name, :location => location, :size => artifact[:tempfile].size, :type => artifact[:type] )
@@ -85,6 +85,7 @@ module SteamCannon
 
         @service.db.save_event( :deploy, :finished, :parent => event )
         { :artifact_id => a.id }
+
       else
         msg = "Error while saving artifact #{name}"
         @service.db.save_event( :deploy, :failed, :parent => event, :msg => msg )

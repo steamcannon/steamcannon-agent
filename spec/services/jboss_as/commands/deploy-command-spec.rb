@@ -11,7 +11,7 @@ module SteamCannon
 
       @service.stub!( :service_helper ).and_return( @service_helper )
       @service.stub!(:db).and_return( @db )
-
+      
       @service.should_receive(:state).and_return( :stopped )
 
       @log            = Logger.new('/dev/null')
@@ -46,7 +46,7 @@ module SteamCannon
     it "should deploy an artifact" do
       @db.should_receive( :save_event ).with( :deploy, :started ).and_return("1")
 
-      @service.should_receive(:jboss_as_configuration).and_return("default")
+      @service.should_receive(:deploy_path).with('name.war').and_return("/opt/jboss-as/server/default/deploy/name.war")
 
       artifact = mock(Artifact)
       artifact.should_receive(:id).and_return(1)
@@ -68,7 +68,7 @@ module SteamCannon
     it "should gracefully handle error while saving artifact" do
       @db.should_receive( :save_event ).with( :deploy, :started ).and_return("1")
 
-      @service.should_receive(:jboss_as_configuration).and_return("default")
+      @service.should_receive(:deploy_path).with('name.war').and_return("/opt/jboss-as/server/default/deploy/name.war")
       @db.should_receive( :save_artifact ).with( :type=>"application/json", :name=>"name.war", :size=>1234, :location=>"/opt/jboss-as/server/default/deploy/name.war" )
 
       FileUtils.should_receive(:mkdir_p).with("/opt/jboss-as/tmp")
