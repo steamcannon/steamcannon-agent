@@ -104,8 +104,8 @@ module SteamCannon
       DeployCommand.new( self, :log => @log ).execute( artifact )
     end
 
-    def undeploy( artifact_id )
-      UndeployCommand.new( self, :log => @log ).execute( artifact_id )
+    def undeploy( artifact_name )
+      UndeployCommand.new( self, :log => @log ).execute( artifact_name )
     end
 
     def deploy_path(name)

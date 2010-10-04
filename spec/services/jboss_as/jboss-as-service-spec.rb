@@ -119,11 +119,11 @@ module SteamCannon
 
     it "should execute undeploy" do
       cmd = mock(UndeployCommand)
-      cmd.should_receive(:execute).with( 1 ).and_return( { :state => :stopped } )
+      cmd.should_receive(:execute).with( 'name.war' ).and_return( { :state => :stopped } )
 
       UndeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
 
-      @service.undeploy( 1 ).should == { :state => :stopped }
+      @service.undeploy( 'name.war' ).should == { :state => :stopped }
     end
 
     describe 'status' do

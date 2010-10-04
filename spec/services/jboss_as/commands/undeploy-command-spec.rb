@@ -11,7 +11,8 @@ module SteamCannon
 
       @service.stub!( :service_helper ).and_return( @service_helper )
       @service.stub!(:db).and_return( @db )
-
+      @service.stub!(:deploy_path).and_return('this/is/a/location')
+      
       @service.should_receive(:state).and_return( :stopped )
 
       @log            = Logger.new('/dev/null')
@@ -21,31 +22,27 @@ module SteamCannon
 
     it "should remove the artifact" do
       @db.should_receive( :save_event ).with( :undeploy, :started ).and_return("1")
-
-      artifact = mock(Artifact)
-      artifact.should_receive( :location ).and_return("this/is/a/location")
-
-      @db.should_receive( :artifact ).with( 12 ).and_return( artifact )
-      @db.should_receive( :remove_artifact ).with( 12 ).and_return(true)
-
       @db.should_receive( :save_event ).with( :undeploy, :finished, :parent => "1" )
+      
+      @service.should_receive(:deploy_path).with('name.war').and_return('this/is/a/location')
 
+      File.should_receive(:exists?).with('this/is/a/location').and_return(true)
+      
       FileUtils.should_receive(:rm).with("this/is/a/location", :force => true)
 
-      @cmd.execute( 12 ).should == nil
+      @cmd.execute( 'name.war' ).should == nil
     end
 
     it "should return error message when artifact doesn't exists" do
       @db.should_receive( :save_event ).with( :undeploy, :started ).and_return("1")
+      @db.should_receive( :save_event ).with( :undeploy, :failed, :parent => "1", :msg=>"Artifact with id 'name.war' not found" )
 
-      @db.should_receive( :artifact ).with( 12 ).and_return( false )
-      @db.should_receive( :save_event ).with( :undeploy, :failed, :parent => "1", :msg=>"Artifact with id '12' not found" )
+      File.should_receive(:exists?).with('this/is/a/location').and_return(false)
 
       begin
-        @cmd.execute( 12 )
-        raise "Should raise"
+        @cmd.execute( 'name.war' )
       rescue => e
-        e.message.should == "Artifact with id '12' not found"
+        e.message.should == "Artifact with id 'name.war' not found"
       end
     end
 

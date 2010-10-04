@@ -39,30 +39,24 @@ module SteamCannon
         raise msg
       end
 
-      artifact = @service.db.artifact( artifact_id.to_i )
-
-      unless artifact
+      artifact_path = @service.deploy_path( artifact_id )
+      
+      unless File.exists?(artifact_path)
         msg = "Artifact with id '#{artifact_id}' not found"
         @log.error msg
         @service.db.save_event( :undeploy, :failed, :msg => msg, :parent => event )
         raise msg
       end
 
-      FileUtils.rm( artifact.location, :force => true )
+      FileUtils.rm( artifact_path, :force => true )
 
-      if @service.db.remove_artifact( artifact_id )
-        @service.db.save_event( :undeploy, :finished, :parent => event )
-      else
-        msg = "Error occurred while removing artifact with id = '#{artifact_id}'"
-        @log.error msg
-        @service.db.save_event( :undeploy, :failed, :parent => event, :msg => msg )      
-        raise msg
-      end
+      @service.db.save_event( :undeploy, :finished, :parent => event )
+
       nil
     end
 
     def is_valid_artifact_id?( artifact_id )
-      return true if artifact_id.is_a?(Fixnum) or artifact_id.to_s.match(/^\d+$/)
+      return true if artifact_id.to_s.match(/^.*\.war+$/)
       false
     end
   end
