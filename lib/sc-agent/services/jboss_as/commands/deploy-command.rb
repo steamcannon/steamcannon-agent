@@ -62,36 +62,26 @@ module SteamCannon
       location        = @service.deploy_path(name)
       tmp_location    = "#{JBossASService::JBOSS_AS_HOME}/tmp/file_#{name}_#{rand(9999999999).to_s.center(10, rand(9).to_s)}"
 
-      if a = @service.db.save_artifact( :name => name, :location => location, :size => artifact[:tempfile].size, :type => artifact[:type] )
 
-        @log.trace "Artifact #{name} saved to DB"
-
-        # First write to tmp location
-        File.open( tmp_location, 'w') do |file|
-          file.write(artifact[:tempfile].read)
-        end
-
-        @log.trace "Artifact #{name} written to a temporary file"
-
-        begin
-          # Then move the file
-          FileUtils.mv( tmp_location, location )
-        rescue => e
-          @log.error e.backtrace
-          raise "Artifact couldn't be deployed."
-        end
-
-        @log.trace "Artifact #{name} deployed."
-
-        @service.db.save_event( :deploy, :finished, :parent => event )
-        { :artifact_id => a.id }
-
-      else
-        msg = "Error while saving artifact #{name}"
-        @service.db.save_event( :deploy, :failed, :parent => event, :msg => msg )
-        @log.error msg
-        raise msg
+      # First write to tmp location
+      File.open( tmp_location, 'w') do |file|
+        file.write(artifact[:tempfile].read)
       end
+
+      @log.trace "Artifact #{name} written to a temporary file"
+
+      begin
+        # Then move the file
+        FileUtils.mv( tmp_location, location )
+      rescue => e
+        @log.error e.backtrace
+        raise "Artifact couldn't be deployed."
+      end
+
+      @log.trace "Artifact #{name} deployed."
+
+      @service.db.save_event( :deploy, :finished, :parent => event )
+      nil
     end
 
     def is_artifact_valid?( artifact )

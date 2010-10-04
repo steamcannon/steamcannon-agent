@@ -48,13 +48,7 @@ module SteamCannon
 
       @service.should_receive(:deploy_path).with('name.war').and_return("/opt/jboss-as/server/default/deploy/name.war")
 
-      artifact = mock(Artifact)
-      artifact.should_receive(:id).and_return(1)
-
-      @db.should_receive( :save_artifact ).with( :type=>"application/json", :name=>"name.war", :size=>1234, :location=>"/opt/jboss-as/server/default/deploy/name.war" ).and_return( artifact )
-
       file = mock("File")
-      file.should_receive(:size).and_return(1234)
 
       File.should_receive(:open)
       FileUtils.should_receive(:mv)
@@ -62,28 +56,7 @@ module SteamCannon
 
       @db.should_receive( :save_event ).with( :deploy, :finished, :parent=>"1" )
 
-      @cmd.execute( { :filename => "name.war", :tempfile => file, :type => "application/json" } ).should == { :artifact_id=>1 }
-    end
-
-    it "should gracefully handle error while saving artifact" do
-      @db.should_receive( :save_event ).with( :deploy, :started ).and_return("1")
-
-      @service.should_receive(:deploy_path).with('name.war').and_return("/opt/jboss-as/server/default/deploy/name.war")
-      @db.should_receive( :save_artifact ).with( :type=>"application/json", :name=>"name.war", :size=>1234, :location=>"/opt/jboss-as/server/default/deploy/name.war" )
-
-      FileUtils.should_receive(:mkdir_p).with("/opt/jboss-as/tmp")
-
-      file = mock("File")
-      file.should_receive(:size).and_return(1234)
-
-      @db.should_receive( :save_event ).with( :deploy, :failed, :parent=>"1", :msg => "Error while saving artifact name.war" )
-
-      begin
-        @cmd.execute( { :filename => "name.war", :tempfile => file, :type => "application/json" } )
-        raise "Should raise"
-      rescue => e
-        e.message.should == "Error while saving artifact name.war"
-      end
+      @cmd.execute( { :filename => "name.war", :tempfile => file, :type => "application/json" } ).should == nil
     end
 
     describe "is_artifact_pull_url?" do
