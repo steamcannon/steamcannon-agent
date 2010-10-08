@@ -109,6 +109,27 @@ module SteamCannon
       @db.should_receive(:remove_artifact).with( 1 ).and_return( true )
       @service.undeploy( 1 )
     end
+
+    describe "logs" do
+      it "should return logs from the log directory" do
+        @service.should_receive(:log_dir).and_return('/log_dir')
+        Dir.should_receive(:glob).with("/log_dir/*log").and_return(['test.log'])
+        @service.logs[:logs].should == ['test.log']
+      end
+    end
+
+    describe "tail" do
+      it "should return lines and offset from TailHelper" do
+        tail_helper = mock(TailHelper)
+        @service.should_receive(:log_dir).and_return('/log_dir')
+        TailHelper.should_receive(:new).with('/log_dir/test_log', 512).and_return(tail_helper)
+        tail_helper.should_receive(:tail).with(10).and_return(['line1', 'line2'])
+        tail_helper.should_receive(:offset).and_return(625)
+        response = @service.tail('test_log', 10, 512)
+        response[:lines].should == ['line1', 'line2']
+        response[:offset].should == 625
+      end
+    end
   end
 end
 

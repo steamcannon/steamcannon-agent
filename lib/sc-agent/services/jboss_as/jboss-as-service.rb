@@ -118,7 +118,7 @@ module SteamCannon
       { :logs => logs }
     end
 
-    def tail ( log_id, num_lines, offset )
+    def tail( log_id, num_lines, offset )
       TailCommand.new( self, :log => @log ).execute( log_id, num_lines, offset )
     end
   end

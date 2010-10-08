@@ -17,6 +17,7 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'sc-agent/managers/service-manager'
+require 'sc-agent/helpers/tail-helper'
 require 'json'
 
 module SteamCannon
@@ -27,7 +28,7 @@ module SteamCannon
     def initialize( options = {} )
       @db    = ServiceManager.register( self, 'mod_cluster' )
       @log   = options[:log] || Logger.new(STDOUT)
-      
+
       # TODO should we also include :error status?
       @state = :started # available statuses: :starting, :started, :configuring, :stopping, :stopped
     end
@@ -43,7 +44,7 @@ module SteamCannon
     def stop
       change_state([:started], :stopping, :stopped)
     end
-    
+
     def configure( data )
       change_state([:started, :stopped], :configuring, @state)
     end
@@ -100,7 +101,7 @@ module SteamCannon
       if a = @db.save_artifact( :name => artifact[:filename], :location => "/opt/mockservice/deploy/#{artifact[:filename]}", :size => artifact[:tempfile].size, :type => artifact[:type] )
         { :artifact_id => a.id }
       else
-        raise "Error while saving artifact #{artifact[:filename]}" 
+        raise "Error while saving artifact #{artifact[:filename]}"
       end
     end
 
@@ -109,6 +110,23 @@ module SteamCannon
       else
         raise "Error occurred while removing artifact with id = '#{artifact_id}'"
       end
+    end
+
+    def logs
+      {:logs => Dir.glob("#{log_dir}/*log").map { |f| File.basename(f) }}
+    end
+
+    def tail( log_id, num_lines, offset )
+      log_path = "#{log_dir}/#{log_id}"
+      helper = TailHelper.new( log_path, offset )
+      lines = helper.tail( num_lines )
+      offset = helper.offset
+      { :lines => lines, :offset => offset }
+    end
+
+    protected
+    def log_dir
+      "/var/log/httpd"
     end
   end
 end
