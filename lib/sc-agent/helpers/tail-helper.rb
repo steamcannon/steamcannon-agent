@@ -27,6 +27,7 @@ module SteamCannon
     end
 
     def tail(num_lines)
+      num_lines = num_lines.to_i
       File.open(@file_path, 'r') do |file|
         file.seek(@offset)
         lines = num_lines.times.map do

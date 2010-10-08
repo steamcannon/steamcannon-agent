@@ -26,7 +26,7 @@ module SteamCannon
 
     it "should tail with no offset" do
       helper = TailHelper.new(@log_file, nil)
-      helper.tail(5).last.should == "log_level: trace\n"
+      helper.tail('5').last.should == "log_level: trace\n"
     end
 
     it "should tail with offset" do
