@@ -47,5 +47,11 @@ module SteamCannon
       helper.offset.should be(3540)
     end
 
+    it "should accept a negative offset to read from the end" do
+      helper = TailHelper.new(@log_file, -275)
+      helper.tail(10).first.should == "I, [2010-09-21 17:00:31 #15949]  INFO -- : Discovering platform...\n"
+      helper.offset.should be(3540)
+    end
+
   end
 end

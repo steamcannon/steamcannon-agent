@@ -29,7 +29,12 @@ module SteamCannon
     def tail(num_lines)
       num_lines = num_lines.to_i
       File.open(@file_path, 'r') do |file|
-        file.seek(@offset)
+        if @offset < 0
+          file.seek(@offset, IO::SEEK_END)
+          file.readline # Advance to the next entire line
+        else
+          file.seek(@offset)
+        end
         lines = (1..num_lines).map do
           begin
             file.readline
