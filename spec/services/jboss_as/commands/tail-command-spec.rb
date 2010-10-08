@@ -53,10 +53,25 @@ module SteamCannon
       end
     end
 
+    describe "logs" do
+      it "should glob for *.log" do
+        @cmd.should_receive(:log_dir).and_return('/log_dir')
+        Dir.should_receive(:glob).with("/log_dir/*.log").and_return(['test.log'])
+        @cmd.logs.should == ['test.log']
+      end
+    end
+
+    describe "log_dir" do
+      it "should generate the correct dir" do
+        @service.should_receive(:jboss_as_configuration).and_return('test-cluster')
+        @cmd.log_dir.should == "#{JBossASService::JBOSS_AS_HOME}/server/test-cluster/log"
+      end
+    end
+
     describe "log_path" do
       it "should generate the correct path" do
-        @service.should_receive(:jboss_as_configuration).and_return('test-cluster')
-        @cmd.log_path('asdf').should == "#{JBossASService::JBOSS_AS_HOME}/server/test-cluster/log/asdf"
+        @cmd.should_receive(:log_dir).and_return('/log_dir')
+        @cmd.log_path('asdf').should == "/log_dir/asdf"
       end
     end
   end

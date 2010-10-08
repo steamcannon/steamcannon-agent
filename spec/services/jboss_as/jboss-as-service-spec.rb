@@ -141,6 +141,15 @@ module SteamCannon
       end
     end
 
+    describe "logs" do
+      it "should return logs from the TailCommand" do
+        tail_command = mock(TailCommand)
+        tail_command.should_receive(:logs).and_return(['test.log'])
+        TailCommand.should_receive(:new).and_return(tail_command)
+        @service.logs[:logs].should == ['test.log']
+      end
+    end
+
     describe "tail" do
       it "should execute the TailCommand" do
         tail_command = mock(TailCommand)

@@ -113,6 +113,11 @@ module SteamCannon
       "#{JBOSS_AS_HOME}/server/#{jboss_as_configuration}/deploy/#{name}"
     end
 
+    def logs
+      logs = TailCommand.new( self, :log => @log).logs
+      { :logs => logs }
+    end
+
     def tail ( log_id, num_lines, offset )
       TailCommand.new( self, :log => @log ).execute( log_id, num_lines, offset )
     end

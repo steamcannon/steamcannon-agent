@@ -32,8 +32,16 @@ module SteamCannon
       { :lines => lines, :offset => offset }
     end
 
+    def logs
+      Dir.glob("#{log_dir}/*.log")
+    end
+
+    def log_dir
+      "#{JBossASService::JBOSS_AS_HOME}/server/#{@service.jboss_as_configuration}/log"
+    end
+
     def log_path( log_id )
-      "#{JBossASService::JBOSS_AS_HOME}/server/#{@service.jboss_as_configuration}/log/#{log_id}"
+      "#{log_dir}/#{log_id}"
     end
   end
 end
