@@ -30,7 +30,7 @@ module SteamCannon
       num_lines = num_lines.to_i
       File.open(@file_path, 'r') do |file|
         file.seek(@offset)
-        lines = num_lines.times.map do
+        lines = (1..num_lines).map do
           begin
             file.readline
           rescue EOFError => e
