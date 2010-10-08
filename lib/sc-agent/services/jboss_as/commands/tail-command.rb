@@ -33,7 +33,7 @@ module SteamCannon
     end
 
     def logs
-      Dir.glob("#{log_dir}/*.log")
+      Dir.glob("#{log_dir}/*.log").map { |f| File.basename(f) }
     end
 
     def log_dir
