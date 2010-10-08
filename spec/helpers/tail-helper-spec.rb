@@ -25,7 +25,7 @@ module SteamCannon
     end
 
     it "should tail with no offset" do
-      helper = TailHelper.new(@log_file)
+      helper = TailHelper.new(@log_file, nil)
       helper.tail(5).last.should == "log_level: trace\n"
     end
 
@@ -35,7 +35,7 @@ module SteamCannon
     end
 
     it "should not error when tailing to end of file" do
-      helper = TailHelper.new(@log_file)
+      helper = TailHelper.new(@log_file, 0)
       lambda {
         helper.tail(10000).last.should == ">> Stopping ...\n"
       }.should_not raise_error

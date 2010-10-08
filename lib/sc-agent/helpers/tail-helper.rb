@@ -21,9 +21,9 @@ module SteamCannon
 
     attr_reader :offset
 
-    def initialize(file_path, offset = 0)
+    def initialize(file_path, offset)
       @file_path = file_path
-      @offset = offset
+      @offset = (offset || 0).to_i
     end
 
     def tail(num_lines)
