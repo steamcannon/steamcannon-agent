@@ -140,6 +140,15 @@ module SteamCannon
         @service.deploy_path('blah.war').should == "#{JBossASService::JBOSS_AS_HOME}/server/#{@service.jboss_as_configuration}/deploy/blah.war"
       end
     end
+
+    describe "tail" do
+      it "should execute the TailCommand" do
+        tail_command = mock(TailCommand)
+        tail_command.should_receive(:execute).with('log', 10, 512)
+        TailCommand.should_receive(:new).and_return(tail_command)
+        @service.tail('log', 10, 512)
+      end
+    end
   end
 end
 

@@ -130,7 +130,7 @@ module SteamCannon
       if a = @db.save_artifact( :name => artifact[:filename], :location => "/opt/mockservice/deploy/#{artifact[:filename]}", :size => artifact[:tempfile].size, :type => artifact[:type] )
         { :artifact_id => a.id }
       else
-        raise "Error while saving artifact #{artifact[:filename]}" 
+        raise "Error while saving artifact #{artifact[:filename]}"
       end
     end
 
@@ -139,6 +139,12 @@ module SteamCannon
       else
         raise "Error occurred while removing artifact with id = '#{artifact_id}'"
       end
+    end
+
+    def tail ( log_id, num_lines, offset )
+      offset = (offset || 0).to_i
+      lines = num_lines.to_i.times.map { |i| "Line #{i + offset}" }
+      { :lines => lines, :offset => offset + 20 }
     end
   end
 end

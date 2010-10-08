@@ -105,5 +105,11 @@ module SteamCannon
     delete "/services/:service/artifacts/:id" do
       execute_operation( params[:service], 'undeploy', params[:id] )
     end
+
+    get "/services/:service/logs/:log_id" do
+      execute_operation( params[:service], 'tail', params[:log_id], params[:num_lines], params[:offset] ) do
+        validate_parameter( :num_lines )
+      end
+    end
   end
 end

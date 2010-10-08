@@ -1,0 +1,45 @@
+I, [2010-09-08 17:50:19 #51349]  INFO -- : Initializing Agent...
+I, [2010-09-08 17:50:19 #51349]  INFO -- : Discovering platform...
+I, [2010-09-08 17:50:19 #51349]  INFO -- : We're on 'ec2' platform
+T, [2010-09-08 17:50:19 #51349] TRACE -- : --- !map:OpenHash 
+log_level: trace
+ssl_cert_file_name: cert.pem
+ssl_key_file_name: private.key
+ssl_dir: ./ssl
+services: 
+- JBossAS
+- Mock
+platform: :ec2
+
+D, [2010-09-08 17:50:19 #51349] DEBUG -- : Initializing certificate...
+D, [2010-09-08 17:50:19 #51349] DEBUG -- : Certificate already exists.
+D, [2010-09-08 17:50:19 #51349] DEBUG -- : Certificate initialization done.
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000043) SELECT sqlite_version(*)
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000065) DROP TABLE IF EXISTS "services"
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000018) PRAGMA table_info("services")
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000238) CREATE TABLE "services" ("name" VARCHAR(50) NOT NULL, PRIMARY KEY("name"))
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000013) DROP TABLE IF EXISTS "events"
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000016) PRAGMA table_info("events")
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000169) CREATE TABLE "events" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "operation" VARCHAR(50), "status" VARCHAR(50), "parent_id" INTEGER, "msg" VARCHAR(50), "time" TIMESTAMP, "service_name" VARCHAR(50) NOT NULL)
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000091) CREATE INDEX "index_events_service" ON "events" ("service_name")
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000013) DROP TABLE IF EXISTS "artifacts"
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000023) PRAGMA table_info("artifacts")
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000138) CREATE TABLE "artifacts" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "location" VARCHAR(50), "name" VARCHAR(50), "type" VARCHAR(50), "size" INTEGER, "service_name" VARCHAR(50) NOT NULL)
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000112) CREATE INDEX "index_artifacts_service" ON "artifacts" ("service_name")
+I, [2010-09-08 17:50:19 #51349]  INFO -- : Loading services...
+T, [2010-09-08 17:50:19 #51349] TRACE -- : Loading JBossAS service...
+T, [2010-09-08 17:50:19 #51349] TRACE -- : Registering SteamCannon::JBossASService service...
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000097) INSERT INTO "services" ("name") VALUES ('jboss_as')
+T, [2010-09-08 17:50:19 #51349] TRACE -- : Service JBossAS loaded.
+T, [2010-09-08 17:50:19 #51349] TRACE -- : Loading Mock service...
+T, [2010-09-08 17:50:19 #51349] TRACE -- : Registering SteamCannon::MockService service...
+T, [2010-09-08 17:50:19 #51349] TRACE -- : ~ (0.000044) INSERT INTO "services" ("name") VALUES ('mock')
+T, [2010-09-08 17:50:19 #51349] TRACE -- : Service Mock loaded.
+I, [2010-09-08 17:50:19 #51349]  INFO -- : 2 service(s) loaded.
+D, [2010-09-08 17:50:28 #51349] DEBUG -- : Executing deploy operation for SteamCannon::MockService...
+T, [2010-09-08 17:50:28 #51349] TRACE -- : ~ (0.000171) INSERT INTO "artifacts" ("location", "name", "type", "size", "service_name") VALUES ('/opt/mockservice/deploy/demo_app.war', 'demo_app.war', 'application/zip', 14522, 'mock')
+>> Writing PID to /tmp/pid/steamcannon-agent.pid
+I, [2010-09-21 17:00:31 #15949]  INFO -- : Discovering platform...
+D, [2010-09-21 17:00:31 #15949] DEBUG -- : Discovering if we're on EC2...
+T, [2010-09-21 17:00:31 #15949] TRACE -- : GET: http://169.254.169.254/1.0/meta-data/local-ipv4
+>> Stopping ...
