@@ -29,6 +29,13 @@ module SteamCannon
     def tail(num_lines)
       num_lines = num_lines.to_i
       File.open(@file_path, 'r') do |file|
+        # Set offset to the beginning or end of the file if
+        # the value passed in is less than or greather than
+        # the min/max allowed
+        if @offset.abs > file.stat.size
+          @offset = @offset < 0 ? 0 : file.stat.size
+        end
+
         if @offset < 0
           file.seek(@offset, IO::SEEK_END)
           file.readline # Advance to the next entire line

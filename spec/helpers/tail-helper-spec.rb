@@ -53,5 +53,15 @@ module SteamCannon
       helper.offset.should be(3540)
     end
 
+    it "should handle negative offsets larger than the file size" do
+      helper = TailHelper.new(@log_file, -123456789)
+      helper.tail(1).last.should == "I, [2010-09-08 17:50:19 #51349]  INFO -- : Initializing Agent...\n"
+    end
+
+    it "should handle offsets larger than the file size" do
+      helper = TailHelper.new(@log_file, 123456789)
+      helper.tail(1).last.should == nil
+    end
+
   end
 end
