@@ -16,19 +16,17 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'sc-agent/services/base-service'
 require 'sc-agent/managers/service-manager'
 require 'json'
 
 module SteamCannon
-  class MockService
+  class MockService < BaseService
 
     def initialize( options = {} )
-      @db = ServiceManager.register( self, 'Mock' )
-
-      @log            = options[:log]             || Logger.new(STDOUT)
-
-      # TODO should we also include :error status?
-      @state                  = :stopped # available statuses: :starting, :started, :configuring, :stopping, :stopped
+      @name = 'mock'
+      @full_name = 'Mock'
+      super
     end
 
     def restart

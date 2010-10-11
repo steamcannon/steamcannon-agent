@@ -16,23 +16,17 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'sc-agent/services/base-service'
 require 'sc-agent/managers/service-manager'
 require 'json'
 
 module SteamCannon
-  class PostgreSQLService
-    attr_reader :name
+  class PostgreSQLService < BaseService
 
     def initialize(options = {})
-      @db             = ServiceManager.register(self, 'postgresql')
-      @log            = options[:log] || Logger.new(STDOUT)
-      @exec_helper    = options[:exec_helper] || ExecHelper.new({:log => @log})
-      @service_helper = options[:service_helper] || ServiceHelper.new(self, :log => @log)
-
-      @name           = 'postgresql'
-
-      # TODO should we also include :error status?
-      @state          = :started # available statuses: :starting, :started, :configuring, :stopping, :stopped
+      @name = 'postgresql'
+      @fullname = @name
+      super
     end
 
     def restart

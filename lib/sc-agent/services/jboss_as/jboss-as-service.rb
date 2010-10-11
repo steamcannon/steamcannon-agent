@@ -16,6 +16,7 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'sc-agent/services/base-service'
 require 'sc-agent/helpers/service-helper'
 require 'sc-agent/services/jboss_as/commands/check-status-command'
 require 'sc-agent/services/jboss_as/commands/configure-command'
@@ -27,31 +28,18 @@ require 'json'
 require 'fileutils'
 
 module SteamCannon
-  class JBossASService
+  class JBossASService < BaseService
 
     JBOSS_AS_SYSCONFIG_FILE = '/etc/sysconfig/jboss-as'
     JBOSS_AS_HOME           = '/opt/jboss-as'
 
-    attr_accessor :state
-
-    attr_reader :db
-    attr_reader :name
-    attr_reader :service_helper
     attr_reader :jboss_as_configuration
 
     def initialize( options = {} )
-      @db = ServiceManager.register( self, 'JBoss Application Server' )
-
-      @log            = options[:log]             || Logger.new(STDOUT)
-      @exec_helper    = options[:exec_helper]     || ExecHelper.new( :log => @log )
-
-      @service_helper = ServiceHelper.new( self, :log => @log )
-
+      @name = 'jboss-as'
+      @full_name = 'JBoss Application Server'
       @jboss_as_configuration   = 'cluster-ec2'
-      @name                     = 'jboss-as'
-
-      # TODO should we also include :error status?
-      @state                  = :stopped # available statuses: :starting, :started, :configuring, :stopping, :stopped
+      super
     end
 
     def restart

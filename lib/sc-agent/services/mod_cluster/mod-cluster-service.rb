@@ -16,21 +16,21 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'sc-agent/services/base-service'
 require 'sc-agent/managers/service-manager'
 require 'sc-agent/helpers/tail-helper'
 require 'json'
 
 module SteamCannon
-  class ModClusterService
+  class ModClusterService < BaseService
 
     # TODO: this is currently just a mock driver - it just reports
     # that mod_cluster is :started
     def initialize( options = {} )
-      @db    = ServiceManager.register( self, 'mod_cluster' )
-      @log   = options[:log] || Logger.new(STDOUT)
-
-      # TODO should we also include :error status?
-      @state = :started # available statuses: :starting, :started, :configuring, :stopping, :stopped
+      @name = 'mod_cluster'
+      @full_name = 'Mod Cluster'
+      super
+      @state = :started
     end
 
     def restart
