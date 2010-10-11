@@ -67,32 +67,6 @@ module SteamCannon
       { :state => :started }
     end
 
-    def artifact( artifact_id )
-      begin
-        artifact = @db.artifact( artifact_id.to_i )
-      rescue => e
-        @log.error e
-      end
-
-      unless artifact.nil?
-        { :name => artifact.name, :size => artifact.size, :type => artifact.type }
-      else
-        msg = "Could not retrieve artifact with id = #{artifact_id}"
-        @log.error msg
-        raise msg
-      end
-    end
-
-    def artifacts
-      artifacts = []
-
-      @db.artifacts.each do |artifact|
-        artifacts << { :name => artifact.name, :id => artifact.id }
-      end
-
-      { :artifacts => artifacts }
-    end
-
     def deploy( artifact )
       unless [:started, :stopped].include?(@state)
         raise "Current service status ('#{@state}') does not allow deploying to the service."

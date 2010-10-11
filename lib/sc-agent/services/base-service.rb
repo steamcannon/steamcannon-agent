@@ -38,6 +38,68 @@ module SteamCannon
       @state                  = :stopped # available statuses: :starting, :started, :configuring, :stopping, :stopped
     end
 
-    #TODO: move common actions here as well
+    def restart
+      @service_helper.execute(:restart, :backgroud => true)
+    end
+
+    def start
+      @service_helper.execute(:start, :backgroud => true)
+    end
+
+    def stop
+      @service_helper.execute(:stop, :backgroud => true)
+    end
+
+    
+    def configure( config )
+      ConfigureCommand.new( self, :log => @log, :threaded => true  ).execute( config )
+    end
+
+    def status
+      { :state => @state }
+    end
+
+    def artifact( artifact_id )
+      begin
+        artifact = @db.artifact( artifact_id.to_i )
+      rescue => e
+        @log.error e
+      end
+
+      unless artifact.nil?
+        { :name => artifact.name, :size => artifact.size, :type => artifact.type }
+      else
+        msg = "Could not retrieve artifact with id = #{artifact_id}"
+        @log.error msg
+        raise msg
+      end
+    end
+
+    def artifacts
+      artifacts = []
+
+      @db.artifacts.each do |artifact|
+        artifacts << { :name => artifact.name, :id => artifact.id }
+      end
+
+      { :artifacts => artifacts }
+    end
+
+    def deploy( artifact )
+      DeployCommand.new( self, :log => @log ).execute( artifact )
+    end
+
+    def undeploy( artifact_name )
+      UndeployCommand.new( self, :log => @log ).execute( artifact_name )
+    end
+
+    def logs
+      logs = TailCommand.new( self, :log => @log).logs
+      { :logs => logs }
+    end
+
+    def tail( log_id, num_lines, offset )
+      TailCommand.new( self, :log => @log ).execute( log_id, num_lines, offset )
+    end
   end
 end

@@ -29,18 +29,6 @@ module SteamCannon
       super
     end
 
-    def restart
-      @service_helper.execute(:restart, :backgroud => true)
-    end
-
-    def start
-      @service_helper.execute(:start, :backgroud => true)
-    end
-
-    def stop
-      @service_helper.execute(:stop, :backgroud => true)
-    end
-
     def configure(data)
       status
     end
@@ -59,33 +47,7 @@ module SteamCannon
         end
       end
 
-      {:state => @state}
-    end
-
-    def artifact(artifact_id)
-      begin
-        artifact = @db.artifact(artifact_id.to_i)
-      rescue => e
-        @log.error e
-      end
-
-      unless artifact.nil?
-        {:name => artifact.name, :size => artifact.size, :type => artifact.type}
-      else
-        msg = "Could not retrieve artifact with id = #{artifact_id}"
-        @log.error msg
-        raise msg
-      end
-    end
-
-    def artifacts
-      artifacts = []
-
-      @db.artifacts.each do |artifact|
-        artifacts << {:name => artifact.name, :id => artifact.id}
-      end
-
-      {:artifacts => artifacts}
+      super
     end
 
     # TODO: dummy output, should be changed in the future
