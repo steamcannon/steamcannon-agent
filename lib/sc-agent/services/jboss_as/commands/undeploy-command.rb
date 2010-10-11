@@ -17,47 +17,49 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 module SteamCannon
-  class UndeployCommand
-    def initialize( service, options = {})
-      @cmds     = {}
+  module JBossAS
+    class UndeployCommand
+      def initialize( service, options = {})
+        @cmds     = {}
 
-      @service        = service
-      @state          = @service.state
+        @service        = service
+        @state          = @service.state
 
-      @log            = options[:log]             || Logger.new(STDOUT)
-      @exec_helper    = options[:exec_helper]     || ExecHelper.new( :log => @log )
-      @threaded       = options[:threaded]        || false
-    end
-
-    def execute( artifact_id )
-      event = @service.db.save_event( :undeploy, :started )
-
-      unless is_valid_artifact_id?( artifact_id )
-        msg = "No or invalid artifact id provided"
-        @log.error msg
-        @service.db.save_event( :undeploy, :failed, :msg => msg, :parent => event )
-        raise msg
+        @log            = options[:log]             || Logger.new(STDOUT)
+        @exec_helper    = options[:exec_helper]     || ExecHelper.new( :log => @log )
+        @threaded       = options[:threaded]        || false
       end
 
-      artifact_path = @service.deploy_path( artifact_id )
-      
-      unless File.exists?(artifact_path)
-        msg = "Artifact with id '#{artifact_id}' not found"
-        @log.error msg
-        @service.db.save_event( :undeploy, :failed, :msg => msg, :parent => event )
-        raise msg
+      def execute( artifact_id )
+        event = @service.db.save_event( :undeploy, :started )
+
+        unless is_valid_artifact_id?( artifact_id )
+          msg = "No or invalid artifact id provided"
+          @log.error msg
+          @service.db.save_event( :undeploy, :failed, :msg => msg, :parent => event )
+          raise msg
+        end
+
+        artifact_path = @service.deploy_path( artifact_id )
+
+        unless File.exists?(artifact_path)
+          msg = "Artifact with id '#{artifact_id}' not found"
+          @log.error msg
+          @service.db.save_event( :undeploy, :failed, :msg => msg, :parent => event )
+          raise msg
+        end
+
+        FileUtils.rm( artifact_path, :force => true )
+
+        @service.db.save_event( :undeploy, :finished, :parent => event )
+
+        nil
       end
 
-      FileUtils.rm( artifact_path, :force => true )
-
-      @service.db.save_event( :undeploy, :finished, :parent => event )
-
-      nil
-    end
-
-    def is_valid_artifact_id?( artifact_id )
-      return true if artifact_id.to_s.match(/^.*\.war+$/)
-      false
+      def is_valid_artifact_id?( artifact_id )
+        return true if artifact_id.to_s.match(/^.*\.war+$/)
+        false
+      end
     end
   end
 end

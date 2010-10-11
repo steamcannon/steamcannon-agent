@@ -1,7 +1,7 @@
 require 'sc-agent/services/jboss_as/commands/undeploy-command'
 
 module SteamCannon
-  describe UndeployCommand do
+  describe JBossAS::UndeployCommand do
 
     before(:each) do
       @service        = mock( 'Service' )
@@ -16,7 +16,7 @@ module SteamCannon
       @service.should_receive(:state).and_return( :stopped )
 
       @log            = Logger.new('/dev/null')
-      @cmd            = UndeployCommand.new( @service, :log => @log )
+      @cmd            = JBossAS::UndeployCommand.new( @service, :log => @log )
       @exec_helper    = @cmd.instance_variable_get(:@exec_helper)
     end
 

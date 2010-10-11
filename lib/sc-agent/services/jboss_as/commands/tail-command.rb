@@ -19,29 +19,31 @@
 require 'sc-agent/helpers/tail-helper'
 
 module SteamCannon
-  class TailCommand
-    def initialize( service, options = {} )
-      @service = service
-      @log     = options[:log] || Logger.new(STDOUT)
-    end
+  module JBossAS
+    class TailCommand
+      def initialize( service, options = {} )
+        @service = service
+        @log     = options[:log] || Logger.new(STDOUT)
+      end
 
-    def execute( log_id, num_lines, offset )
-      helper = TailHelper.new( log_path(log_id), offset )
-      lines = helper.tail( num_lines )
-      offset = helper.offset
-      { :lines => lines, :offset => offset }
-    end
+      def execute( log_id, num_lines, offset )
+        helper = TailHelper.new( log_path(log_id), offset )
+        lines = helper.tail( num_lines )
+        offset = helper.offset
+        { :lines => lines, :offset => offset }
+      end
 
-    def logs
-      Dir.glob("#{log_dir}/*.log").map { |f| File.basename(f) }
-    end
+      def logs
+        Dir.glob("#{log_dir}/*.log").map { |f| File.basename(f) }
+      end
 
-    def log_dir
-      "#{JBossASService::JBOSS_AS_HOME}/server/#{@service.jboss_as_configuration}/log"
-    end
+      def log_dir
+        "#{JBossASService::JBOSS_AS_HOME}/server/#{@service.jboss_as_configuration}/log"
+      end
 
-    def log_path( log_id )
-      "#{log_dir}/#{log_id}"
+      def log_path( log_id )
+        "#{log_dir}/#{log_id}"
+      end
     end
   end
 end

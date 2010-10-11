@@ -78,7 +78,7 @@ module SteamCannon
       cmd = mock(ConfigureCommand)
       cmd.should_receive(:execute).with( :a => :b ).and_return( { :state => :stopped } )
 
-      ConfigureCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
+      JBossAS::ConfigureCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )
 
       @service.configure( :a => :b ).should == { :state => :stopped }
     end
@@ -109,19 +109,19 @@ module SteamCannon
     end
 
     it "should execute deploy" do
-      cmd = mock(DeployCommand)
+      cmd = mock(JBossAS::DeployCommand)
       cmd.should_receive(:execute).with( "artifact" ).and_return( { :state => :stopped } )
 
-      DeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
+      JBossAS::DeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
 
       @service.deploy( "artifact" ).should == { :state => :stopped }
     end
 
     it "should execute undeploy" do
-      cmd = mock(UndeployCommand)
+      cmd = mock(JBossAS::UndeployCommand)
       cmd.should_receive(:execute).with( 'name.war' ).and_return( { :state => :stopped } )
 
-      UndeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
+      JBossAS::UndeployCommand.should_receive(:new).with(@service, :log => @log).and_return(cmd)
 
       @service.undeploy( 'name.war' ).should == { :state => :stopped }
     end
@@ -143,18 +143,18 @@ module SteamCannon
 
     describe "logs" do
       it "should return logs from the TailCommand" do
-        tail_command = mock(TailCommand)
+        tail_command = mock(JBossAS::TailCommand)
         tail_command.should_receive(:logs).and_return(['test.log'])
-        TailCommand.should_receive(:new).and_return(tail_command)
+        JBossAS::TailCommand.should_receive(:new).and_return(tail_command)
         @service.logs[:logs].should == ['test.log']
       end
     end
 
     describe "tail" do
       it "should execute the TailCommand" do
-        tail_command = mock(TailCommand)
+        tail_command = mock(JBossAS::TailCommand)
         tail_command.should_receive(:execute).with('log', 10, 512)
-        TailCommand.should_receive(:new).and_return(tail_command)
+        JBossAS::TailCommand.should_receive(:new).and_return(tail_command)
         @service.tail('log', 10, 512)
       end
     end

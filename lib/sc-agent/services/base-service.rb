@@ -33,7 +33,8 @@ module SteamCannon
       @exec_helper    = options[:exec_helper]     || ExecHelper.new( :log => @log )
       @config         = options[:config]
       @service_helper = ServiceHelper.new( self, :log => @log )
-      
+      @service_module_name = self.class.name[/(.*)Service/, 1]
+        
       # TODO should we also include :error status?
       @state                  = :stopped # available statuses: :starting, :started, :configuring, :stopping, :stopped
     end
@@ -52,7 +53,7 @@ module SteamCannon
 
     
     def configure( config )
-      ConfigureCommand.new( self, :log => @log, :threaded => true  ).execute( config )
+      eval("#{@service_module_name}::ConfigureCommand").new( self, :log => @log, :threaded => true  ).execute( config )
     end
 
     def status
@@ -86,20 +87,20 @@ module SteamCannon
     end
 
     def deploy( artifact )
-      DeployCommand.new( self, :log => @log ).execute( artifact )
+      eval("#{@service_module_name}::DeployCommand").new( self, :log => @log ).execute( artifact )
     end
 
     def undeploy( artifact_name )
-      UndeployCommand.new( self, :log => @log ).execute( artifact_name )
+      eval("#{@service_module_name}::UndeployCommand").new( self, :log => @log ).execute( artifact_name )
     end
 
     def logs
-      logs = TailCommand.new( self, :log => @log).logs
+      logs = eval("#{@service_module_name}::TailCommand").new( self, :log => @log).logs
       { :logs => logs }
     end
 
     def tail( log_id, num_lines, offset )
-      TailCommand.new( self, :log => @log ).execute( log_id, num_lines, offset )
+      eval("#{@service_module_name}::TailCommand").new( self, :log => @log ).execute( log_id, num_lines, offset )
     end
   end
 end

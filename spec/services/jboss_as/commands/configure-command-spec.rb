@@ -1,7 +1,7 @@
 require 'sc-agent/services/jboss_as/commands/configure-command'
 
 module SteamCannon
-  describe ConfigureCommand do
+  describe JBossAS::ConfigureCommand do
 
     before(:each) do
       @service        = mock( 'Service' )
@@ -15,7 +15,7 @@ module SteamCannon
       @service.should_receive(:state).and_return( :stopped )
 
       @log            = Logger.new('/dev/null')
-      @cmd            = ConfigureCommand.new( @service, :log => @log )
+      @cmd            = JBossAS::ConfigureCommand.new( @service, :log => @log )
       @exec_helper    = @cmd.instance_variable_get(:@exec_helper)
     end
 

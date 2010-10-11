@@ -20,11 +20,11 @@ require 'sc-agent/services/jboss_as/jboss-as-service'
 require 'logger'
 
 module SteamCannon
-  describe TailCommand do
+  describe JBossAS::TailCommand do
     before(:each) do
       @service = mock('Service')
       @log     = Logger.new('/dev/null')
-      @cmd     = TailCommand.new(@service, :log => @log)
+      @cmd     = JBossAS::TailCommand.new(@service, :log => @log)
     end
 
     describe "execute" do
