@@ -101,6 +101,7 @@ module SteamCannon
       
       def mount_ebs_volume
         log.debug "Mounting #{STORAGE_VOLUME_DEVICE} at #{STORAGE_VOLUME_MOUNT_POINT}"
+        @exec_helper.execute("mkdir -p #{STORAGE_VOLUME_MOUNT_POINT}")
         @exec_helper.execute("mount #{STORAGE_VOLUME_DEVICE} #{STORAGE_VOLUME_MOUNT_POINT}")
       end
     end
