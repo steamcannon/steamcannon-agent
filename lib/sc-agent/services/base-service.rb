@@ -27,7 +27,7 @@ module SteamCannon
     attr_reader :config
     
     def initialize( options = {} )
-      @db = ServiceManager.register( self, @full_name )
+      @db = ServiceManager.register( self, @name, @full_name )
       
       @log            = options[:log]             || Logger.new(STDOUT)
       @exec_helper    = options[:exec_helper]     || ExecHelper.new( :log => @log )

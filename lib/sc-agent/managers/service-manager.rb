@@ -68,10 +68,8 @@ module SteamCannon
         @log.info "#{@config['services'].nil? ? 0 : @config['services'].size} service(s) loaded."
       end
 
-      def register( o, full_name )
-        @log.trace "Registering #{o.class} service..."
-
-        name = underscore(o.class.name.split('::').last.split('Service').first)
+      def register( o, name, full_name )
+        @log.trace "Registering #{o.class} service (#{name}, #{full_name})..."
 
         @services[name] = { :object => o, :info => { :name => name, :full_name => full_name } }
 

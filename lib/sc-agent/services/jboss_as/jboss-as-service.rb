@@ -36,7 +36,7 @@ module SteamCannon
     attr_reader :jboss_as_configuration
 
     def initialize( options = {} )
-      @name = 'jboss-as'
+      @name = 'jboss_as'
       @full_name = 'JBoss Application Server'
       @jboss_as_configuration   = 'cluster-ec2'
       super

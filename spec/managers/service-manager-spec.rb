@@ -45,7 +45,7 @@ module SteamCannon
 
       DBHelper.should_receive(:new).with('mock', :log => @log ).and_return(db_helper)
 
-      @manager.register( service, 'Mock Service' ).should == db_helper
+      @manager.register( service, 'mock', 'Mock Service' ).should == db_helper
       @manager.services.size.should == 1
       @manager.services.should == {"mock"=>{:info=>{:name=>"mock", :full_name=>"Mock Service"}, :object=> service } }
     end
@@ -81,24 +81,14 @@ module SteamCannon
     it "should get array of services info" do
       DBHelper.stub!(:new)
 
-      service1 = mock('MockOneService')
-      service2 = mock('MockTwoService')
-
-      class1_mock = mock(Class)
-      class1_mock.should_receive(:name).and_return('MockOneService')
-
-      service1.should_receive(:class).twice.and_return(class1_mock)
-
-      class2_mock = mock(Class)
-      class2_mock.should_receive(:name).and_return('MockTwoService')
-
-      service2.should_receive(:class).twice.and_return(class2_mock)
-
-      @manager.register(service1, 'Mock One Service')
-      @manager.register(service2, 'Mock Two Service')
+      service1 = mock('service')
+      service2 = mock('service')
+      
+      @manager.register(service1, 'service1', 'Mock One Service')
+      @manager.register(service2, 'service2', 'Mock Two Service')
 
       @manager.services_info.size.should == 2
-      @manager.services_info.should == [{:name=>"mock_two", :full_name=>"Mock Two Service"}, {:name=>"mock_one", :full_name=>"Mock One Service"}]
+      @manager.services_info.should == [{:name=>"service1", :full_name=>"Mock One Service"}, {:name=>"service2", :full_name=>"Mock Two Service"}]
     end
 
     describe "configure" do
