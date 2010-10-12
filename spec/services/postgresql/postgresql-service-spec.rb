@@ -60,16 +60,6 @@ module SteamCannon
       @service.status.should == {:state => :error}
     end
 
-    it "should return status on deploy operation" do
-      @service.should_receive(:status).and_return({:state => :stopped})
-      @service.deploy('something').should == {:state => :stopped}
-    end
-
-    it "should return status on undeploy operation" do
-      @service.should_receive(:status).and_return({:state => :stopped})
-      @service.undeploy('something').should == {:state => :stopped}
-    end
-
     it "should restart the service" do
       @service_helper.should_receive(:execute).with(:restart, :backgroud => true).and_return({:state => :restarting})
       @service.restart.should == {:state => :restarting}

@@ -53,14 +53,5 @@ module SteamCannon
       super
     end
 
-    # TODO: dummy output, should be changed in the future
-    def deploy(artifact)
-      status
-    end
-
-    # TODO: dummy output, should be changed in the future
-    def undeploy(artifact_id)
-      status
-    end
   end
 end

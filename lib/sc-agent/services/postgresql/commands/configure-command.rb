@@ -20,18 +20,10 @@ require 'sc-agent/services/base-command'
 
 module SteamCannon
   module PostgreSQL
-    class ConfigureCommand
-      def initialize( service, options = {})
-        @cmds     = {}
+    class ConfigureCommand < BaseCommand
 
-        @service        = service
-        @state          = @service.state
-
-        @log            = options[:log]             || Logger.new(STDOUT)
-        @exec_helper    = options[:exec_helper]     || ExecHelper.new( :log => @log )
-        @threaded       = options[:threaded]        || false
-      end
-
+      ALLOWED_COMMANDS = [:create_admin]
+      
       def execute( data )
         event = @service.db.save_event( :configure, :started )
 
@@ -53,55 +45,40 @@ module SteamCannon
           raise msg
         end
 
-        @service.state = :configuring
-
-        if @threaded
-          Thread.new { configure( data, event ) }
-        else
-          configure( data, event )
-        end
-
-        { :state => @service.state }
+        configure( data, event )
       end
 
       def configure( data, event = nil )
         begin
-          restart = false
-
-          restart = UpdateGossipHostAddressCommand.new( :log => @log ).execute( data[:gossip_host] ) if data[:gossip_host]
-          restart = UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data[:s3_ping] ) if data[:s3_ping]
-
-          substate = @state
-          unless data[:proxy_list].nil?
-            proxy_command = UpdateProxyListCommand.new(:log => @log, :state => substate)
-            restart = proxy_command.execute( data[:proxy_list] )
+          command, payload = data.first
+          if ALLOWED_COMMANDS.include?(command)
+            result = send(command, payload)
+          else
+            raise "Invalid command :#{command} given"
           end
-
-          if restart
-            begin
-              action = substate == :started ? :restart : :start
-              @log.debug "Restarting JBoss AS after configuration with :#{action} action"
-              @service.service_helper.execute( action, :event => event, :background => false )
-            rescue
-              msg = "Restarting JBoss AS failed, couldn't finish updating JBoss AS"
-              @log.error msg
-              @service.state = @state
-              @service.db.save_event( :configure, :failed, :msg => msg )
-              substate = :stopped
-              return false
-            end
-          end
-
-          @service.state = substate
           @service.db.save_event( :configure, :finished )
+          result
         rescue => e
           msg = "An error occurred while configuring '#{@service.name}' service: #{e}"
           @log.error e
           @log.error msg
-          @service.state = @state
           @service.db.save_event( :configure, :failed, :msg => msg )
-          return false
+          { :error => msg }
         end
+      end
+
+      protected
+      def create_admin(data)
+        psql("CREATE ROLE #{escape_sql data[:user]} WITH PASSWORD '#{escape_sql data[:password]}' SUPERUSER")
+        nil
+      end
+
+      def psql(cmd)
+        @exec_helper.execute("su postgres -c \"#{cmd}\" | psql")
+      end
+
+      def escape_sql(sql)
+        sql
       end
     end
   end

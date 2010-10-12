@@ -10,146 +10,94 @@ module SteamCannon
 
       @service.stub!( :service_helper ).and_return( @service_helper )
       @service.stub!(:db).and_return( @db )
+      @service.stub!( :config ).and_return({ })
       @service.stub!(:name).and_return( "postgresql" )
 
       @service.stub!(:state).and_return( :stopped )
 
+      @db.stub!(:save_event)
+
       @log            = Logger.new('/dev/null')
       @cmd            = PostgreSQL::ConfigureCommand.new( @service, :log => @log )
+      @cmd.stub!(:psql).and_return("psql stub called")
       @exec_helper    = @cmd.instance_variable_get(:@exec_helper)
     end
-    
-    it "should not configure because of invalid data provided" do
-      @service.instance_variable_set(:@state, :stopped)
 
-      db1 = mock("db1")
-      db1.should_receive( :save_event ).with( :configure, :started ).and_return("1")
-      @service.should_receive(:db).and_return( db1 )
+    context 'it should not configure when' do
+      before(:each) do
+        @service.instance_variable_set(:@state, :stopped)
 
-      db2 = mock("db2")
-      db2.should_receive( :save_event ).with( :configure, :failed, :msg => "No or invalid data provided to configure service." )
-      @service.should_receive(:db).and_return( db2 )
+        db1 = mock("db1")
+        db1.should_receive( :save_event ).with( :configure, :started ).and_return("1")
+        @service.should_receive(:db).and_return( db1 )
 
-      begin
-        @cmd.execute( nil )
-        raise "Should raise"
-      rescue => e
-        e.message.should == "No or invalid data provided to configure service."
+        db2 = mock("db2")
+        db2.should_receive( :save_event ).with( :configure, :failed, :msg => "No or invalid data provided to configure service." )
+        @service.should_receive(:db).and_return( db2 )
+
       end
+
+      it "it is passed nil data" do
+        begin
+          @cmd.execute( nil )
+          raise "Should raise"
+        rescue => e
+          e.message.should == "No or invalid data provided to configure service."
+        end
+      end
+
     end
 
 
-=begin
-    it "should configure service" do
-      @service.instance_variable_set(:@state, :stopped)
+    describe 'configure' do
 
-      db1 = mock("db1")
-      db1.should_receive( :save_event ).with( :configure, :started ).and_return("1")
-      @service.should_receive(:db).and_return( db1 )
+      it "should return an error when an error occurs" do
+        @cmd.configure(:blah => 'ding').should == { :error => "An error occurred while configuring 'postgresql' service: Invalid command :blah given" }
+      end
 
-      @service.should_receive(:state=).with(:configuring)
-      @service.should_receive(:state).and_return(:stopped)
+      context "when given the :create_admin command" do
+        before(:each) do
+          @payload = { :user => 'username', :password => 'userpassword' }
+          @data = { :create_admin => @payload }
+        end
 
-      @cmd.should_receive( :configure ).with( {}, "1" )
+        it "should delegate to create_admin" do
+          @cmd.should_receive(:create_admin).with(@payload)
+          @cmd.configure(@data)
+        end
 
-      @cmd.execute( {}.to_json ).should == { :state => :stopped }
+        it "should return the result from the command" do
+          @cmd.stub!(:create_admin).and_return("the result")
+          @cmd.configure(@data).should == 'the result'
+        end
+      end
     end
-=end
 
-
-=begin
-
-    describe ".configure" do
-      it "should do nothing" do
-
-        db1 = mock("db1")
-        db1.should_receive( :save_event ).with( :configure, :finished )
-        @service.should_receive(:db).and_return( db1 )
-
-        @service.should_receive(:state=).with(:stopped)
-
-        UpdateGossipHostAddressCommand.should_not_receive(:new)
-        UpdateS3PingCredentialsCommand.should_not_receive(:new)
-        UpdateProxyListCommand.should_not_receive(:new)
-
-        @service_helper.should_not_receive( :execute )
-
-        @cmd.configure( {}, "1" ) == true
+    describe "create_admin" do
+      before(:each) do
+        @payload = { :user => 'username', :password => 'userpassword' }
+      end
+      
+      it "should delegate to psql" do
+        @cmd.should_receive(:psql).with("CREATE ROLE username WITH PASSWORD 'userpassword' SUPERUSER")
+        @cmd.send(:create_admin, @payload)
       end
 
-      it "should update gossip host only" do
-        db1 = mock("db1")
-        db1.should_receive( :save_event ).with( :configure, :finished )
-        @service.should_receive(:db).and_return( db1 )
-
-        cmd = mock(UpdateGossipHostAddressCommand)
-        cmd.should_receive( :execute ).with( "10.1.0.1" ).and_return( false )
-
-        UpdateGossipHostAddressCommand.should_receive(:new).with( :log => @log ).and_return( cmd )
-
-        UpdateS3PingCredentialsCommand.should_not_receive(:new)
-        UpdateProxyListCommand.should_not_receive(:new)
-
-        @service_helper.should_not_receive( :execute )
-
-        @service.should_receive(:state=).with(:stopped)
-
-        @cmd.configure( { :gossip_host => "10.1.0.1" }, "1" ) == true
+      it "should escape any sql in the username/pw" do
+        @cmd.should_receive(:escape_sql).with('username').and_return('username')
+        @cmd.should_receive(:escape_sql).with('userpassword').and_return('userpassword')
+        @cmd.send(:create_admin, @payload)
       end
 
-      it "should update gossip host and s3_ping and restart" do
-        db1 = mock("db1")
-        db1.should_receive( :save_event ).with( :configure, :finished )
-        @service.should_receive(:db).and_return( db1 )
-
-        gossip_host_cmd = mock(UpdateGossipHostAddressCommand)
-        gossip_host_cmd.should_receive( :execute ).with( "10.1.0.1" ).and_return( false )
-
-        UpdateGossipHostAddressCommand.should_receive(:new).with( :log => @log ).and_return( gossip_host_cmd )
-
-        s3_ping_cmd = mock(UpdateS3PingCredentialsCommand)
-        s3_ping_cmd.should_receive( :execute ).with( { 'pre_signed_put_url' => 'a', 'pre_signed_delete_url' => 'b' } ).and_return( true )
-
-        UpdateS3PingCredentialsCommand.should_receive(:new).with( :log => @log ).and_return( s3_ping_cmd )
-
-        UpdateProxyListCommand.should_not_receive(:new)
-
-        @service_helper.should_receive( :execute )
-
-        @service.should_receive(:state=).ordered.with(:stopped)
-
-        @cmd.configure( { :gossip_host => "10.1.0.1", :s3_ping => { 'pre_signed_put_url' => 'a', 'pre_signed_delete_url' => 'b' } }, "1" ) == true
+      it "should return nil on success" do
+        @cmd.send(:create_admin, @payload).should be_nil
       end
+    end
 
-      it "should update proxy_list" do
-        db1 = mock("db1")
-        db1.should_receive( :save_event ).with( :configure, :finished )
-        @service.should_receive(:db).and_return( db1 )
-
-        proxy_list_cmd = mock(UpdateProxyListCommand)
-        proxy_list_cmd.should_receive( :execute ).with( { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } ).and_return( false )
-
-        UpdateProxyListCommand.should_receive(:new).with( :log => @log, :state => :stopped ).and_return( proxy_list_cmd )
-
-        @service.should_receive(:state=).ordered.with(:stopped)
-
-        @cmd.configure( {:proxy_list => { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } }, "1" ) == true
-      end
-
-      it "should return false when something bad happens" do
-        proxy_list_cmd = mock(UpdateProxyListCommand)
-        proxy_list_cmd.stub!(:execute).and_raise("Unexpected error")
-        UpdateProxyListCommand.should_receive(:new).and_return( proxy_list_cmd )
-
-        @db.should_receive( :save_event ).with( :configure, :failed, :msg => "An error occurred while configuring 'postgresql' service: Unexpected error" )
-        @service.should_receive(:state=).ordered.with(:stopped)
-
-        @cmd.configure( { :proxy_list => { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } }, "1" ).should == false
-      end
+    describe "escape_sql" do
+      it "should sanitize sql"
     end
     
-=end
-
   end
 end
 
