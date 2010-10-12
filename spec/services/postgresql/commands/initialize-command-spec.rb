@@ -98,7 +98,8 @@ module SteamCannon
       
       context 'when the volume is not formatted' do
         before(:each) do
-          @cmd.stub!(:mount_ebs_volume).and_return("mount: you must specify the filesystem type")
+          @cmd.should_receive(:mount_ebs_volume).once.and_raise(ExecHelper::ExecError.new('', "mount: you must specify the filesystem type"))
+          @cmd.should_receive(:mount_ebs_volume).once.and_return("")
         end
 
         it "should format the device" do
@@ -107,7 +108,6 @@ module SteamCannon
         end
 
         it "should mount the device" do
-          @cmd.should_receive(:mount_ebs_volume).twice.and_return("mount: you must specify the filesystem type")
           @cmd.send(:initialize_ebs_volume)
         end
       end

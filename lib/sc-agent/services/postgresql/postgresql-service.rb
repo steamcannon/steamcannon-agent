@@ -17,6 +17,7 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'sc-agent/services/base-service'
+require 'sc-agent/services/postgresql/commands/initialize-command'
 require 'sc-agent/managers/service-manager'
 require 'json'
 

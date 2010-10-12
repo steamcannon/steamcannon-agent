@@ -62,7 +62,17 @@ class ExecHelper
     rescue => e
       @log.error e.backtrace.join($/)
       @log.error "An error occurred while executing command: '#{command}', #{e.message}"
-      raise "An error occurred while executing command: '#{command}', #{e.message}"
+      raise ExecError.new("An error occurred while executing command: '#{command}', #{e.message}", output)
+    end
+  end
+
+  class ExecError < RuntimeError
+    attr_accessor :output
+    
+    def initialize(message, output)
+      super(message)
+      self.output = output
     end
   end
 end
+

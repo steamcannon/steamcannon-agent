@@ -72,12 +72,17 @@ module SteamCannon
           log.debug "#{STORAGE_VOLUME_DEVICE} not found, sleeping #{STORAGE_VOLUME_SLEEP_SECONDS} seconds"
           sleep(STORAGE_VOLUME_SLEEP_SECONDS) 
         end
-        
-        if mount_ebs_volume =~ /you must specify/
-          format_ebs_volume
+
+        begin
           mount_ebs_volume
-        else
           log.debug "#{STORAGE_VOLUME_DEVICE} already formatted"
+        rescue ExecHelper::ExecError => ex
+          if ex.output =~ /you must specify/
+            format_ebs_volume
+            mount_ebs_volume
+          else
+            raise ex
+          end
         end
       end
 
