@@ -75,7 +75,7 @@ module SteamCannon
     end
 
     it "should execute configure" do
-      cmd = mock(ConfigureCommand)
+      cmd = mock(JBossAS::ConfigureCommand)
       cmd.should_receive(:execute).with( :a => :b ).and_return( { :state => :stopped } )
 
       JBossAS::ConfigureCommand.should_receive(:new).with( @service, :log => @log, :threaded => true ).and_return( cmd )

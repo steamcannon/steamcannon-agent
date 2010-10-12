@@ -28,11 +28,21 @@ module SteamCannon
       @db             = mock(DBHelper)
       @log            = Logger.new('/dev/null')
 
-      ServiceManager.should_receive(:register).and_return(@db)
+      ServiceManager.stub!(:register).and_return(@db)
 
+      @initialize_command = mock(PostgreSQL::InitializeCommand)
+      @initialize_command.stub!(:execute)
+      PostgreSQL::InitializeCommand.stub!(:new).and_return(@initialize_command)
+      
       @service        = PostgreSQLService.new(:log => @log)
       @exec_helper    = @service.instance_variable_get(:@exec_helper)
       @service_helper = @service.instance_variable_get(:@service_helper)
+    end
+
+    it "should initialize the db on instantiation" do
+      @initialize_command.should_receive(:execute)
+      PostgreSQL::InitializeCommand.should_receive(:new).and_return(@initialize_command)
+      PostgreSQLService.new
     end
 
     it "should return started status" do

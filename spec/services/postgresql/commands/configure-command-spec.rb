@@ -1,7 +1,7 @@
-require 'sc-agent/services/jboss_as/commands/configure-command'
+require 'sc-agent/services/postgresql/commands/configure-command'
 
 module SteamCannon
-  describe JBossAS::ConfigureCommand do
+  describe PostgreSQL::ConfigureCommand do
 
     before(:each) do
       @service        = mock( 'Service' )
@@ -10,36 +10,15 @@ module SteamCannon
 
       @service.stub!( :service_helper ).and_return( @service_helper )
       @service.stub!(:db).and_return( @db )
-      @service.stub!( :config ).and_return({ })
-      @service.stub!(:name).and_return( "jboss-as" )
+      @service.stub!(:name).and_return( "postgresql" )
 
-      @service.should_receive(:state).and_return( :stopped )
+      @service.stub!(:state).and_return( :stopped )
 
       @log            = Logger.new('/dev/null')
-      @cmd            = JBossAS::ConfigureCommand.new( @service, :log => @log )
+      @cmd            = PostgreSQL::ConfigureCommand.new( @service, :log => @log )
       @exec_helper    = @cmd.instance_variable_get(:@exec_helper)
     end
-
-
-    it "should not configure because of wrong state" do
-      @cmd.instance_variable_set(:@state, :starting)
-
-      db1 = mock("db1")
-      db1.should_receive( :save_event ).with( :configure, :started ).and_return("1")
-      @service.should_receive(:db).and_return( db1 )
-
-      db2 = mock("db2")
-      db2.should_receive( :save_event ).with( :configure, :failed, :msg=>"Service is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action." )
-      @service.should_receive(:db).and_return( db2 )
-
-      begin
-        @cmd.execute( {}.to_json )
-        raise "Should raise"
-      rescue => e
-        e.message.should == "Service is currently in 'starting' state. It needs to be in 'started' or 'stopped' state to execute this action."
-      end
-    end
-
+    
     it "should not configure because of invalid data provided" do
       @service.instance_variable_set(:@state, :stopped)
 
@@ -59,6 +38,8 @@ module SteamCannon
       end
     end
 
+
+=begin
     it "should configure service" do
       @service.instance_variable_set(:@state, :stopped)
 
@@ -73,6 +54,10 @@ module SteamCannon
 
       @cmd.execute( {}.to_json ).should == { :state => :stopped }
     end
+=end
+
+
+=begin
 
     describe ".configure" do
       it "should do nothing" do
@@ -156,12 +141,15 @@ module SteamCannon
         proxy_list_cmd.stub!(:execute).and_raise("Unexpected error")
         UpdateProxyListCommand.should_receive(:new).and_return( proxy_list_cmd )
 
-        @db.should_receive( :save_event ).with( :configure, :failed, :msg => "An error occurred while configuring 'jboss-as' service: Unexpected error" )
+        @db.should_receive( :save_event ).with( :configure, :failed, :msg => "An error occurred while configuring 'postgresql' service: Unexpected error" )
         @service.should_receive(:state=).ordered.with(:stopped)
 
         @cmd.configure( { :proxy_list => { "10.1.0.1" => { :host => "10.1.0.1", :port => 80 } } }, "1" ).should == false
       end
     end
+    
+=end
+
   end
 end
 

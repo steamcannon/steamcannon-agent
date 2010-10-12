@@ -30,7 +30,7 @@ end
 # lib/ to run individually, and they are fast enough to run all of
 # them quickly, so let's do it!
 watch( '^spec/.*-spec\.rb' ) { |m| run_all_specs }
-watch( '^lib/sc-agent/(.*)\.rb' ) { |m| run_all_specs }
+watch( '^lib/sc-agent/.*\.rb' ) { |m| run_all_specs }
 
 # --------------------------------------------------
 # Signal Handling

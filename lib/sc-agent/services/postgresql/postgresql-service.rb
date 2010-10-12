@@ -27,6 +27,8 @@ module SteamCannon
       @name = 'postgresql'
       @fullname = @name
       super
+
+      PostgreSQL::InitializeCommand.new(self, :threaded => true).execute
     end
 
     def configure(data)
