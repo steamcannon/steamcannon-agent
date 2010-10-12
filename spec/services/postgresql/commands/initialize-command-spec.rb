@@ -26,6 +26,11 @@ module SteamCannon
     end
 
     describe 'initialize_db' do
+      it "should write out the postgresql config" do
+        @cmd.should_receive(:create_postgresql_sysconfig)
+        @cmd.initialize_db
+      end
+      
       it "should update the config access permissions" do
         @cmd.should_receive(:update_host_access_permissions)
         @cmd.initialize_db

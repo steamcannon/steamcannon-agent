@@ -24,7 +24,9 @@ module SteamCannon
 
       STORAGE_VOLUME_DEVICE = '/dev/xvdf'
       STORAGE_VOLUME_SLEEP_SECONDS = 10
-      PSQL_DATA_DIR = '/var/lib/pgsql/data'
+      STORAGE_VOLUME_MOUNT_POINT = '/data'
+      PSQL_DATA_DIR = "#{STORAGE_VOLUME_MOUNT_POINT}/pgsql"
+      PSQL_LOG_FILE = "#{STORAGE_VOLUME_MOUNT_POINT}/pgstartup.log"
       PSQL_CONF_FILE = "#{PSQL_DATA_DIR}/pg_hba.conf"
       
       def execute
@@ -39,6 +41,7 @@ module SteamCannon
 
       def initialize_db( event = nil )
         log.info "Initializing postgresql db"
+        create_postgresql_sysconfig
         initialize_ebs_volume if config.platform == :ec2
         if !File.exists?(PSQL_CONF_FILE)
           initialize_database_config
@@ -50,6 +53,11 @@ module SteamCannon
       end
 
       protected
+      def create_postgresql_sysconfig
+        log.debug "Writing postgresql settings to /etc/sysconfig/pgsql/postgresql"
+        @exec_helper.execute("/bin/echo -e 'PGDATA=#{PSQL_DATA_DIR}\nPGLOG=#{PSQL_LOG_FILE}' > /etc/sysconfig/pgsql/postgresql")
+      end
+      
       def update_host_access_permissions
         log.debug "Updating access permissions in #{PSQL_CONF_FILE}"
         @exec_helper.execute("/bin/sed -i s/'^host'/'# host'/g #{PSQL_CONF_FILE}")
@@ -92,8 +100,8 @@ module SteamCannon
       end
       
       def mount_ebs_volume
-        log.debug "Mounting #{STORAGE_VOLUME_DEVICE} at #{PSQL_DATA_DIR}"
-        @exec_helper.execute("mount #{STORAGE_VOLUME_DEVICE} #{PSQL_DATA_DIR}")
+        log.debug "Mounting #{STORAGE_VOLUME_DEVICE} at #{STORAGE_VOLUME_MOUNT_POINT}"
+        @exec_helper.execute("mount #{STORAGE_VOLUME_DEVICE} #{STORAGE_VOLUME_MOUNT_POINT}")
       end
     end
   end
