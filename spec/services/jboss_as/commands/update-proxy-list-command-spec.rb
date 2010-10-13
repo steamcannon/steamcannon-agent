@@ -5,6 +5,7 @@ module SteamCannon
 
     before(:each) do
       Socket.should_receive(:gethostname).any_number_of_times.and_return("localhost")
+      Resolv.stub!(:getaddress).and_return { |host| host }
     end
 
     describe "when stopped" do

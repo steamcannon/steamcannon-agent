@@ -17,6 +17,7 @@
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 require 'logger'
+require 'resolv'
 require  'sc-agent/helpers/exec-helper'
 require  'sc-agent/services/jboss_as/jboss-as-service'
 
@@ -68,13 +69,16 @@ module SteamCannon
     end
 
     def update_running_jboss(proxies)
+      proxy_hosts = proxies.keys
       current_proxies = get_current_proxies
       current_hosts = current_proxies.keys
 
-      # first of all, remove old proxies
+      # Convert any hostnames to IPs
+      proxy_hosts = proxy_hosts.map { |host| Resolv.getaddress(host) }
 
+      # remove old proxies
       current_hosts.each do |host|
-        unless proxies.include?(host)
+        unless proxy_hosts.include?(host)
           begin
             remove_proxy( host, current_proxies[host][:port] )
           rescue
@@ -85,7 +89,7 @@ module SteamCannon
       end
 
       # now we need to add new proxies or update ports
-      proxies.keys.each do |host|
+      proxy_hosts.each do |host|
         if current_hosts.include?(host)
           unless current_proxies[host][:port].eql?(@default_front_end_port)
             @log.debug "Proxy for host #{current_proxies[host][:host]} needs to be updated because port has changed from #{current_proxies[host][:port]} to #{@default_front_end_port}, updating..."
