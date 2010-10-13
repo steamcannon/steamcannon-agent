@@ -76,7 +76,7 @@ module SteamCannon
       end
 
       def psql(cmd)
-        @exec_helper.execute("su postgres -c \"#{cmd}\" | psql")
+        @exec_helper.execute("su postgres -c \"echo \\\"#{cmd}\\\" | psql\"")
       end
 
       def escape_sql(sql)
