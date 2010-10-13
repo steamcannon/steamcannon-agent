@@ -53,7 +53,7 @@ module SteamCannon
 
       context 'when the db config already exists' do
         before(:each) do
-          File.should_receive(:exists?).with(PostgreSQL::InitializeCommand::PSQL_CONF_FILE).and_return(true)
+          File.should_receive(:exists?).with(PostgreSQL::InitializeCommand::PSQL_ACCESS_FILE).and_return(true)
         end
 
         it "should not try to init the config" do

@@ -27,7 +27,8 @@ module SteamCannon
       STORAGE_VOLUME_MOUNT_POINT = '/data'
       PSQL_DATA_DIR = "#{STORAGE_VOLUME_MOUNT_POINT}/pgsql"
       PSQL_LOG_FILE = "#{STORAGE_VOLUME_MOUNT_POINT}/pgstartup.log"
-      PSQL_CONF_FILE = "#{PSQL_DATA_DIR}/pg_hba.conf"
+      PSQL_ACCESS_FILE = "#{PSQL_DATA_DIR}/pg_hba.conf"
+      PSQL_CONF_FILE = "#{PSQL_DATA_DIR}/postgresql.conf"
       
       def execute
         event = service.db.save_event( :initialize, :started )
@@ -43,7 +44,7 @@ module SteamCannon
         log.info "Initializing postgresql db"
         create_postgresql_sysconfig
         initialize_ebs_volume if config.platform == :ec2
-        if !File.exists?(PSQL_CONF_FILE)
+        if !File.exists?(PSQL_ACCESS_FILE)
           initialize_database_config
           update_host_access_permissions
         end
@@ -59,14 +60,15 @@ module SteamCannon
       end
       
       def update_host_access_permissions
-        log.debug "Updating access permissions in #{PSQL_CONF_FILE}"
-        @exec_helper.execute("/bin/sed -i s/'^host'/'# host'/g #{PSQL_CONF_FILE}")
-        @exec_helper.execute("/bin/echo 'host    all         all         0.0.0.0/0          md5' >> #{PSQL_CONF_FILE}")
+        log.debug "Updating access permissions in #{PSQL_ACCESS_FILE}"
+        @exec_helper.execute("/bin/sed -i s/'^host'/'# host'/g #{PSQL_ACCESS_FILE}")
+        @exec_helper.execute("/bin/echo 'host    all         all         0.0.0.0/0          md5' >> #{PSQL_ACCESS_FILE}")
       end
 
       def initialize_database_config
         log.debug "Initializing postgresql data"
         @exec_helper.execute("/sbin/service postgresql initdb")
+        @exec_helper.execute("/bin/echo \"listen_addresses = '*'\" >> #{PSQL_CONF_FILE}")
       end
 
       def register_service
