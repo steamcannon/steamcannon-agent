@@ -71,12 +71,12 @@ module SteamCannon
 
       protected
       def create_admin(data)
-        psql("CREATE ROLE #{escape_sql data[:user]} WITH PASSWORD '#{escape_sql data[:password]}' SUPERUSER")
+        psql("CREATE USER #{escape_sql data[:user]} WITH PASSWORD '#{escape_sql data[:password]}' CREATEROLE CREATEDB")
         nil
       end
 
       def psql(cmd)
-        @exec_helper.execute("su postgres -c \"echo \\\"#{cmd}\\\" | psql\"")
+        @exec_helper.execute("echo \"#{cmd}\" | su postgres -c psql")
       end
 
       def escape_sql(sql)

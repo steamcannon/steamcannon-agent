@@ -79,7 +79,7 @@ module SteamCannon
       end
       
       it "should delegate to psql" do
-        @cmd.should_receive(:psql).with("CREATE ROLE username WITH PASSWORD 'userpassword' SUPERUSER")
+        @cmd.should_receive(:psql).with("CREATE USER username WITH PASSWORD 'userpassword' CREATEROLE CREATEDB")
         @cmd.send(:create_admin, @payload)
       end
 
