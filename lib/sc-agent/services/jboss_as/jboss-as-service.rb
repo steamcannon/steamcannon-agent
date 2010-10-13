@@ -40,6 +40,10 @@ module SteamCannon
       @full_name = 'JBoss Application Server'
       @jboss_as_configuration   = 'cluster-ec2'
       super
+
+      #TODO: remove after this happens in the AMI
+      @log.info "LINKING /etc/init.d/jboss_as TO /etc/init.d/jboss-as6. SHOULD I STILL BE DOING THIS??"
+      @exec_helper.execute("/bin/ln -s /etc/init.d/jboss-as6 /etc/init.d/jboss_as")
     end
 
     def status
