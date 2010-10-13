@@ -98,6 +98,7 @@ module SteamCannon
               action = substate == :started ? :restart : :start
               @log.debug "Restarting JBoss AS after configuration with :#{action} action"
               @service.service_helper.execute( action, :event => event, :background => false )
+              substate = :started
             rescue
               msg = "Restarting JBoss AS failed, couldn't finish updating JBoss AS"
               @log.error msg

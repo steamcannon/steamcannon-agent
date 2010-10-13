@@ -131,7 +131,7 @@ module SteamCannon
 
         @service_helper.should_receive( :execute )
 
-        @service.should_receive(:state=).ordered.with(:stopped)
+        @service.should_receive(:state=).ordered.with(:started)
 
         @cmd.configure( { :gossip_host => "10.1.0.1", :s3_ping => { 'pre_signed_put_url' => 'a', 'pre_signed_delete_url' => 'b' } }, "1" ) == true
       end
