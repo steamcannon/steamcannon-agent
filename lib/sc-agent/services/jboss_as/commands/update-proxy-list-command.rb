@@ -74,7 +74,7 @@ module SteamCannon
       current_hosts = current_proxies.keys
 
       # Convert any hostnames to IPs
-      proxy_hosts = proxy_hosts.map { |host| Resolv.getaddress(host) }
+      proxy_hosts = proxy_hosts.map { |host| Resolv.getaddress(host.to_s) }
 
       # remove old proxies
       current_hosts.each do |host|
