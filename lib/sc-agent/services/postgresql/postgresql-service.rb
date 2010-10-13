@@ -29,11 +29,7 @@ module SteamCannon
       @fullname = @name
       super
 
-      PostgreSQL::InitializeCommand.new(self, :threaded => true).execute
-    end
-
-    def configure(data)
-      status
+      PostgreSQL::InitializeCommand.new(self).execute
     end
 
     def status
