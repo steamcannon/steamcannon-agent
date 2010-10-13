@@ -42,8 +42,10 @@ module SteamCannon
       super
 
       #TODO: remove after this happens in the AMI
-      @log.info "LINKING /etc/init.d/jboss_as TO /etc/init.d/jboss-as6. SHOULD I STILL BE DOING THIS??"
-      @exec_helper.execute("/bin/ln -s /etc/init.d/jboss-as6 /etc/init.d/jboss_as")
+      unless File.exists?('/etc/init.d/jboss_as')
+        @log.info "LINKING /etc/init.d/jboss_as TO /etc/init.d/jboss-as6. SHOULD I STILL BE DOING THIS??"
+        @exec_helper.execute("/bin/ln -s /etc/init.d/jboss-as6 /etc/init.d/jboss_as")
+      end
     end
 
     def status
