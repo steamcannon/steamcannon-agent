@@ -116,6 +116,21 @@ module SteamCannon
           @cmd.send(:initialize_ebs_volume)
         end
       end
+
+      context 'when the volume is already mounted' do
+        before(:each) do
+          @cmd.should_receive(:mount_ebs_volume).once.and_raise(ExecHelper::ExecError.new('', "mount: /dev/xvdf already mounted or /data busy"))
+        end
+        
+        it "should not raise" do
+          lambda { @cmd.send(:initialize_ebs_volume) }.should_not raise_error
+        end
+
+        it "should not attempt to format the volume" do
+          @cmd.should_not_receive(:format_ebs_volume)
+          @cmd.send(:initialize_ebs_volume)
+        end
+      end
     end
   end
 end

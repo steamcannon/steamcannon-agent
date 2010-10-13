@@ -88,6 +88,8 @@ module SteamCannon
           if ex.output =~ /you must specify/
             format_ebs_volume
             mount_ebs_volume
+          elsif ex.output =~ /already mounted/
+            log.debug "#{STORAGE_VOLUME_DEVICE} already mounted at #{STORAGE_VOLUME_MOUNT_POINT}"
           else
             raise ex
           end
