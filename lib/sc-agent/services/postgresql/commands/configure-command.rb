@@ -50,7 +50,9 @@ module SteamCannon
 
       def configure( data, event = nil )
         begin
-          command, payload = data.first
+          command = data.keys.first
+          payload = data[command]
+
           if ALLOWED_COMMANDS.include?(command)
             result = send(command, payload)
           else
