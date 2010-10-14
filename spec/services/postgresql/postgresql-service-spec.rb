@@ -74,6 +74,13 @@ module SteamCannon
       @service_helper.should_receive(:execute).with(:start, :backgroud => true).and_return({:state => :starting})
       @service.start.should == {:state => :starting}
     end
+
+    describe "tail_command_options" do
+      it "should return the path to the log dir" do
+        @service.tail_command_options[:log_dir].should == "/data/pgsql/pg_log"
+      end
+    end
+
   end
 end
 

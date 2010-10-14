@@ -86,21 +86,9 @@ module SteamCannon
       end
     end
 
-    def logs
-      {:logs => Dir.glob("#{log_dir}/*log").map { |f| File.basename(f) }}
-    end
-
-    def tail( log_id, num_lines, offset )
-      log_path = "#{log_dir}/#{log_id}"
-      helper = TailHelper.new( log_path, offset )
-      lines = helper.tail( num_lines )
-      offset = helper.offset
-      { :lines => lines, :offset => offset }
-    end
-
     protected
-    def log_dir
-      "/var/log/httpd"
+    def tail_command_options
+      { :log_dir => "/var/log/httpd" }
     end
   end
 end

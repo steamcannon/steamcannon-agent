@@ -22,7 +22,6 @@ require 'sc-agent/services/jboss_as/commands/check-status-command'
 require 'sc-agent/services/jboss_as/commands/configure-command'
 require 'sc-agent/services/jboss_as/commands/deploy-command'
 require 'sc-agent/services/jboss_as/commands/undeploy-command'
-require 'sc-agent/services/jboss_as/commands/tail-command'
 require 'sc-agent/managers/service-manager'
 require 'json'
 require 'fileutils'
@@ -51,5 +50,8 @@ module SteamCannon
       "#{JBOSS_AS_HOME}/server/#{jboss_as_configuration}/deploy/#{name}"
     end
 
+    def tail_command_options
+      { :log_dir => "#{JBossASService::JBOSS_AS_HOME}/server/#{@jboss_as_configuration}/log" }
+    end
   end
 end

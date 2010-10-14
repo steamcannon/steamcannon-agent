@@ -16,15 +16,14 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'sc-agent/services/jboss_as/jboss-as-service'
 require 'logger'
 
 module SteamCannon
-  describe JBossAS::TailCommand do
+  describe TailCommand do
     before(:each) do
       @service = mock('Service')
       @log     = Logger.new('/dev/null')
-      @cmd     = JBossAS::TailCommand.new(@service, :log => @log)
+      @cmd     = TailCommand.new(@service, :log => @log, :log_dir => '/log_dir')
     end
 
     describe "execute" do
@@ -54,23 +53,14 @@ module SteamCannon
     end
 
     describe "logs" do
-      it "should glob for *.log" do
-        @cmd.should_receive(:log_dir).and_return('/log_dir')
-        Dir.should_receive(:glob).with("/log_dir/*.log").and_return(['test.log'])
+      it "should glob for *log" do
+        Dir.should_receive(:glob).with("/log_dir/*log").and_return(['test.log'])
         @cmd.logs.should == ['test.log']
-      end
-    end
-
-    describe "log_dir" do
-      it "should generate the correct dir" do
-        @service.should_receive(:jboss_as_configuration).and_return('test-cluster')
-        @cmd.log_dir.should == "#{JBossASService::JBOSS_AS_HOME}/server/test-cluster/log"
       end
     end
 
     describe "log_path" do
       it "should generate the correct path" do
-        @cmd.should_receive(:log_dir).and_return('/log_dir')
         @cmd.log_path('asdf').should == "/log_dir/asdf"
       end
     end

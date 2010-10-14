@@ -50,5 +50,8 @@ module SteamCannon
       super
     end
 
+    def tail_command_options
+      { :log_dir => "/data/pgsql/pg_log" }
+    end
   end
 end

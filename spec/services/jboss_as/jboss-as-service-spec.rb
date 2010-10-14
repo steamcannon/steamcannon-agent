@@ -141,21 +141,10 @@ module SteamCannon
       end
     end
 
-    describe "logs" do
-      it "should return logs from the TailCommand" do
-        tail_command = mock(JBossAS::TailCommand)
-        tail_command.should_receive(:logs).and_return(['test.log'])
-        JBossAS::TailCommand.should_receive(:new).and_return(tail_command)
-        @service.logs[:logs].should == ['test.log']
-      end
-    end
 
-    describe "tail" do
-      it "should execute the TailCommand" do
-        tail_command = mock(JBossAS::TailCommand)
-        tail_command.should_receive(:execute).with('log', 10, 512)
-        JBossAS::TailCommand.should_receive(:new).and_return(tail_command)
-        @service.tail('log', 10, 512)
+    describe "tail_command_options" do
+      it "should return the path to the log dir" do
+        @service.tail_command_options[:log_dir].should == "/opt/jboss-as/server/cluster-ec2/log"
       end
     end
   end

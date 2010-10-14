@@ -16,6 +16,8 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'sc-agent/helpers/tail-command'
+
 module SteamCannon
   class BaseService
     attr_accessor :state
@@ -95,12 +97,21 @@ module SteamCannon
     end
 
     def logs
-      logs = eval("#{@service_module_name}::TailCommand").new( self, :log => @log).logs
-      { :logs => logs }
+      { :logs => tail_command ? tail_command.logs : [] }
     end
 
     def tail( log_id, num_lines, offset )
-      eval("#{@service_module_name}::TailCommand").new( self, :log => @log ).execute( log_id, num_lines, offset )
+      tail_command ? tail_command.execute( log_id, num_lines, offset ) : {}
+    end
+
+    protected
+    def tail_command
+      @tail_command ||= tail_command_options ? TailCommand.new(self, { :log => @log }.merge(tail_command_options)) : false
+    end
+
+    def tail_command_options
+      #override to have log tailing, pointing to the log dir
+      # {:log_dir => '/path', :log_file_glob => '*log' } 
     end
   end
 end
