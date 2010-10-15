@@ -52,6 +52,23 @@ module SteamCannon
       last_response.headers["Content-Type"].should == "application/json;charset=utf-8"
     end
 
+    describe 'cluster_member_addresses' do
+      before(:each) do
+        @helper = mock(ClusterMemberAddressHelper)
+        ClusterMemberAddressHelper.should_receive(:new).and_return(@helper)
+      end
+      
+      it "should create a cluster member address" do
+        @helper.should_receive(:execute).with(:create, 'a_hostname', 'an_address')
+        post '/cluster_member_addresses', :hostname => 'a_hostname', :address => 'an_address'
+      end
+      
+      it "should delete a cluster member address" do
+        @helper.should_receive(:execute).with(:delete, 'a_hostname')
+        delete "/cluster_member_addresses/a_hostname"
+      end
+    end
+    
     it "should return 404 because service doesn't exists" do
       ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( false )

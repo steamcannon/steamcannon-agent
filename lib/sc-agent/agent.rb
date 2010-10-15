@@ -78,6 +78,17 @@ module SteamCannon
       ServiceManager.configure( params[:certificate], params[:keypair] )
     end
 
+    post '/cluster_member_addresses' do
+      validate_parameter( :hostname )
+      validate_parameter( :address )
+
+      ClusterMemberAddressHelper.new.execute(:create, params[:hostname], params[:address])
+    end
+
+    delete '/cluster_member_addresses/:hostname' do
+      ClusterMemberAddressHelper.new.execute(:delete, params[:hostname])
+    end
+    
     get '/services/:service/:operation'do
       execute_operation( params[:service], params[:operation] )
     end
