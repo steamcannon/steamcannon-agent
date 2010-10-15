@@ -78,6 +78,10 @@ module SteamCannon
       store_cert_file( cert.to_text + cert.to_pem )
     end
 
+    def ssl_files_exists?
+      File.exists?( @key_file ) and File.exists?( @cert_file )
+    end
+
     def store_key_file( data )
       File.open( @key_file, 'w') { |f| f.write( data) }
     end

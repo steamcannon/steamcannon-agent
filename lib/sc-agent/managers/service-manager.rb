@@ -25,29 +25,30 @@ module SteamCannon
   class ServiceManager
     class << self
       attr_accessor :services
+      attr_reader :is_configured, :ssl_helper
 
       def prepare( config, log )
         @config  = config
         @log     = log
 
         @services = {}
+        @ssl_helper = SSLHelper.new( @config, :log => @log )
 
         Dir.glob("lib/sc-agent/services/**/*-service.rb").each  do |file|
           require file.match(/^lib\/(.*)\.rb$/)[1]
         end
+
+        @is_configured = @ssl_helper.ssl_files_exists?
 
         self
       end
 
       def configure( cert, keypair )
         @log.info "Reconfiguring Agent..."
-
-        ssl_helper = SSLHelper.new( @config, :log => @log )
-
         @log.debug  "Saving received certificates..."
 
-        ssl_helper.store_cert_file( cert )
-        ssl_helper.store_key_file( keypair )
+        @ssl_helper.store_cert_file( cert )
+        @ssl_helper.store_key_file( keypair )
 
         @log.info "Executing service restart..."
         child = fork do

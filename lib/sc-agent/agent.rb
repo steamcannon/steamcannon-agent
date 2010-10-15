@@ -48,6 +48,7 @@ module SteamCannon
 
     helpers do
       def execute_operation( service, operation, *params )
+        raise NotFound unless ServiceManager.is_configured
         raise NotFound, "Service '#{service}' doesn't exists." unless ServiceManager.service_exists?( service )
 
         yield if block_given?
@@ -66,6 +67,7 @@ module SteamCannon
     end
 
     get '/services' do
+      raise NotFound unless ServiceManager.is_configured
       { :services => ServiceManager.services_info }.to_json
     end
 

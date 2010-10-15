@@ -28,15 +28,22 @@ module SteamCannon
 
       @config = {'services' => 'Mock'}
       @manager = ServiceManager.prepare( @config, @log )
+      @ssl_helper = @manager.ssl_helper
     end
 
     it "should prepare ServiceManager" do
       config = {'services' => 'Mock'}
 
       Dir.should_receive(:glob).with("lib/sc-agent/services/**/*-service.rb").and_return(['lib/abc/test.rb'])
-      @manager.should_receive(:require).with('abc/test')
+      ServiceManager.should_receive(:require).with('abc/test')
 
-      @manager.prepare( config, @log )
+      ssl_helper = mock(SSLHelper)
+      ssl_helper.should_receive(:ssl_files_exists?).and_return(true)
+
+      SSLHelper.should_receive(:new).with( config, :log => @log  ).and_return( ssl_helper )
+
+      ServiceManager.prepare( config, @log )
+      ServiceManager.is_configured.should == true
     end
 
     it "should register a service and return valid db_helper" do
@@ -83,7 +90,7 @@ module SteamCannon
 
       service1 = mock('service')
       service2 = mock('service')
-      
+
       @manager.register(service1, 'service1', 'Mock One Service')
       @manager.register(service2, 'service2', 'Mock Two Service')
 
@@ -93,10 +100,8 @@ module SteamCannon
 
     describe "configure" do
       before(:each) do
-        @ssl_helper = mock(SSLHelper)
         @ssl_helper.stub!(:store_cert_file)
         @ssl_helper.stub!(:store_key_file)
-        SSLHelper.stub(:new).and_return(@ssl_helper)
 
         @manager.stub!(:fork)
         Process.stub!(:detach)
@@ -105,8 +110,6 @@ module SteamCannon
       it "should configure the agent" do
         @ssl_helper.should_receive(:store_cert_file).with('CERT')
         @ssl_helper.should_receive(:store_key_file).with('KEY')
-
-        SSLHelper.should_receive(:new).with( @config, :log => @log ).and_return( @ssl_helper )
 
         @manager.configure( 'CERT', 'KEY' )
       end

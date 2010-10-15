@@ -53,6 +53,7 @@ module SteamCannon
     end
 
     it "should return 404 because service doesn't exists" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( false )
 
       get '/services/test/operation'
@@ -64,6 +65,7 @@ module SteamCannon
     end
 
     it "should return 500 because operation is not allowed" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
       ServiceManager.should_receive(:execute_operation).with('test', 'operation').and_raise( "Operation 'operation' is not supported in Test service" )
 
@@ -76,6 +78,7 @@ module SteamCannon
     end
 
     it "should execute stop operation on service" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
       ServiceManager.should_receive(:execute_operation).with('test', 'stop')
 
@@ -85,6 +88,7 @@ module SteamCannon
     end
 
     it "should not execute abc operation on service" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
       ServiceManager.should_not_receive(:execute_operation)
 
@@ -97,6 +101,7 @@ module SteamCannon
     end
 
     it "should get the artifact" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
       ServiceManager.should_receive(:execute_operation).with('test', 'artifact', '1').and_return( { :artifact => 'artifact'} )
 
@@ -109,6 +114,7 @@ module SteamCannon
     end
 
     it "should get 404 because artifact doesn't exists anymore" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
       ServiceManager.should_receive(:execute_operation).with('test', 'artifact', '1').and_raise( NotFound.new("No artifact") )
 
@@ -121,6 +127,7 @@ module SteamCannon
     end
 
     it "should not deploy a new artifact because no artifact was specified" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
 
       post '/services/test/artifacts'
@@ -132,6 +139,7 @@ module SteamCannon
     end
 
     it "should deploy a new artifact" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
       ServiceManager.should_receive(:execute_operation).with('test', 'deploy', 'something').and_return( { :artifact_id => 1 } )
 
@@ -144,6 +152,7 @@ module SteamCannon
     end
 
     it "should not configure the service because no config was specified" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
 
       post '/services/test/configure'
@@ -155,6 +164,7 @@ module SteamCannon
     end
 
     it "should configure the service" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
       ServiceManager.should_receive(:execute_operation).with('test', 'configure', 'something').and_return( { :state => :started } )
 
@@ -167,6 +177,7 @@ module SteamCannon
     end
 
     it "should delete the artifact" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
       ServiceManager.should_receive(:service_exists?).with('test').and_return( true )
       ServiceManager.should_receive(:execute_operation).with('test', 'undeploy', '1').and_return( { :status => "ok" } )
 
@@ -182,5 +193,23 @@ module SteamCannon
 
       last_response.status.should == 200
     end
+
+    it "should try to access /services before configuring" do
+      ServiceManager.should_receive(:is_configured).and_return( false )
+
+      get '/services'
+
+      last_response.status.should == 404
+    end
+
+    it "should try to access /services after configuring" do
+      ServiceManager.should_receive(:is_configured).and_return( true )
+      ServiceManager.should_receive(:services_info).and_return('something')
+
+      get '/services'
+
+      last_response.status.should == 200
+    end
+
   end
 end
