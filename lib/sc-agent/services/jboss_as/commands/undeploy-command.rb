@@ -33,13 +33,6 @@ module SteamCannon
       def execute( artifact_id )
         event = @service.db.save_event( :undeploy, :started )
 
-        unless is_valid_artifact_id?( artifact_id )
-          msg = "No or invalid artifact id provided"
-          @log.error msg
-          @service.db.save_event( :undeploy, :failed, :msg => msg, :parent => event )
-          raise msg
-        end
-
         artifact_path = @service.deploy_path( artifact_id )
 
         unless File.exists?(artifact_path)
@@ -56,10 +49,6 @@ module SteamCannon
         nil
       end
 
-      def is_valid_artifact_id?( artifact_id )
-        return true if artifact_id.to_s.match(/^.*\.war+$/)
-        false
-      end
     end
   end
 end

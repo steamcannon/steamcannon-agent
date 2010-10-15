@@ -46,17 +46,6 @@ module SteamCannon
       end
     end
 
-    it "should return error message when invalid artifact_id is provided" do
-      @db.should_receive( :save_event ).with( :undeploy, :started ).and_return("1")
-      @db.should_receive( :save_event ).with( :undeploy, :failed, :parent => "1", :msg=>"No or invalid artifact id provided" )
-
-      begin
-        @cmd.execute( "d24" )
-        raise "Should raise"
-      rescue => e
-        e.message.should == "No or invalid artifact id provided"
-      end
-    end
   end
 end
 
