@@ -34,13 +34,19 @@ module SteamCannon
     def discover_platform
       @log.info "Discovering platform..."
 
-      return :ec2 if discover_ec2
+      i = 0
 
-      return :virtualbox if discover_virtualbox
+      while 10 > i
+        return :ec2 if discover_ec2
+        return :virtualbox if discover_virtualbox
 
-      @log.warn "We're on unknown platform!"
+        @log.trace "Sleeping for 5 seconds..."
+        sleep 5
+        i+=1
+      end
 
-      :unknown
+      @log.error "Couldn't discover platform..."
+      abort
     end
 
     def discover_ec2

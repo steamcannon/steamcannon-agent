@@ -28,10 +28,22 @@ module SteamCannon
       @helper.discover_virtualbox.should == false
     end
 
-    it "should discover platform" do
+    it "should discover platform and abort if no platform was discovered after 10 retries" do
+      @helper.should_receive(:discover_ec2).exactly(10).times.and_return(false)
+      @helper.should_receive(:discover_virtualbox).exactly(10).times.and_return(false)
+      @helper.should_receive(:sleep).with(5).exactly(10).times
+      @helper.should_receive(:abort)
+
+      @helper.discover_platform
+    end
+
+    it "should discover platform and return it" do
       @helper.should_receive(:discover_ec2).and_return(false)
       @helper.should_receive(:discover_virtualbox).and_return(false)
-      @helper.discover_platform.should == :unknown
+      @helper.should_receive(:sleep).with(5).once
+      @helper.should_receive(:discover_ec2).and_return(true)
+
+      @helper.discover_platform == :ec2
     end
 
     describe ".read_certificate" do
