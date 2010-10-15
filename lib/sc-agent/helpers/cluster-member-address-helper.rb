@@ -31,6 +31,7 @@ module SteamCannon
       thread do
         send(action, *args)
       end
+      nil
     end
 
     def create(host, address)
