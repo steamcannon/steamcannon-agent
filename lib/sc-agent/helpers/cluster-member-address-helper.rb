@@ -52,7 +52,7 @@ module SteamCannon
       contents = hosts_file.readlines
       hosts_file('w') do |f|
         contents.each do |line|
-          f.write("#{line}\n") unless line =~ /\s#{host}$/
+          f.write(line) unless line =~ /\s#{host}$/
         end
       end
     end
