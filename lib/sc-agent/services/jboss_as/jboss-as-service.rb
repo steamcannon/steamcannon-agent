@@ -46,6 +46,18 @@ module SteamCannon
       super
     end
 
+    #overrides BaseService#artifact, since we don't store artifacts in
+    #the db for jboss
+    def artifact( artifact_id )
+      if File.exists?(deploy_path(artifact_id))
+        { :name => artifact_id, :size => File.size(deploy_path(artifact_id)) }
+      else
+        msg = "Could not retrieve artifact named '#{artifact_id}'"
+        @log.error msg
+        raise msg
+      end
+    end
+
     def deploy_path(name)
       "#{JBOSS_AS_HOME}/server/#{jboss_as_configuration}/deploy/#{name}"
     end

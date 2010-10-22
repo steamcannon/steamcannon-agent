@@ -41,39 +41,26 @@ module SteamCannon
       @service.status.should == { :state => :stopped }
     end
 
-    it "should not return the selected artifact because of unexpected error" do
-      @db.should_receive(:artifact).with( 1 ).and_raise("boom")
+    describe 'artifact' do
+      it "should not return the selected artifact" do
+        File.should_receive(:exists?).with( @service.deploy_path("not_there.war") ).and_return( false )
 
-      begin
-        @cmd.execute( @service.artifact( "1" ) )
-        raise "Should raise"
-      rescue => e
-        e.message.should == "Could not retrieve artifact with id = 1"
+        begin
+          @service.artifact( "not_there.war" )
+          raise "Should raise"
+        rescue => e
+          e.message.should == "Could not retrieve artifact named 'not_there.war'"
+        end
+      end
+
+      it "should return the selected artifact" do
+        File.should_receive(:exists?).with( @service.deploy_path("there.war") ).and_return( true )
+        File.should_receive(:size).with( @service.deploy_path("there.war") ).and_return( 1234 )
+        
+        @service.artifact( "there.war" ).should == { :name => 'there.war', :size => 1234 }
       end
     end
-
-    it "should not return the selected artifact" do
-      @db.should_receive(:artifact).with( 1 ).and_return( nil )
-
-      begin
-        @cmd.execute( @service.artifact( "1" ) )
-        raise "Should raise"
-      rescue => e
-        e.message.should == "Could not retrieve artifact with id = 1"
-      end
-    end
-
-    it "should return the selected artifact" do
-      artifact = mock(Artifact)
-
-      artifact.should_receive(:name).and_return('name')
-      artifact.should_receive(:type).and_return('abc')
-      artifact.should_receive(:size).and_return(1234)
-
-      @db.should_receive(:artifact).with( 1 ).and_return( artifact )
-      @service.artifact( "1" ).should == {:type => 'abc', :name => 'name', :size => 1234 }
-    end
-
+    
     it "should execute configure" do
       cmd = mock(JBossAS::ConfigureCommand)
       cmd.should_receive(:execute).with( :a => :b ).and_return( { :state => :stopped } )
