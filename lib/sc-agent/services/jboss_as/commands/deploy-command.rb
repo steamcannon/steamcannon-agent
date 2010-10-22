@@ -52,38 +52,19 @@ module SteamCannon
 
         if is_artifact_pull_url?(artifact)
           @log.debug "Pulling artifact"
-          artifact = pull_artifact(artifact)
+          status = :pending
+          Thread.new { 
+            artifact = pull_artifact(artifact)
+            write_and_move_artifact(artifact)
+            @service.db.save_event( :deploy, :finished, :parent => event )          
+          }
+        else
+          status = :deployed
+          write_and_move_artifact(artifact)
+          @service.db.save_event( :deploy, :finished, :parent => event )          
         end
 
-        name = artifact[:filename]
-
-        @log.debug "Received new artifact: #{name}"
-
-        FileUtils.mkdir_p( "#{JBossASService::JBOSS_AS_HOME}/tmp" )
-
-        location        = @service.deploy_path(name)
-        tmp_location    = "#{JBossASService::JBOSS_AS_HOME}/tmp/file_#{name}_#{rand(9999999999).to_s.center(10, rand(9).to_s)}"
-
-
-        # First write to tmp location
-        File.open( tmp_location, 'w') do |file|
-          file.write(artifact[:tempfile].read)
-        end
-
-        @log.trace "Artifact #{name} written to a temporary file"
-
-        begin
-          # Then move the file
-          FileUtils.mv( tmp_location, location )
-        rescue => e
-          @log.error e.backtrace
-          raise "Artifact couldn't be deployed."
-        end
-
-        @log.trace "Artifact #{name} deployed."
-
-        @service.db.save_event( :deploy, :finished, :parent => event )
-        nil
+        { :status => status }
       end
 
       def is_artifact_valid?( artifact )
@@ -120,6 +101,36 @@ module SteamCannon
         }
       end
 
+      def write_and_move_artifact(artifact)
+        name = artifact[:filename]
+
+        @log.debug "Received new artifact: #{name}"
+
+        FileUtils.mkdir_p( "#{JBossASService::JBOSS_AS_HOME}/tmp" )
+
+        location        = @service.deploy_path(name)
+        tmp_location    = "#{JBossASService::JBOSS_AS_HOME}/tmp/file_#{name}_#{rand(9999999999).to_s.center(10, rand(9).to_s)}"
+
+
+        # First write to tmp location
+        File.open( tmp_location, 'w') do |file|
+          file.write(artifact[:tempfile].read)
+        end
+
+        @log.trace "Artifact #{name} written to a temporary file"
+
+        begin
+          # Then move the file
+          FileUtils.mv( tmp_location, location )
+        rescue => e
+          @log.error e.backtrace
+          raise "Artifact couldn't be deployed."
+        end
+
+        @log.trace "Artifact #{name} deployed."
+
+        
+      end
     end
   end
 end

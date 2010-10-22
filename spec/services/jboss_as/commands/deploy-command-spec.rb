@@ -8,7 +8,8 @@ module SteamCannon
       @service_helper = mock( ServiceHelper )
 
       @db = mock("DB")
-
+      @db.stub!(:save_event)
+      
       @service.stub!( :service_helper ).and_return( @service_helper )
       @service.stub!(:db).and_return( @db )
       
@@ -56,9 +57,32 @@ module SteamCannon
 
       @db.should_receive( :save_event ).with( :deploy, :finished, :parent=>"1" )
 
-      @cmd.execute( { :filename => "name.war", :tempfile => file, :type => "application/json" } ).should == nil
+      @cmd.execute( { :filename => "name.war", :tempfile => file, :type => "application/json" } ).should == { :status => :deployed }
     end
 
+    context "when the artifact is a pull" do
+      before(:each) do
+        @cmd.stub!(:is_artifact_pull_url?).and_return(true)
+        @artifact = mock('artifact')
+      end
+
+      it "should handle the deploy in a thread" do
+        Thread.should_receive(:new)
+        @cmd.execute(@artifact)
+      end
+
+      it "should return a pending status" do
+        Thread.stub!(:new)
+        @cmd.execute(@artifact).should == { :status => :pending }
+      end
+
+      it "should pull and write the artifact" do
+        @cmd.should_receive(:pull_artifact)
+        @cmd.should_receive(:write_and_move_artifact)
+        @cmd.execute(@artifact).should == { :status => :pending }
+      end
+    end
+    
     describe "is_artifact_pull_url?" do
       it "should return false if artifact_location is nil" do
         @cmd.should_receive(:artifact_location).with('artifact').and_return(nil)
