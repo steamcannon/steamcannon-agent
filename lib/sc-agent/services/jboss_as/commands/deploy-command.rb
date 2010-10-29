@@ -16,7 +16,8 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
-require 'open-uri'
+require 'tempfile'
+require 'uri'
 
 module SteamCannon
   module JBossAS
@@ -53,15 +54,15 @@ module SteamCannon
         if is_artifact_pull_url?(artifact)
           @log.debug "Pulling artifact"
           status = :pending
-          Thread.new { 
+          Thread.new {
             artifact = pull_artifact(artifact)
             write_and_move_artifact(artifact)
-            @service.db.save_event( :deploy, :finished, :parent => event )          
+            @service.db.save_event( :deploy, :finished, :parent => event )
           }
         else
           status = :deployed
           write_and_move_artifact(artifact)
-          @service.db.save_event( :deploy, :finished, :parent => event )          
+          @service.db.save_event( :deploy, :finished, :parent => event )
         end
 
         { :status => status }
@@ -94,10 +95,12 @@ module SteamCannon
       end
 
       def pull_artifact(artifact)
-        tempfile = open(artifact_location(artifact))
-        { :filename => File.basename(tempfile.base_uri.path),
-          :tempfile => tempfile,
-          :type => tempfile.content_type
+        tempfile = Tempfile.new('artifact')
+        location = artifact_location(artifact)
+        filename = URI.parse(location).path.split("/").last
+        `curl "#{location}" > #{tempfile.path}`
+        { :filename => filename,
+          :tempfile => tempfile
         }
       end
 
@@ -113,10 +116,8 @@ module SteamCannon
 
 
         # First write to tmp location
-        File.open( tmp_location, 'w') do |file|
-          file.write(artifact[:tempfile].read)
-        end
-
+        `cp "#{artifact[:tempfile].path}" "#{tmp_location}"`
+        `chmod 644 "#{tmp_location}"`
         @log.trace "Artifact #{name} written to a temporary file"
 
         begin
@@ -129,7 +130,7 @@ module SteamCannon
 
         @log.trace "Artifact #{name} deployed."
 
-        
+
       end
     end
   end
