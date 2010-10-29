@@ -9,10 +9,10 @@ module SteamCannon
 
       @db = mock("DB")
       @db.stub!(:save_event)
-      
+
       @service.stub!( :service_helper ).and_return( @service_helper )
       @service.stub!(:db).and_return( @db )
-      
+
       @service.should_receive(:state).and_return( :stopped )
 
       @log            = Logger.new('/dev/null')
@@ -51,7 +51,9 @@ module SteamCannon
 
       file = mock("File")
 
-      File.should_receive(:open)
+      file.should_receive(:path).and_return('/tmp/file')
+      @cmd.should_receive('`').with(/^cp/)
+      @cmd.should_receive('`').with(/^chmod/)
       FileUtils.should_receive(:mv)
       FileUtils.should_receive(:mkdir_p).with("/opt/jboss-as/tmp")
 
@@ -82,7 +84,7 @@ module SteamCannon
         @cmd.execute(@artifact).should == { :status => :pending }
       end
     end
-    
+
     describe "is_artifact_pull_url?" do
       it "should return false if artifact_location is nil" do
         @cmd.should_receive(:artifact_location).with('artifact').and_return(nil)
@@ -116,30 +118,21 @@ module SteamCannon
 
     describe "pull_artifact" do
       before(:each) do
-        @uri = mock('uri')
-        @uri.stub!(:path).and_return('/path/to/artifact.war')
         @tempfile = mock('tempfile')
-        @tempfile.stub!(:base_uri).and_return(@uri)
-        @tempfile.stub!(:content_type).and_return('content_type')
+        @tempfile.stub!(:path).and_return('/tmp/path')
+        Tempfile.stub!(:new).and_return(@tempfile)
         @artifact = mock('artifact')
-        @cmd.stub!(:artifact_location).and_return('location')
-        @cmd.stub!(:open).and_return(@tempfile)
+        @cmd.stub!(:artifact_location).and_return('http://location/to/artifact.war?asdf')
       end
 
-      it "should open the artifact's location" do
-        @cmd.should_receive(:artifact_location).with(@artifact).and_return('location')
-        @cmd.should_receive(:open).with('location').and_return(@tempfile)
+      it "should shell out to curl" do
+        @cmd.should_receive('`').with(/^curl .+/)
         @cmd.pull_artifact(@artifact)
       end
 
-      it "should have filename from artifact's uri" do
-        @uri.should_receive(:path).and_return('/path/to/artifact.war')
+      it "should have filename from artifact's location" do
+        @cmd.should_receive(:artifact_location).and_return('http://location/to/artifact.war?asdf')
         @cmd.pull_artifact(@artifact)[:filename].should == 'artifact.war'
-      end
-
-      it "should have type from artifact's content_type" do
-        @tempfile.should_receive(:content_type).and_return('content_type')
-        @cmd.pull_artifact(@artifact)[:type].should == 'content_type'
       end
 
       it "should have tempfile from artifact's tempfile" do
