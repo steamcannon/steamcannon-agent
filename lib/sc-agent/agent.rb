@@ -89,7 +89,7 @@ module SteamCannon
     delete '/cluster_member_addresses/:hostname' do
       ClusterMemberAddressHelper.new.execute(:delete, params[:hostname])
     end
-    
+
     get '/services/:service/:operation'do
       execute_operation( params[:service], params[:operation] )
     end
@@ -121,6 +121,8 @@ module SteamCannon
     end
 
     get "/services/:service/logs/:log_id" do
+      # Unescape the double-escaped log_id param
+      params[:log_id] = CGI.unescape(params[:log_id])
       execute_operation( params[:service], 'tail', params[:log_id], params[:num_lines], params[:offset] ) do
         validate_parameter( :num_lines )
       end

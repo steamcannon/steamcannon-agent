@@ -16,6 +16,7 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'pathname'
 require 'sc-agent/helpers/tail-helper'
 
 module SteamCannon
@@ -35,7 +36,10 @@ module SteamCannon
     end
 
     def logs
-      Dir.glob("#{@log_dir}/#{@log_file_glob}").map { |f| File.basename(f) }
+      log_path = Pathname.new(@log_dir)
+      Dir.glob("#{@log_dir}/**/#{@log_file_glob}").map do |path|
+        Pathname.new(path).relative_path_from(log_path).to_s
+      end
     end
 
     def log_path( log_id )

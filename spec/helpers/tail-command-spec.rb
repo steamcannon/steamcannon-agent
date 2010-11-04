@@ -55,8 +55,9 @@ module SteamCannon
 
     describe "logs" do
       it "should glob for *log" do
-        Dir.should_receive(:glob).with("/log_dir/*log").and_return(['test.log'])
-        @cmd.logs.should == ['test.log']
+        Dir.should_receive(:glob).with("/log_dir/**/*log").and_return(['/log_dir/test.log',
+                                                                       '/log_dir/subdir/test2.log'])
+        @cmd.logs.should == ['test.log', 'subdir/test2.log']
       end
     end
 
