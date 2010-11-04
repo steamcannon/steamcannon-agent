@@ -123,6 +123,7 @@ module SteamCannon
         Tempfile.stub!(:new).and_return(@tempfile)
         @artifact = mock('artifact')
         @cmd.stub!(:artifact_location).and_return('http://location/to/artifact.war?asdf')
+        @cmd.stub!('`')
       end
 
       it "should shell out to curl" do
