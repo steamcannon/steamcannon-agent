@@ -1,18 +1,8 @@
 Dependencies
 ============
 
-        gem install sinatra dm-core dm-sqlite-adapter dm-migrations dm-is-tree json open4 rest-client rack-test
-        gem install ./gems/thin-1.2.8.gem
-
-Build
------
-
-        gem install rake echoe
-
-Tests
------
-
-        gem install rake rspec rcov
+        gem install bundler
+        bundle install
 
 Running
 =======
@@ -22,19 +12,10 @@ Running
         thin -C config/thin/local.yaml start
 
 Tests
------
+=====
 
         cd steamcannon-agent/spec
         rake
-
-Building
-========
-
-To build the gem you need to execute
-
-        rake package
-
-Gem will be placed under pkg/ directory.
 
 API description
 ===============
