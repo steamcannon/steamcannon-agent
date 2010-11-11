@@ -2,4 +2,4 @@ ruby_sitelib: /usr/lib/ruby/site_ruby
 gem_dir: /usr/lib/ruby/gems/1.8
 bin_dir: /usr/bin
 ruby_abi: 1.8
-tree_prefix: steamcannon
+tree_prefix: steamcannon-
