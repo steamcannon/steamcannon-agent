@@ -29,7 +29,8 @@ require 'json'
 
 module SteamCannon
   class Agent < Sinatra::Base
-
+    API_VERSION = "1.0"
+    
     set :show_exceptions, false
     set :raise_errors, false
     set :logging, false
@@ -63,6 +64,10 @@ module SteamCannon
       end
     end
 
+    get '/api_version' do
+      { :api_version => API_VERSION }.to_json
+    end
+    
     get '/status' do
       { :load => ExecHelper.new( :log => Logger.new('/dev/null') ).execute('cat /proc/loadavg') }.to_json
     end

@@ -1,4 +1,9 @@
+This CHANGELOG describes api level changes only.
 
-v0.0.1
+v1.0
+* get "/services/:service/logs/:log_id" expects the :log_id param to still be cgi escaped.
 
-* Initial version
+v0.9 
+ * Initial version
+
+

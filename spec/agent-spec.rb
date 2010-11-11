@@ -21,6 +21,15 @@ module SteamCannon
       JSON.parse( response.body, :symbolize_names => true) if response.body.length > 0
     end
 
+    it "should return the current version" do
+      get '/api_version'
+
+      response = parse_response( last_response )
+
+      last_response.status.should == 200
+      response[:api_version].should == SteamCannon::Agent::API_VERSION
+    end
+    
     it "should return current status" do
       exec_helper = mock( ExecHelper )
       exec_helper.should_receive(:execute).with('cat /proc/loadavg').and_return('0.04 0.05 0.00 1/91 1851')
