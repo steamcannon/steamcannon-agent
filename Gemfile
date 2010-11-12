@@ -11,6 +11,10 @@ gem "json", "1.4.6"
 gem "open4", "1.0.1"
 gem "rest-client", "1.6.1"
 
+group :init do
+  gem "bundler", "1.0.3"
+end
+
 group :test do
   gem "rack-test", "0.5.4"
   gem "rspec", "1.3.1"
