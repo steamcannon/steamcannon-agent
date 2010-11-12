@@ -17,7 +17,3 @@ group :test do
   gem "rcov", "0.9.9"
   gem "rake", "0.8.7"
 end
-
-group :build do
-  gem "echoe", "4.3.1"
-end
