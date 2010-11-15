@@ -1,5 +1,6 @@
 source "http://rubygems.org"
 
+gem "rack", "1.0.1"
 gem "sinatra", "1.0"
 gem "steamcannon-thin", "1.2.8"
 
