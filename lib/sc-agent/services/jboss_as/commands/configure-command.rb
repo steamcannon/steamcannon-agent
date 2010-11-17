@@ -20,6 +20,7 @@ require 'sc-agent/services/base-command'
 require 'sc-agent/services/jboss_as/commands/update-gossip-host-address-command'
 require 'sc-agent/services/jboss_as/commands/update-proxy-list-command'
 require 'sc-agent/services/jboss_as/commands/update-s3ping-credentials-command'
+require 'sc-agent/services/jboss_as/commands/update-admin-credentials-command'
 
 module SteamCannon
   module JBossAS
@@ -31,6 +32,7 @@ module SteamCannon
         add_command( UpdateGossipHostAddressCommand.new( :log => @log ), :offline )
         add_command( UpdateProxyListCommand.new( :log => @log ), :online )
         add_command( UpdateS3PingCredentialsCommand.new( :log => @log ), :offline )
+        add_command( UpdateAdminCredentialsCommand.new( :log => @log, :service => @service ), :offline )
       end
 
       def add_command( cmd, type )
@@ -84,13 +86,17 @@ module SteamCannon
         begin
           restart = false
 
-          restart = UpdateGossipHostAddressCommand.new( :log => @log ).execute( data[:gossip_host] ) if data[:gossip_host]
-          restart = UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data[:s3_ping] ) if data[:s3_ping]
+          gossip_restart = UpdateGossipHostAddressCommand.new( :log => @log ).execute( data[:gossip_host] ) if data[:gossip_host]
+          s3_ping_restart = UpdateS3PingCredentialsCommand.new( :log => @log ).execute( data[:s3_ping] ) if data[:s3_ping]
+          admin_restart = update_admin_credentials( data[:create_admin] ) if data[:create_admin]
+
+          restart = true if gossip_restart || s3_ping_restart || admin_restart
 
           substate = @state
           unless data[:proxy_list].nil?
             proxy_command = UpdateProxyListCommand.new(:log => @log, :state => substate)
-            restart = proxy_command.execute( data[:proxy_list] )
+            proxy_restart = proxy_command.execute( data[:proxy_list] )
+            restart = true if restart || proxy_restart
           end
 
           if restart
@@ -119,6 +125,10 @@ module SteamCannon
           @service.db.save_event( :configure, :failed, :msg => msg )
           return false
         end
+      end
+
+      def update_admin_credentials( credentials )
+        UpdateAdminCredentialsCommand.new( :log => @log, :service => @service ).execute( credentials )
       end
     end
   end

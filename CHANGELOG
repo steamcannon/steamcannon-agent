@@ -2,6 +2,9 @@ This CHANGELOG describes api level changes only.
 
 v1.0
 * get "/services/:service/logs/:log_id" expects the :log_id param to still be cgi escaped.
+* post "/services/jboss_as/configure" now accepts
+  {"create_admin":{"user":"user","password":"password"}}
+  in the json body to set jmx-console and admin-console user/password
 
 v0.9 
  * Initial version

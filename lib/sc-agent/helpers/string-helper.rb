@@ -31,7 +31,7 @@ module SteamCannon
     end
 
     def prop_value( string, name )
-      string.scan(/^#{name}='(.*)'/).to_s
+      string.scan(/^#{name}='?([^']*)'?/).to_s
     end
 
     def is_last_line_empty?( string )
