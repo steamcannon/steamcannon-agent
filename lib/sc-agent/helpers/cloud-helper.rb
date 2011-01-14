@@ -96,7 +96,7 @@ module SteamCannon
           begin
             encoded_data = `#{VBOX_CONTROL} guestproperty get /Deltacloud/UserData | grep Value`
             encoded_data.gsub!(/^Value: (.+)/, '\1')
-            data = JSON.parse(Base64.decode64(encoded_data), :symbolize_names => true)
+            data = JSON.parse(encoded_data, :symbolize_names => true)
             return nil unless data.is_a?(Hash)
             return data[:steamcannon_ca_cert]
           rescue => e

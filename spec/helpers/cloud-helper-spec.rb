@@ -63,7 +63,7 @@ module SteamCannon
       end
 
       it "should read certificate for Virtualbox" do
-        @helper.should_receive('`').and_return("Value: " + Base64.encode64('{ "steamcannon_ca_cert": "CERT" }'))
+        @helper.should_receive('`').and_return('Value: { "steamcannon_ca_cert": "CERT" }')
         @helper.read_certificate(:virtualbox).should == "CERT"
       end
 
