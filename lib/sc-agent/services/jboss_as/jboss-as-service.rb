@@ -37,8 +37,9 @@ module SteamCannon
     def initialize( options = {} )
       @name = 'jboss_as'
       @full_name = 'JBoss Application Server'
-      @jboss_as_configuration   = 'cluster-ec2'
       super
+
+      @jboss_as_configuration = @config.platform == :ec2 ? 'cluster-ec2' : 'cluster'
     end
 
     def status
