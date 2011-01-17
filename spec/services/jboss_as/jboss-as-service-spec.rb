@@ -30,7 +30,8 @@ module SteamCannon
 
       ServiceManager.should_receive(:register).and_return( @db )
 
-      @service        = JBossASService.new( :log => @log  )
+      @config         = mock('Config', :platform => :ec2)
+      @service        = JBossASService.new( :log => @log, :config => @config  )
       @exec_helper    = @service.instance_variable_get(:@exec_helper)
       @service_helper = @service.instance_variable_get(:@service_helper)
 
@@ -56,11 +57,11 @@ module SteamCannon
       it "should return the selected artifact" do
         File.should_receive(:exists?).with( @service.deploy_path("there.war") ).and_return( true )
         File.should_receive(:size).with( @service.deploy_path("there.war") ).and_return( 1234 )
-        
+
         @service.artifact( "there.war" ).should == { :name => 'there.war', :size => 1234 }
       end
     end
-    
+
     it "should execute configure" do
       cmd = mock(JBossAS::ConfigureCommand)
       cmd.should_receive(:execute).with( :a => :b ).and_return( { :state => :stopped } )
